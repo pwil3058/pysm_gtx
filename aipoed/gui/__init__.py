@@ -20,3 +20,10 @@
 
 import gi
 gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
+
+def yield_to_pending_events():
+    while True:
+        Gtk.main_iteration()
+        if not Gtk.events_pending():
+            break

@@ -80,7 +80,7 @@ class Dialog(Gtk.Dialog, BusyIndicator):
         BusyIndicator.__init__(self, kwargs.get("parent", None))
 
 class QuestionDialog(Dialog):
-    def __init__(self, question="", explanation="", **kwargs):
+    def __init__(self, question="", clarification="", **kwargs):
         Dialog.__init__(self, **kwargs)
         self.set_skip_taskbar_hint(True)
         self.set_destroy_with_parent(True)
@@ -94,8 +94,8 @@ class QuestionDialog(Dialog):
         q_label.set_justify(Gtk.Justification.LEFT)
         q_label.set_line_wrap(True)
         grid.attach_next_to(q_label, image, Gtk.PositionType.RIGHT, 1, 1)
-        if explanation:
-            e_label = Gtk.Label(explanation)
+        if clarification:
+            e_label = Gtk.Label(clarification)
             e_label.set_justify(Gtk.Justification.FILL)
             e_label.set_line_wrap(True)
             grid.attach_next_to(e_label, q_label, Gtk.PositionType.BOTTOM, 1, 1)
@@ -104,9 +104,42 @@ class QuestionDialog(Dialog):
 CANCEL_OK_BUTTONS = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK)
 NO_YES_BUTTONS = (Gtk.STOCK_NO, Gtk.ResponseType.NO, Gtk.STOCK_YES, Gtk.ResponseType.YES)
 
+from .. import Suggestion
+Response = Suggestion
+
+SUGGESTION_LABEL_MAP = {
+    Suggestion.FORCE : _("Force"),
+    Suggestion.REFRESH : _("Refresh"),
+    Suggestion.RECOVER : _("Recover"),
+    Suggestion.RENAME : _("Rename"),
+    Suggestion.DISCARD : _("Discard"),
+    Suggestion.ABSORB : _("Absorb"),
+    Suggestion.EDIT : _("Edit"),
+    Suggestion.MERGE : _("Merge"),
+    Suggestion.OVERWRITE : _("Overwrite"),
+    Suggestion.SKIP : _("Skip"),
+    Suggestion.SKIP_ALL : _("Skip All"),
+}
+
+ALL_SUGGESTIONS = [key for key in sorted(SUGGESTION_LABEL_MAP.keys())]
+
+assert len(SUGGESTION_LABEL_MAP) == Suggestion.NFLAGS
+
+def response_str(response):
+    if response > 0:
+        return SUGGESTION_LABEL_MAP[response]
+    else:
+        return _("Gtk.Response({})".format(response))
+
 class AskerMixin:
-    def ask_question(self, question, explanation="", buttons=CANCEL_OK_BUTTONS):
-        dialog = QuestionDialog(parent=self.get_toplevel(), buttons=buttons, question=question, explanation=explanation)
+    def ask_question(self, question, clarification="", buttons=CANCEL_OK_BUTTONS):
+        dialog = QuestionDialog(parent=self.get_toplevel(), buttons=buttons, question=question, clarification=clarification)
         response = dialog.run()
         dialog.destroy()
         return response
+    def accept_suggestion_or_cancel(self, result, clarification="", suggestions=ALL_SUGGESTIONS):
+        buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        for suggestion in suggestions:
+            if result.suggests(suggestion):
+                buttons += (SUGGESTION_LABEL_MAP[suggestion], suggestion)
+        return self.ask_question(result.message, clarification, buttons)

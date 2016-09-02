@@ -14,3 +14,13 @@
 ### You should have received a copy of the GNU General Public License
 ### along with this program; if not, write to the Free Software
 ### Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+def create_flag_generator():
+    """
+    Create a new flag generator
+    """
+    next_flag_num = 0
+    while True:
+        yield 2 ** next_flag_num
+        next_flag_num += 1
+

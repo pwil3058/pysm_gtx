@@ -41,6 +41,10 @@ class Suggestion:
     SKIP, \
     SKIP_ALL = [2 ** flag_num for flag_num in range(Result._NFLAGS, NFLAGS + Result._NFLAGS)]
     ALL = 2 ** (NFLAGS + Result._NFLAGS) - 1 - Result.MASK
+    # Some commonly used combinations
+    OVERWRITE_OR_RENAME = OVERWRITE | RENAME
+    FORCE_OR_REFRESH = FORCE | REFRESH
+    FORCE_ABSORB_OR_REFRESH = FORCE | ABSORB | REFRESH
 
 assert(Result.MASK & Suggestion.ALL == 0)
 
@@ -95,7 +99,7 @@ class _OperationsMixin:
         return self.ecode & suggestion != 0
 
 # result of running and external command
-class CmdResult(collections.namedtuple('CmdResult', ['ecode', 'stdout', 'stderr']), _OperationsMixin):
+class CmdResult(collections.namedtuple('CmdResult', ['ecode', 'stdout', 'stderr']), Result, _OperationsMixin):
     def __str__(self):
         return "CmdResult(ecode={0:b}, stdout={1}, stderr={2})".format(self.ecode, self.stdout, self.stderr)
     def __or__(self, suggestions):
@@ -135,7 +139,7 @@ class CmdResult(collections.namedtuple('CmdResult', ['ecode', 'stdout', 'stderr'
             return self.stderr
 
 # result returned from an internal "action" function/method
-class ActionResult(collections.namedtuple('ActionResult', ['ecode', 'message']), _OperationsMixin):
+class ActionResult(collections.namedtuple('ActionResult', ['ecode', 'message']), Result, _OperationsMixin):
     def __str__(self):
         return "ActionResult(ecode={0:b}, message={1})".format(self.ecode, self.message)
     def __or__(self, suggestions):

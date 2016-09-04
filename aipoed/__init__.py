@@ -49,6 +49,7 @@ class Suggestion:
 assert(Result.MASK & Suggestion.ALL == 0)
 
 class _OperationsMixin:
+    Suggest = Suggestion
     @property
     def is_ok(self):
         assert self.ecode == 0 or self.ecode & Result.MASK != 0

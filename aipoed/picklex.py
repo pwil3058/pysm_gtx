@@ -15,21 +15,18 @@
 ### along with this program; if not, write to the Free Software
 ### Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-def create_flag_generator():
-    """
-    Create a new flag generator
-    """
-    next_flag_num = 0
-    while True:
-        yield 2 ** next_flag_num
-        next_flag_num += 1
-
-quote_if_needed = lambda string: string if string.count(" ") == 0 else "\"" + string + "\""
-
-quoted_join = lambda strings, joint=" ": joint.join((quote_if_needed(file_path) for file_path in strings))
-
-def strings_to_quoted_list_string(strings):
-    if len(strings) == 1:
-        return quote_if_needed(strings[0])
-    return quoted_join(strings[:-1], ", ") + _(" and ") + quote_if_needed(strings[-1])
-
+class PickeExtensibleObject(object):
+    '''A base class for pickleable objects that can cope with modifications'''
+    RENAMES = dict()
+    NEW_FIELDS = dict()
+    def __setstate__(self, state):
+        self.__dict__ = state
+        for old_field in self.RENAMES:
+            if old_field in self.__dict__:
+                self.__dict__[self.RENAMES[old_field]] = self.__dict__.pop(old_field)
+    def __getstate__(self):
+        return self.__dict__
+    def __getattr__(self, attr):
+        if attr in self.NEW_FIELDS:
+            return self.NEW_FIELDS[attr]
+        raise AttributeError

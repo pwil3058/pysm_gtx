@@ -44,7 +44,9 @@ class Suggestion:
     # Some commonly used combinations
     OVERWRITE_OR_RENAME = OVERWRITE | RENAME
     FORCE_OR_REFRESH = FORCE | REFRESH
+    FORCE_OR_ABSORB = FORCE | ABSORB
     FORCE_ABSORB_OR_REFRESH = FORCE | ABSORB | REFRESH
+    MERGE_OR_DISCARD = MERGE | DISCARD
 
 assert(Result.MASK & Suggestion.ALL == 0)
 

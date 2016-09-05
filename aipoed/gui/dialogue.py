@@ -388,21 +388,21 @@ class AskerMixin:
         return self.ask_question(result.message, clarification, buttons)
     # Commonly encountered suggestion combinations
     def ask_edit_force_or_cancel(self, result, clarification=""):
-        self.accept_suggestion_or_cancel(result, clarification, [Suggestion.EDIT, Suggestion.FORCE])
+        return self.accept_suggestion_or_cancel(result, clarification, [Suggestion.EDIT, Suggestion.FORCE])
     def ask_force_or_cancel(self, result, clarification=""):
-        self.accept_suggestion_or_cancel(result, clarification, [Suggestion.FORCE])
+        return self.accept_suggestion_or_cancel(result, clarification, [Suggestion.FORCE])
     def ask_force_refresh_absorb_or_cancel(self, result, clarification=""):
-        self.accept_suggestion_or_cancel(result, clarification, [Suggestion.FORCE, Suggestion.REFRESH, Suggestion.ABSORB])
+        return self.accept_suggestion_or_cancel(result, clarification, [Suggestion.FORCE, Suggestion.REFRESH, Suggestion.ABSORB])
     def ask_recover_or_cancel(self, result, clarification=""):
-        self.accept_suggestion_or_cancel(result, clarification, [Suggestion.RECOVER])
+        return self.accept_suggestion_or_cancel(result, clarification, [Suggestion.RECOVER])
     def ask_rename_force_or_cancel(self, result, clarification=""):
-        self.accept_suggestion_or_cancel(result, clarification, [Suggestion.RENAME, Suggestion.FORCE])
+        return self.accept_suggestion_or_cancel(result, clarification, [Suggestion.RENAME, Suggestion.FORCE])
     def ask_rename_force_or_skip(self, result, clarification=""):
-        self.accept_suggestion_or_cancel(result, clarification, [Suggestion.RENAME, Suggestion.FORCE, Suggestion.SKIP, Suggestion.SKIP_ALL])
+        return self.accept_suggestion_or_cancel(result, clarification, [Suggestion.RENAME, Suggestion.FORCE, Suggestion.SKIP, Suggestion.SKIP_ALL])
     def ask_rename_overwrite_force_or_cancel(self, result, clarification=""):
-        self.accept_suggestion_or_cancel(result, clarification, [Suggestion.RENAME, Suggestion.OVERWRITE, Suggestion.FORCE])
+        return self.accept_suggestion_or_cancel(result, clarification, [Suggestion.RENAME, Suggestion.OVERWRITE, Suggestion.FORCE])
     def ask_rename_overwrite_or_cancel(self, result, clarification=""):
-        self.accept_suggestion_or_cancel(result, clarification, [Suggestion.RENAME, Suggestion.OVERWRITE])
+        return self.accept_suggestion_or_cancel(result, clarification, [Suggestion.RENAME, Suggestion.OVERWRITE])
 
 class ReporterMixin:
     def inform_user(self, msg, expln=None, problem_type=Gtk.MessageType.INFO):
@@ -415,11 +415,11 @@ class ReporterMixin:
         dialog.run()
         dialog.destroy()
     def alert_user(self, msg, expln=None):
-        self.inform_user(msg, expln, problem_type=Gtk.MessageType.ERROR)
+        return self.inform_user(msg, expln, problem_type=Gtk.MessageType.ERROR)
     def report_failure(self, failure):
-        self.inform_user(failure.result, Gtk.MessageType.ERROR)
+        return self.inform_user(failure.result, Gtk.MessageType.ERROR)
     def report_exception_as_error(self, edata):
-        alert_user(str(edata))
+        return self.alert_user(str(edata))
     def report_any_problems(self, result):
         if result.is_ok:
             return
@@ -427,7 +427,7 @@ class ReporterMixin:
             problem_type = Gtk.MessageType.WARNING
         else:
             problem_type = Gtk.MessageType.ERROR
-        self.inform_user(result.message, problem_type=problem_type)
+        return self.inform_user(result.message, problem_type=problem_type)
 
 class ClientMixin(BusyIndicatorUser, PathSelectorMixin, AskerMixin, ReporterMixin):
     pass

@@ -421,6 +421,7 @@ class FileTreeView(tlview.View, actions.CAGandUIManager, doop.DoOperationMixin):
         return False
     @staticmethod
     def _handle_double_click_cb(tree_view, tree_path, tree_column):
+        # TODO: think about making double click on directory change directories
         fs_item = tree_view.get_model()[tree_path][0]
         if not fs_item.is_dir:
             xtnl_edit.edit_files_extern([fs_item.path])

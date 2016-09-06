@@ -23,8 +23,12 @@ from gi.repository import Gtk
 from gi.repository import Gdk
 
 from .. import enotify
+from ..decorators import singleton
 
 from . import yield_to_pending_events
+
+# parent for windows/dialogs that would otherwise be orphans
+main_window = None
 
 class BusyIndicator:
     def __init__(self, parent=None):
@@ -80,13 +84,17 @@ class BusyIndicatorUser:
 
 class Window(Gtk.Window, BusyIndicator):
     def __init__(self, *args, **kwargs):
+        if not kwargs.get("parent", None):
+            kwargs["parent"] = main_window
         Gtk.Window.__init__(self, *args, **kwargs)
         BusyIndicator.__init__(self)
 
 class Dialog(Gtk.Dialog, BusyIndicator):
     def __init__(self, *args, **kwargs):
+        if not kwargs.get("parent", None):
+            kwargs["parent"] = main_window
         Gtk.Dialog.__init__(self, *args, **kwargs)
-        BusyIndicator.__init__(self, kwargs.get("parent", None))
+        BusyIndicator.__init__(self, )
 
 class ListenerDialog(Dialog, enotify.Listener):
     def __init__(self, *args, **kwargs):
@@ -99,7 +107,7 @@ class ListenerDialog(Dialog, enotify.Listener):
         self.destroy()
 
 class QuestionDialog(Dialog):
-    def __init__(self, question="", clarification="", **kwargs):
+    def __init__(self, qtn="", expln="", **kwargs):
         Dialog.__init__(self, **kwargs)
         self.set_skip_taskbar_hint(True)
         self.set_destroy_with_parent(True)
@@ -109,12 +117,12 @@ class QuestionDialog(Dialog):
         image.set_from_stock(Gtk.STOCK_DIALOG_QUESTION, Gtk.IconSize.DIALOG)
         grid.add(image)
         q_label = Gtk.Label()
-        q_label.set_markup("<big><b>" + question + "</b></big>")
+        q_label.set_markup("<big><b>" + qtn + "</b></big>")
         q_label.set_justify(Gtk.Justification.LEFT)
         q_label.set_line_wrap(True)
         grid.attach_next_to(q_label, image, Gtk.PositionType.RIGHT, 1, 1)
-        if clarification:
-            e_label = Gtk.Label(clarification)
+        if expln:
+            e_label = Gtk.Label(expln)
             e_label.set_justify(Gtk.Justification.FILL)
             e_label.set_line_wrap(True)
             grid.attach_next_to(e_label, q_label, Gtk.PositionType.BOTTOM, 1, 1)
@@ -122,11 +130,9 @@ class QuestionDialog(Dialog):
 
 class CancelOKDialog(Dialog):
     def __init__(self, title=None, parent=None):
-        if not parent:
-            parent = main_window
         flags = Gtk.DialogFlags.DESTROY_WITH_PARENT
         buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK)
-        Dialog.__init__(self, title, parent, flags, buttons)
+        Dialog.__init__(self, title=title, parent=parent, flags=flags, buttons=buttons)
 
 class ReadTextWidget(Gtk.HBox):
     def __init__(self, prompt=None, suggestion="", width_chars=32):
@@ -156,7 +162,7 @@ class ReadTextWidget(Gtk.HBox):
 
 class ReadTextDialog(CancelOKDialog):
     def __init__(self, title=None, prompt=None, suggestion="", parent=None):
-        CancelOKDialog.__init__(self, title, parent)
+        CancelOKDialog.__init__(self, title=title, parent=parent)
         self._rtw = ReadTextWidget(prompt, suggestion, width_chars=32)
         self.entry.set_activates_default(True)
         self.vbox.pack_start(self._rtw, expand=False, fill=True, padding=0)
@@ -358,16 +364,16 @@ def response_str(response):
         return _("Gtk.Response({})".format(response))
 
 class AskerMixin:
-    def ask_question(self, question, clarification="", buttons=CANCEL_OK_BUTTONS):
-        dialog = QuestionDialog(parent=self.get_toplevel(), buttons=buttons, question=question, clarification=clarification)
+    def ask_question(self, qtn, expln="", buttons=CANCEL_OK_BUTTONS):
+        dialog = QuestionDialog(parent=self.get_toplevel(), buttons=buttons, qtn=qtn, expln=expln)
         response = dialog.run()
         dialog.destroy()
         return response
-    def ask_ok_cancel(self, question, clarification=""):
-        return self.ask_question(question, clarification) == Gtk.ResponseType.OK
-    def ask_yes_no(self, question, clarification=""):
+    def ask_ok_cancel(self, qtn, expln=""):
+        return self.ask_question(qtn, expln) == Gtk.ResponseType.OK
+    def ask_yes_no(self, qtn, expln=""):
         buttons = (Gtk.STOCK_NO, Gtk.ResponseType.NO, Gtk.STOCK_YES, Gtk.ResponseType.YES)
-        return self.ask_question(question, clarification, buttons) == Gtk.ResponseType.YES
+        return self.ask_question(qtn, expln, buttons) == Gtk.ResponseType.YES
     def ask_dir_path(self, prompt, suggestion=None, existing=True):
         dialog = EnterDirPathDialog(title=_("Enter Directory Path"), prompt=prompt, suggestion=suggestion, existing=existing, parent=self.get_toplevel())
         dir_path = dialog.path if dialog.run() == Gtk.ResponseType.OK else None
@@ -378,31 +384,31 @@ class AskerMixin:
         file_path = dialog.path if dialog.run() == Gtk.ResponseType.OK else None
         dialog.destroy()
         return file_path
-    def confirm_list_action(self, alist, question):
-        return self.ask_ok_cancel('\n'.join(alist + ['\n', question]))
-    def accept_suggestion_or_cancel(self, result, clarification="", suggestions=ALL_SUGGESTIONS):
+    def confirm_list_action(self, alist, qtn):
+        return self.ask_ok_cancel('\n'.join(alist + ['\n', qtn]))
+    def accept_suggestion_or_cancel(self, result, expln="", suggestions=ALL_SUGGESTIONS):
         buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
         for suggestion in suggestions:
             if result.suggests(suggestion):
                 buttons += (SUGGESTION_LABEL_MAP[suggestion], suggestion)
-        return self.ask_question(result.message, clarification, buttons)
+        return self.ask_question(result.message, expln, buttons)
     # Commonly encountered suggestion combinations
-    def ask_edit_force_or_cancel(self, result, clarification=""):
-        return self.accept_suggestion_or_cancel(result, clarification, [Suggestion.EDIT, Suggestion.FORCE])
-    def ask_force_or_cancel(self, result, clarification=""):
-        return self.accept_suggestion_or_cancel(result, clarification, [Suggestion.FORCE])
-    def ask_force_refresh_absorb_or_cancel(self, result, clarification=""):
-        return self.accept_suggestion_or_cancel(result, clarification, [Suggestion.FORCE, Suggestion.REFRESH, Suggestion.ABSORB])
-    def ask_recover_or_cancel(self, result, clarification=""):
-        return self.accept_suggestion_or_cancel(result, clarification, [Suggestion.RECOVER])
-    def ask_rename_force_or_cancel(self, result, clarification=""):
-        return self.accept_suggestion_or_cancel(result, clarification, [Suggestion.RENAME, Suggestion.FORCE])
-    def ask_rename_force_or_skip(self, result, clarification=""):
-        return self.accept_suggestion_or_cancel(result, clarification, [Suggestion.RENAME, Suggestion.FORCE, Suggestion.SKIP, Suggestion.SKIP_ALL])
-    def ask_rename_overwrite_force_or_cancel(self, result, clarification=""):
-        return self.accept_suggestion_or_cancel(result, clarification, [Suggestion.RENAME, Suggestion.OVERWRITE, Suggestion.FORCE])
-    def ask_rename_overwrite_or_cancel(self, result, clarification=""):
-        return self.accept_suggestion_or_cancel(result, clarification, [Suggestion.RENAME, Suggestion.OVERWRITE])
+    def ask_edit_force_or_cancel(self, result, expln=""):
+        return self.accept_suggestion_or_cancel(result, expln, [Suggestion.EDIT, Suggestion.FORCE])
+    def ask_force_or_cancel(self, result, expln=""):
+        return self.accept_suggestion_or_cancel(result, expln, [Suggestion.FORCE])
+    def ask_force_refresh_absorb_or_cancel(self, result, expln=""):
+        return self.accept_suggestion_or_cancel(result, expln, [Suggestion.FORCE, Suggestion.REFRESH, Suggestion.ABSORB])
+    def ask_recover_or_cancel(self, result, expln=""):
+        return self.accept_suggestion_or_cancel(result, expln, [Suggestion.RECOVER])
+    def ask_rename_force_or_cancel(self, result, expln=""):
+        return self.accept_suggestion_or_cancel(result, expln, [Suggestion.RENAME, Suggestion.FORCE])
+    def ask_rename_force_or_skip(self, result, expln=""):
+        return self.accept_suggestion_or_cancel(result, expln, [Suggestion.RENAME, Suggestion.FORCE, Suggestion.SKIP, Suggestion.SKIP_ALL])
+    def ask_rename_overwrite_force_or_cancel(self, result, expln=""):
+        return self.accept_suggestion_or_cancel(result, expln, [Suggestion.RENAME, Suggestion.OVERWRITE, Suggestion.FORCE])
+    def ask_rename_overwrite_or_cancel(self, result, expln=""):
+        return self.accept_suggestion_or_cancel(result, expln, [Suggestion.RENAME, Suggestion.OVERWRITE])
 
 class ReporterMixin:
     def inform_user(self, msg, expln=None, problem_type=Gtk.MessageType.INFO):
@@ -415,11 +421,11 @@ class ReporterMixin:
         dialog.run()
         dialog.destroy()
     def alert_user(self, msg, expln=None):
-        return self.inform_user(msg, expln, problem_type=Gtk.MessageType.ERROR)
+        return self.inform_user(msg=msg, expln=expln, problem_type=Gtk.MessageType.ERROR)
     def report_failure(self, failure):
-        return self.inform_user(failure.result, Gtk.MessageType.ERROR)
+        return self.inform_user(msg=failure.result, problem_type=Gtk.MessageType.ERROR)
     def report_exception_as_error(self, edata):
-        return self.alert_user(str(edata))
+        return self.alert_user(msg=str(edata))
     def report_any_problems(self, result):
         if result.is_ok:
             return
@@ -427,7 +433,16 @@ class ReporterMixin:
             problem_type = Gtk.MessageType.WARNING
         else:
             problem_type = Gtk.MessageType.ERROR
-        return self.inform_user(result.message, problem_type=problem_type)
+        return self.inform_user(msg=result.message, problem_type=problem_type)
 
 class ClientMixin(BusyIndicatorUser, PathSelectorMixin, AskerMixin, ReporterMixin):
     pass
+
+@singleton
+class MainWindow(Gtk.Window, BusyIndicator, AskerMixin, ReporterMixin):
+    def __init__(self, *args, **kwargs):
+        global main_window
+        kwargs["type"] = Gtk.WindowType.TOPLEVEL
+        Gtk.Window.__init__(self, *args, **kwargs)
+        BusyIndicator.__init__(self)
+        main_window = self

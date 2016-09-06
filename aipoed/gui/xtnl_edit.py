@@ -246,10 +246,10 @@ actions.CLASS_INDEP_AGS[actions.AC_DONT_CARE].add_actions(
     [
         ("allocate_xtnl_editors", Gtk.STOCK_PREFERENCES, _("_Editor Allocation"), "",
          _('Allocate editors to file types'),
-         lambda _action=None:  EditorAllocationDialog(parent=dialogue.main_window).show()
+         lambda _action=None:  EditorAllocationDialog().show()
         ),
         ("allocate_xtnl_perusers", Gtk.STOCK_PREFERENCES, _("_Peruser Allocation"), "",
          _("Allocate perusers to file types"),
-         lambda _action=None: PeruserAllocationDialog(parent=dialogue.main_window).show()
+         lambda _action=None: PeruserAllocationDialog().show()
         ),
     ])

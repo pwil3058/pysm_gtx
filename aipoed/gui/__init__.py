@@ -1,7 +1,5 @@
 ### -*- coding: utf-8 -*-
 ###
-###  aipoed/__init__.py
-###
 ###  Copyright (C) 2016 Peter Williams <pwil3058@gmail.com>
 ###
 ###
@@ -27,3 +25,4 @@ def yield_to_pending_events():
         Gtk.main_iteration()
         if not Gtk.events_pending():
             break
+

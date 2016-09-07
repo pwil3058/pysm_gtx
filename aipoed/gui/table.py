@@ -175,9 +175,8 @@ class TableView(tlview.ListView, actions.CAGandUIManager, dialogue.BusyIndicator
     SET_EVENTS = enotify.E_CHANGE_WD
     REFRESH_EVENTS = 0
     AU_REQ_EVENTS = 0
-    def __init__(self, busy_indicator=None, size_req=None):
+    def __init__(self, size_req=None):
         tlview.ListView.__init__(self)
-        dialogue.BusyIndicatorUser.__init__(self, busy_indicator)
         actions.CAGandUIManager.__init__(self, selection=self.get_selection(), popup=self.PopUp)
         auto_update.AutoUpdater.__init__(self)
         enotify.Listener.__init__(self)
@@ -190,8 +189,6 @@ class TableView(tlview.ListView, actions.CAGandUIManager, dialogue.BusyIndicator
             self.register_auto_update_cb(self.auto_update_cb)
         if size_req:
             self.set_size_request(size_req[0], size_req[1])
-        self.connect("button_press_event", self._handle_clear_selection_cb)
-        self.connect("key_press_event", self._handle_clear_selection_cb)
     def populate_action_groups(self):
         self.action_groups[actions.AC_DONT_CARE].add_actions(
             [
@@ -214,16 +211,6 @@ class TableView(tlview.ListView, actions.CAGandUIManager, dialogue.BusyIndicator
         except KeyError:
             args["tbd_reset_only"] = [self]
         return self.AU_REQ_EVENTS
-    def _handle_clear_selection_cb(self, widget, event):
-        if event.type == Gdk.EventType.BUTTON_PRESS:
-            if event.button == 2:
-                self.seln.unselect_all()
-                return True
-        elif event.type == Gdk.EventType.KEY_PRESS:
-            if event.keyval == Gdk.keyval_from_name("Escape"):
-                self.seln.unselect_all()
-                return True
-        return False
     def _get_table_db(self):
         assert False, _("Must be defined in child")
     def _fetch_contents(self, tbd_reset_only=False, **kwargs):
@@ -306,8 +293,8 @@ class TableView(tlview.ListView, actions.CAGandUIManager, dialogue.BusyIndicator
 class MapManagedTableView(TableView, gutils.MappedManager):
     __g_type_name__ = "MapManagedTableView"
     _NEEDS_RESET = 123
-    def __init__(self, busy_indicator=None, size_req=None):
-        TableView.__init__(self, busy_indicator=busy_indicator, size_req=size_req)
+    def __init__(self, size_req=None):
+        TableView.__init__(self, size_req=size_req)
         gutils.MappedManager.__init__(self)
         self._needs_refresh = True
     def auto_update_cb(self, events_so_far, args):
@@ -342,11 +329,11 @@ class MapManagedTableView(TableView, gutils.MappedManager):
 class TableWidget(Gtk.VBox):
     __g_type_name__ = "TableWidget"
     VIEW = TableView
-    def __init__(self, scroll_bar=True, busy_indicator=None, size_req=None, **kwargs):
+    def __init__(self, scroll_bar=True, size_req=None, **kwargs):
         Gtk.VBox.__init__(self)
         self.header = gutils.SplitBar()
         self.pack_start(self.header, expand=False, fill=True, padding=0)
-        self.view = self.VIEW(busy_indicator=busy_indicator, size_req=size_req, **kwargs)
+        self.view = self.VIEW(size_req=size_req, **kwargs)
         if scroll_bar:
             self.pack_start(gutils.wrap_in_scrolled_window(self.view), expand=True, fill=True, padding=0)
         else:
@@ -363,3 +350,34 @@ class TableWidget(Gtk.VBox):
         return self.view.get_selection()
     def unselect_all(self):
         self.seln.unselect_all()
+
+class TableData:
+    def __init__(self, **kwargs):
+        self._kwargs = kwargs
+        h = hashlib.sha1()
+        pdt = self._get_data_text(h)
+        self._db_hash_digest = h.digest()
+        self._current_text_digest = None
+        self._finalize(pdt)
+    def __getattr__(self, name):
+        if name == "is_current": return self._is_current()
+    def _finalize(self, pdt):
+        assert False, "_finalize() must be defined in child"
+    def _is_current(self):
+        h = hashlib.sha1()
+        self._current_text = self._get_data_text(h)
+        self._current_text_digest = h.digest()
+        return self._current_text_digest == self._db_hash_digest
+    def reset(self):
+        if self._current_text_digest is None:
+            return self.__class__(**self._kwargs)
+        if self._current_text_digest != self._db_hash_digest:
+            self._db_hash_digest = self._current_text_digest
+            self._finalize(self._current_text)
+        return self
+    def _get_data_text(self, h):
+        assert False, "_get_data_text() must be defined in child"
+    def iter_rows(self):
+        for row in self._rows:
+            yield row
+

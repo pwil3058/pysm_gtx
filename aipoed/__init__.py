@@ -203,3 +203,4 @@ else:
                os.access(potential_path, os.X_OK):
                 return potential_path
         return None
+

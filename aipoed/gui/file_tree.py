@@ -24,10 +24,10 @@ from gi.repository import GObject
 from .. import CmdResult, CmdFailure
 
 from .. import utils
-from .. import fsdb
 from .. import os_utils
 from .. import enotify
 
+from . import fsdb
 from . import tlview
 from . import gutils
 from . import actions

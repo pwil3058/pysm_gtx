@@ -179,7 +179,7 @@ class AliasPathTable(table.EditedEntriesTable):
     BUTTONS = []
     VIEW = AliasPathView
 
-class PathSelectDialog(dialogue.Dialog):
+class PathSelectDialog(dialogue.Dialog, dialogue.AskerMixin, dialogue.ReporterMixin, dialogue.PathSelectorMixin):
     PATH_TABLE = AliasPathTable
     def __init__(self, label, suggestion=None, parent=None):
         dialogue.Dialog.__init__(self, title=_("Select {}").format(label), parent=parent,
@@ -213,8 +213,9 @@ class PathSelectDialog(dialogue.Dialog):
     def _path_cb(self, entry=None):
         self.response(Gtk.ResponseType.OK)
     def _browse_cb(self, button=None):
-        dirname = dialogue.select_directory(_("Browse for Directory"), existing=True, parent=self)
-        if dirname:
-            self._path.set_text(utils.path_rel_home(dirname))
+        dir_path = self.select_directory(_("Browse for Directory"), existing=True)
+        if dir_path:
+            from .. import HOME
+            self._path.set_text("~" + os.sep + os.path.relpath(dir_path, HOME))
     def get_path(self):
         return os.path.expanduser(self._path.get_text())

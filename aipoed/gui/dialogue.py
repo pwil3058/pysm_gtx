@@ -439,7 +439,7 @@ class ClientMixin(BusyIndicatorUser, PathSelectorMixin, AskerMixin, ReporterMixi
     pass
 
 @singleton
-class MainWindow(Gtk.Window, BusyIndicator, AskerMixin, ReporterMixin):
+class MainWindow(Gtk.Window, BusyIndicator, AskerMixin, ReporterMixin, PathSelectorMixin):
     def __init__(self, *args, **kwargs):
         global main_window
         kwargs["type"] = Gtk.WindowType.TOPLEVEL

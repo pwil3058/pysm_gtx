@@ -21,6 +21,8 @@
 import os
 import collections
 
+HOME = os.path.expanduser("~")
+
 class Result:
     OK = 0
     _NFLAGS = 2
@@ -203,4 +205,3 @@ else:
                os.access(potential_path, os.X_OK):
                 return potential_path
         return None
-

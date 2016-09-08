@@ -131,7 +131,7 @@ def run_cmd_in_bgnd(cmd):
     """Run the given command in the background and poll for its exit using
     _wait_for_bgnd_timeout() as a callback.
     """
-    from gi.repository import GObject
+    import threading
     def _wait_for_bgnd_cmd_timeout(pid):
         """Callback to clean up after background tasks complete"""
         try:
@@ -139,7 +139,11 @@ def run_cmd_in_bgnd(cmd):
                 rpid, _dummy= os.waitpid(pid, 0)
             else:
                 rpid, _dummy= os.waitpid(pid, os.WNOHANG)
-            return rpid != pid
+            if rpid != pid:
+                threading.Timer(2, _wait_for_bgnd_cmd_timeout, [pid]).start()
+                return True
+            else:
+                return False
         except OSError:
             return False
     if isinstance(cmd, str):
@@ -152,8 +156,8 @@ def run_cmd_in_bgnd(cmd):
         pid = subprocess.Popen(cmd).pid
     if not pid:
         return False
-    GObject.timeout_add(2000, _wait_for_bgnd_cmd_timeout, pid)
-    return True
+    _wait_for_bgnd_cmd_timeout(pid)
+    return pid
 
 # Some generalized lambdas to assisting in constructing commands
 OPTNL_FLAG = lambda val, flag: [flag] if val else []

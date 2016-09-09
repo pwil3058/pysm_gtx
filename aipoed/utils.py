@@ -41,3 +41,14 @@ def samefile(filepath1, filepath2):
         return os.path.samefile(filepath1, filepath2)
     except AttributeError:
         return os.path.abspath(filepath1) == os.path.abspath(filepath2)
+
+def path_rel_home(path):
+    """Return the given path as a path relative to user's home directory."""
+    import os
+    import urllib
+    pr = urllib.parse.urlparse(path)
+    if pr.scheme and pr.scheme != "file":
+        return path
+    if pr.path.startswith("~" + os.sep):
+        return pr.path
+    return os.path.join("~", os.path.relpath(os.path.abspath(pr.path), os.getenv("HOME")))

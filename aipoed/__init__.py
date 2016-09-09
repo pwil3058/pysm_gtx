@@ -205,3 +205,7 @@ else:
                os.access(potential_path, os.X_OK):
                 return potential_path
         return None
+
+# import some modules
+from . import i18n
+from . import options

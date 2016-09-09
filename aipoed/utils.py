@@ -52,3 +52,31 @@ def path_rel_home(path):
     if pr.path.startswith("~" + os.sep):
         return pr.path
     return os.path.join("~", os.path.relpath(os.path.abspath(pr.path), os.getenv("HOME")))
+
+def is_utf8_compliant(text):
+    try:
+        text.encode('utf-8')
+    except UnicodeError:
+        return False
+    return True
+
+ISO_8859_CODECS = ['iso-8859-{0}'.format(x) for x in range(1, 17)]
+ISO_2022_CODECS = ['iso-2022-jp', 'iso-2022-kr'] + \
+    ['iso-2022-jp-{0}'.format(x) for x in list(range(1, 3)) + ['2004', 'ext']]
+
+def make_utf8_compliant(text):
+    '''Return a UTF-8 compliant version of text'''
+    if text is None:
+        return ""
+    if isinstance(text, bytes):
+        return text.decode("utf-8")
+    elif is_utf8_compliant(text):
+        return text
+    for codec in ISO_8859_CODECS + ISO_2022_CODECS:
+        try:
+            text = unicode(text, codec).encode('utf-8')
+            return text
+        except UnicodeError:
+            continue
+    raise UnicodeError
+

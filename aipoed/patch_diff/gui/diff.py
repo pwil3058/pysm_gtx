@@ -23,7 +23,6 @@ from gi.repository import Pango
 
 from ... import CmdResult, CmdFailure
 from ... import runext
-from ... import enotify
 from ... import options
 
 from .. import patchlib
@@ -428,7 +427,7 @@ class DiffPlusesWidget(DiffPlusNotebook, FileAndRefreshActions):
     def window_title(self):
         return ""
 
-class DiffTextWidget(DiffPlusNotebook, FileAndRefreshActions):
+class DiffTextsWidget(DiffPlusNotebook, FileAndRefreshActions):
     A_NAME_LIST = ["diff_save", "diff_save_as", "diff_refresh"]
     def __init__(self, num_strip_levels=1, **kwargs):
         diff_text = self._get_diff_text()
@@ -470,3 +469,13 @@ class GenericDiffDialog(dialogue.ListenerDialog):
         self.show_all()
     def _close_cb(self, dialog, response_id):
         dialog.destroy()
+
+def launch_external_diff(file_a, file_b):
+    extdiff = options.get("diff", "extdiff")
+    if not extdiff:
+        return CmdResult.warning(_("No external diff viewer is defined.\n"))
+    try:
+        runext.run_cmd_in_bgnd([extdiff, file_a, file_b])
+    except OSError as edata:
+        return CmdResult.error(stderr=_("Error launching external viewer \"{0}\": {1}\n").format(extdiff, edata.strerror))
+    return CmdResult.ok()

@@ -23,18 +23,36 @@ from gi.repository import GdkPixbuf
 
 PACKAGE_NAME = "aipoed"
 
-def find_icon_directory(app_or_pkg_name):
+def find_app_icon_directory(app_name):
     # find the icons directory
     # first look in the source directory (so that we can run uninstalled)
     icon_dir_path = os.path.join(sys.path[0], "pixmaps")
     if not os.path.exists(icon_dir_path) or not os.path.isdir(icon_dir_path):
-        _TAILEND = os.path.join("share", "pixmaps", app_or_pkg_name)
+        _TAILEND = os.path.join("share", "pixmaps", app_name)
         _prefix = sys.path[0]
         while _prefix:
             icon_dir_path = os.path.join(_prefix, _TAILEND)
             if os.path.exists(icon_dir_path) and os.path.isdir(icon_dir_path):
                 break
             _prefix = os.path.dirname(_prefix)
+    return icon_dir_path
+
+def find_pkg_icon_directory(pkg_name):
+    # find the icons directory
+    # first look in the source directory (so that we can run uninstalled)
+    for path in sys.path:
+        _prefix = path
+        if os.path.isdir(os.path.join(path, pkg_name)):
+            icon_dir_path = os.path.join(path, "pixmaps")
+            if os.path.isdir(icon_dir_path):
+                return icon_dir_path
+            break
+    _TAILEND = os.path.join("share", "pixmaps", pkg_name)
+    while _prefix:
+        icon_dir_path = os.path.join(_prefix, _TAILEND)
+        if os.path.exists(icon_dir_path) and os.path.isdir(icon_dir_path):
+            break
+        _prefix = os.path.dirname(_prefix)
     return icon_dir_path
 
 _PREFIX = PACKAGE_NAME + "_"
@@ -52,7 +70,7 @@ _STOCK_ITEMS_OWN_PNG = [
     (STOCK_REFRESH_PATCH, _("Refresh"), 0, 0, None),
 ]
 
-def add_own_stock_icons(name, stock_item_list):
+def add_own_stock_icons(name, stock_item_list, find_icon_directory=find_app_icon_directory):
     LIBDIR = find_icon_directory(name)
     OFFSET = len(name) + 1
     png_file_name = lambda item_name: os.path.join(LIBDIR, item_name[OFFSET:] + os.extsep + "png")
@@ -65,7 +83,7 @@ def add_own_stock_icons(name, stock_item_list):
         _name = _item[0]
         factory.add(_name, Gtk.IconSet(make_pixbuf(_name)))
 
-add_own_stock_icons(PACKAGE_NAME, _STOCK_ITEMS_OWN_PNG)
+add_own_stock_icons(PACKAGE_NAME, _STOCK_ITEMS_OWN_PNG, find_pkg_icon_directory)
 
 StockAlias = collections.namedtuple("StockAlias", ["name", "alias", "text"])
 

@@ -32,9 +32,12 @@ class PatchWidget(Gtk.VBox):
         Gtk.VBox.__init__(self)
         self.epatch = patch
         #
+        self.status_box = Gtk.HBox()
+        self.status_box.show_all()
         self.tws_display = self.TWSDisplay()
         self.tws_display.set_value(len(self.epatch.report_trailing_whitespace()))
         hbox = Gtk.HBox()
+        hbox.pack_start(self.status_box, expand=False, fill=True, padding=0)
         hbox.pack_start(Gtk.Label(label), expand=False, fill=True, padding=0)
         hbox.pack_end(self.tws_display, expand=False, fill=True, padding=0)
         self.pack_start(hbox, expand=False, fill=True, padding=0)

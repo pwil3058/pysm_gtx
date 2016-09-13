@@ -23,6 +23,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 from gi.repository import Gdk
+from gi.types import GObjectMeta
 
 class MaskedCondns(collections.namedtuple('MaskedCondns', ['condns', 'mask'])):
     __slots__ = ()
@@ -314,8 +315,17 @@ class UIManager(Gtk.UIManager):
         if isinstance(widget, Gtk.MenuItem) and tooltip:
             widget.set_tooltip_text(tooltip)
 
+class _ActionGroupPopulator(GObjectMeta, type):
+    def __init__(Class, classname, supers, classdict):
+        Class._action_group_populators = set()
+        for cls in (Class,) + supers:
+            try:
+                Class._action_group_populators.add(cls.populate_action_groups)
+            except AttributeError:
+                pass
+
 # TODO: change method names to avoid accidental conflicts with other mixins
-class CAGandUIManager:
+class CAGandUIManager(metaclass=_ActionGroupPopulator):
     '''This is a "mix in" class and needs to be merged with a Gtk.Widget() descendant'''
     UI_DESCR = '''<ui></ui>'''
     def __init__(self, selection=None, popup=None):
@@ -323,12 +333,11 @@ class CAGandUIManager:
         CLASS_INDEP_AGS.add_ui_mgr(self.ui_manager)
         name = '{0}:{1:x}'.format(self.__class__.__name__, self.__hash__())
         self.action_groups = ConditionalActionGroups(name, ui_mgrs=[self.ui_manager], selection=selection)
-        self.populate_action_groups()
+        for action_group_populator in self._action_group_populators:
+            action_group_populator(self)
         self.ui_manager.add_ui_from_string(self.UI_DESCR)
         self._popup_cb_id = self._popup = None
         self.set_popup(popup)
-    def populate_action_groups(self):
-        assert False, _("should be derived in subclass")
     @staticmethod
     def _button_press_cb(widget, event):
         if event.type == Gdk.EventType.BUTTON_PRESS:

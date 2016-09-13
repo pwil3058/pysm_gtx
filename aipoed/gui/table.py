@@ -380,4 +380,3 @@ class TableData:
     def iter_rows(self):
         for row in self._rows:
             yield row
-

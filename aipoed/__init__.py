@@ -20,8 +20,15 @@
 
 import os
 import collections
+import gettext
+
+from . import i18n
 
 HOME = os.path.expanduser("~")
+PKG_NAME = "aipoed"
+LOCALE_DIR = i18n.find_locale_dir()
+
+gettext.install(PKG_NAME, LOCALE_DIR)
 
 class Result:
     OK = 0
@@ -207,5 +214,4 @@ else:
         return None
 
 # import some modules
-from . import i18n
 from . import options

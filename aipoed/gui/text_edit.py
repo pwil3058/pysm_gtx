@@ -33,20 +33,16 @@ from gi.repository import Gtk
 from gi.repository import Pango
 from gi.repository import GObject
 
-from aipoed import CmdFailure
-
-from aipoed.gui import actions
-from aipoed.gui import dialogue
-from aipoed.gui import gutils
-from aipoed.gui import textview
-
+from .. import CmdFailure
 from .. import utils
 
-from . import ifce
-from . import config
+from . import actions
+from . import dialogue
+from . import gutils
+from . import textview
 
 class MessageWidget(textview.Widget, actions.CAGandUIManager):
-    UI_DESCR = ''
+    UI_DESCR = ""
     AC_SAVE_OK = actions.ActionCondns.new_flag()
     def __init__(self, save_file_name=None, auto_save=False, parent=None):
         self._parent = parent
@@ -69,29 +65,29 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager):
         # TODO: self.conditional_action_group = Gtk.ActionGroup("save file dependent")
         self.action_groups[actions.AC_DONT_CARE].add_actions(
             [
-                ("text_edit_ack", None, _('_Ack'), None,
-                 _('Insert Acked-by tag at cursor position'), self._insert_ack_acb),
-                ("text_edit_sign_off", None, _('_Sign Off'), None,
-                 _('Insert Signed-off-by tag at cursor position'), self._insert_sign_off_acb),
-                ("text_edit_author", None, _('A_uthor'), None,
-                 _('Insert Author tag at cursor position'), self._insert_author_acb),
-                ("text_edit_save_as", Gtk.STOCK_SAVE_AS, _('S_ave as'), "",
-                 _('Save summary to a file'), self._save_text_as_acb),
-                ("text_edit_load_from", Gtk.STOCK_REVERT_TO_SAVED, _('_Load from'), "",
-                 _('Load summary from a file'), self._load_text_from_acb),
-                ("text_edit_insert_from", Gtk.STOCK_PASTE, _('_Insert from'), '',
-                 _('Insert the contents of a file at cursor position'), self._insert_text_from_acb),
+                ("text_edit_ack", None, _("_Ack"), None,
+                 _("Insert Acked-by tag at cursor position"), self._insert_ack_acb),
+                ("text_edit_sign_off", None, _("_Sign Off"), None,
+                 _("Insert Signed-off-by tag at cursor position"), self._insert_sign_off_acb),
+                ("text_edit_author", None, _("A_uthor"), None,
+                 _("Insert Author tag at cursor position"), self._insert_author_acb),
+                ("text_edit_save_as", Gtk.STOCK_SAVE_AS, _("S_ave as"), "",
+                 _("Save summary to a file"), self._save_text_as_acb),
+                ("text_edit_load_from", Gtk.STOCK_REVERT_TO_SAVED, _("_Load from"), "",
+                 _("Load summary from a file"), self._load_text_from_acb),
+                ("text_edit_insert_from", Gtk.STOCK_PASTE, _("_Insert from"), "",
+                 _("Insert the contents of a file at cursor position"), self._insert_text_from_acb),
             ])
         self.action_groups[self.AC_SAVE_OK].add_actions(
             [
-                ("text_edit_save_to_file", Gtk.STOCK_SAVE, _('_Save'), "",
-                 _('Save summary to file'), self._save_text_to_file_acb),
-                ("text_edit_load_fm_file", Gtk.STOCK_REVERT_TO_SAVED, _('_Revert'), "",
-                 _('Load summary from saved file'), self._load_text_fm_file_acb),
+                ("text_edit_save_to_file", Gtk.STOCK_SAVE, _("_Save"), "",
+                 _("Save summary to file"), self._save_text_to_file_acb),
+                ("text_edit_load_fm_file", Gtk.STOCK_REVERT_TO_SAVED, _("_Revert"), "",
+                 _("Load summary from saved file"), self._load_text_fm_file_acb),
             ])
         self.save_toggle_action = Gtk.ToggleAction(
-                "text_edit_toggle_auto_save", _('Auto Sa_ve'),
-                _('Automatically/periodically save summary to file'), Gtk.STOCK_SAVE
+                "text_edit_toggle_auto_save", _("Auto Sa_ve"),
+                _("Automatically/periodically save summary to file"), Gtk.STOCK_SAVE
             )
         self.save_toggle_action.connect("toggled", self._toggle_auto_save_acb)
         self.action_groups[self.AC_SAVE_OK].add_action(self.save_toggle_action)
@@ -100,28 +96,49 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager):
         self.action_groups.update_condns(mcondn)
     @staticmethod
     def _inform_user_data_problem():
-        dialogue.main_window.inform_user(_('Unable to determine user\'s data'), parent=self._parent)
+        dialogue.main_window.inform_user(_("Unable to determine user\"s data"))
+    @staticmethod
+    def get_author_name_and_email():
+        import email.utils
+        from .. import options
+        DEFAULT_NAME_EVARS = ["GECOS", "GIT_AUTHOR_NAME", "LOGNAME"]
+        DEFAULT_EMAIL_EVARS = ["EMAIL_ADDRESS", "GIT_AUTHOR_EMAIL"]
+        # first check for OUR definitions in the current pgnd
+        email_addr = options.get("user", "email", pgnd_only=True)
+        if email_addr:
+            name = options.get("user", "name")
+            return email.utils.formataddr((name if name else utils.get_first_in_envar(DEFAULT_NAME_EVARS, default="unknown"), email_addr,))
+        # then check for OUR global definitions
+        email_addr = options.get("user", "email")
+        if email_addr:
+            name = options.get("user", "name")
+            return email.utils.formataddr((name if name else utils.get_first_in_envar(DEFAULT_NAME_EVARS, default="unknown"), email_addr,))
+        email_addr = utils.get_first_in_envar(DEFAULT_EMAIL_EVARS, default=None)
+        if email_addr:
+            name = options.get("user", "name")
+            return email.utils.formataddr((name if name else utils.get_first_in_envar(DEFAULT_NAME_EVARS, default="unknown"), email_addr,))
+        return None
     def _insert_sign_off_acb(self, _action=None):
-        data = ifce.get_author_name_and_email()
+        data = self.get_author_name_and_email()
         if data:
             self.bfr.insert_at_cursor("Signed-off-by: %s\n" % data)
         else:
             self._inform_user_data_problem()
     def _insert_ack_acb(self, _action=None):
-        data = ifce.get_author_name_and_email()
+        data = self.get_author_name_and_email()
         if data:
             self.bfr.insert_at_cursor("Acked-by: %s\n" % data)
         else:
             self._inform_user_data_problem()
     def _insert_author_acb(self, _action=None):
-        data = ifce.get_author_name_and_email()
+        data = self.get_author_name_and_email()
         if data:
             self.bfr.insert_at_cursor("Author: %s\n" % data)
         else:
             self._inform_user_data_problem()
     def _ok_to_overwrite_summary(self):
         if self.bfr.get_char_count():
-            return dialogue.main_window.ask_ok_cancel(_('Buffer contents will be destroyed. Continue?'))
+            return dialogue.main_window.ask_ok_cancel(_("Buffer contents will be destroyed. Continue?"))
         return True
     def save_text_to_file(self, file_name=None):
         if not file_name:
@@ -129,18 +146,18 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager):
                 return
             file_name = self._save_file_name
         try:
-            open(file_name, 'w').write(self.get_contents())
+            open(file_name, "w").write(self.get_contents())
             self._save_file_name = file_name
             self._save_file_digest = self.digest
         except IOError:
-            dialogue.main_window.alert_user(_('Save failed!'))
+            dialogue.main_window.alert_user(_("Save failed!"))
     def _save_text_to_file_acb(self, _action=None):
         self.save_text_to_file()
     def _save_text_as_acb(self, _action=None):
-        fname = dialogue.main_window.ask_file_path(_('Enter file name'), existing=False, suggestion=self._save_file_name)
+        fname = dialogue.main_window.ask_file_path(_("Enter file name"), existing=False, suggestion=self._save_file_name)
         if fname and os.path.exists(fname) and not utils.samefile(fname, self._save_file_name):
             if not utils.samefile(fname, ifce.SCM.get_default_commit_save_file()):
-                if not dialogue.main_window.ask_ok_cancel(os.linesep.join([fname, _('\nFile exists. Overwrite?')])):
+                if not dialogue.main_window.ask_ok_cancel(os.linesep.join([fname, _("\nFile exists. Overwrite?")])):
                     return
         self.save_text_to_file(file_name=fname)
     def load_text_fm_file(self, file_name=None, already_checked=False):
@@ -151,27 +168,27 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager):
                 return
             file_name = self._save_file_name
         try:
-            self.set_contents(open(file_name, 'rb').read())
+            self.set_contents(open(file_name, "rb").read())
             self._save_file_name = file_name
             self._save_file_digest = self.digest
         except IOError:
-            dialogue.main_window.alert_user(_('Load from file failed!'))
+            dialogue.main_window.alert_user(_("Load from file failed!"))
     def _load_text_fm_file_acb(self, _action=None):
         self.load_text_fm_file()
     def _load_text_from_acb(self, _action=None):
         if not self._ok_to_overwrite_summary():
             return
-        fname = dialogue.main_window.ask_file_path(_('Enter file name'), existing=True)
+        fname = dialogue.main_window.ask_file_path(_("Enter file name"), existing=True)
         self.load_text_fm_file(file_name=fname, already_checked=True)
     def _insert_text_from_acb(self, _action=None):
-        file_name = dialogue.main_window.ask_file_path(_('Enter file name'), existing=True)
+        file_name = dialogue.main_window.ask_file_path(_("Enter file name"), existing=True)
         if file_name is not None:
             try:
-                text = open(file_name, 'rb').read()
+                text = open(file_name, "rb").read()
                 self.bfr.insert_at_cursor(text)
                 self.bfr.set_modified(True)
             except IOError:
-                dialogue.main_window.alert_user(_('Insert at cursor from file failed!'))
+                dialogue.main_window.alert_user(_("Insert at cursor from file failed!"))
     def get_auto_save(self):
         return self.save_toggle_action.get_active()
     def set_auto_save(self, active=True):
@@ -197,11 +214,11 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager):
             self.save_text_to_file("")
 
 class DbMessageWidget(MessageWidget):
-    UI_DESCR = ''
+    UI_DESCR = ""
     def get_text_fm_db(self):
-        raise NotImplentedError('Must be defined in child')
+        raise NotImplentedError("Must be defined in child")
     def set_text_in_db(self, text):
-        raise NotImplentedError('Must be defined in child')
+        raise NotImplentedError("Must be defined in child")
     def __init__(self, save_file_name=None, auto_save=False, parent=None):
         MessageWidget.__init__(self, parent=parent)
         self.view.set_cursor_visible(True)
@@ -216,10 +233,10 @@ class DbMessageWidget(MessageWidget):
     def populate_action_groups(self):
         self.action_groups[actions.AC_DONT_CARE].add_actions(
             [
-                ("text_edit_save", Gtk.STOCK_SAVE, _('_Save'), "",
-                 _('Save summary to database'), self._save_text_acb),
-                ("text_edit_load", Gtk.STOCK_REVERT_TO_SAVED, _('_Reload'), "",
-                 _('Reload summary from database'), self._reload_text_acb),
+                ("text_edit_save", Gtk.STOCK_SAVE, _("_Save"), "",
+                 _("Save summary to database"), self._save_text_acb),
+                ("text_edit_load", Gtk.STOCK_REVERT_TO_SAVED, _("_Reload"), "",
+                 _("Reload summary from database"), self._reload_text_acb),
             ])
     def _save_text_acb(self, *args):
         text = self.bfr.get_text(self.bfr.get_start_iter(), self.bfr.get_end_iter())

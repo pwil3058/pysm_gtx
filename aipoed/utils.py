@@ -53,6 +53,17 @@ def path_rel_home(path):
         return pr.path
     return os.path.join("~", os.path.relpath(os.path.abspath(pr.path), os.getenv("HOME")))
 
+def get_first_in_envar(envar_list, default=""):
+    import os
+    for envar in envar_list:
+        try:
+            value = os.environ[envar]
+            if value != '':
+                return value
+        except KeyError:
+            continue
+    return default
+
 def is_utf8_compliant(text):
     try:
         text.encode('utf-8')
@@ -79,4 +90,3 @@ def make_utf8_compliant(text):
         except UnicodeError:
             continue
     raise UnicodeError
-

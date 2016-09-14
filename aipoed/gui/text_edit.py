@@ -85,7 +85,7 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager, dialogue.ClientMix
     def _inform_user_data_problem(self):
         self.inform_user(_("Unable to determine user\"s data"))
     @staticmethod
-    def get_author_name_and_email():
+    def get_user_name_and_email():
         import email.utils
         from .. import options
         DEFAULT_NAME_EVARS = ["GECOS", "GIT_AUTHOR_NAME", "LOGNAME"]
@@ -106,19 +106,19 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager, dialogue.ClientMix
             return email.utils.formataddr((name if name else utils.get_first_in_envar(DEFAULT_NAME_EVARS, default="unknown"), email_addr,))
         return None
     def _insert_sign_off_acb(self, _action=None):
-        data = self.get_author_name_and_email()
+        data = self.get_user_name_and_email()
         if data:
             self.bfr.insert_at_cursor("Signed-off-by: %s\n" % data)
         else:
             self._inform_user_data_problem()
     def _insert_ack_acb(self, _action=None):
-        data = self.get_author_name_and_email()
+        data = self.get_user_name_and_email()
         if data:
             self.bfr.insert_at_cursor("Acked-by: %s\n" % data)
         else:
             self._inform_user_data_problem()
     def _insert_author_acb(self, _action=None):
-        data = self.get_author_name_and_email()
+        data = self.get_user_name_and_email()
         if data:
             self.bfr.insert_at_cursor("Author: %s\n" % data)
         else:

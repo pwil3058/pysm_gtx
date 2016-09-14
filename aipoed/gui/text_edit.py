@@ -30,7 +30,7 @@ from . import dialogue
 from . import gutils
 from . import textview
 
-class MessageWidget(textview.Widget, actions.CAGandUIManager):
+class MessageWidget(textview.Widget, actions.CAGandUIManager, dialogue.ClientMixin):
     UI_DESCR = ""
     AC_SAVE_OK = actions.ActionCondns.new_flag()
     def __init__(self, save_file_name=None, auto_save=False, parent=None):
@@ -82,9 +82,8 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager):
     def _update_action_sensitivities(self):
         mcondn = actions.MaskedCondns(0 if self._save_file_name is not None else self.AC_SAVE_OK, self.AC_SAVE_OK)
         self.action_groups.update_condns(mcondn)
-    @staticmethod
-    def _inform_user_data_problem():
-        dialogue.main_window.inform_user(_("Unable to determine user\"s data"))
+    def _inform_user_data_problem(self):
+        self.inform_user(_("Unable to determine user\"s data"))
     @staticmethod
     def get_author_name_and_email():
         import email.utils
@@ -126,7 +125,7 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager):
             self._inform_user_data_problem()
     def _ok_to_overwrite_summary(self):
         if self.bfr.get_char_count():
-            return dialogue.main_window.ask_ok_cancel(_("Buffer contents will be destroyed. Continue?"))
+            return self.ask_ok_cancel(_("Buffer contents will be destroyed. Continue?"))
         return True
     def save_text_to_file(self, file_name=None):
         if not file_name:
@@ -138,14 +137,14 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager):
             self._save_file_name = file_name
             self._save_file_digest = self.digest
         except IOError:
-            dialogue.main_window.alert_user(_("Save failed!"))
+            self.alert_user(_("Save failed!"))
     def _save_text_to_file_acb(self, _action=None):
         self.save_text_to_file()
     def _save_text_as_acb(self, _action=None):
-        fname = dialogue.main_window.ask_file_path(_("Enter file name"), existing=False, suggestion=self._save_file_name)
+        fname = self.ask_file_path(_("Enter file name"), existing=False, suggestion=self._save_file_name)
         if fname and os.path.exists(fname) and not utils.samefile(fname, self._save_file_name):
             if not utils.samefile(fname, ifce.SCM.get_default_commit_save_file()):
-                if not dialogue.main_window.ask_ok_cancel(os.linesep.join([fname, _("\nFile exists. Overwrite?")])):
+                if not self.ask_ok_cancel(os.linesep.join([fname, _("\nFile exists. Overwrite?")])):
                     return
         self.save_text_to_file(file_name=fname)
     def load_text_fm_file(self, file_name=None, already_checked=False):
@@ -160,23 +159,23 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager):
             self._save_file_name = file_name
             self._save_file_digest = self.digest
         except IOError:
-            dialogue.main_window.alert_user(_("Load from file failed!"))
+            self.alert_user(_("Load from file failed!"))
     def _load_text_fm_file_acb(self, _action=None):
         self.load_text_fm_file()
     def _load_text_from_acb(self, _action=None):
         if not self._ok_to_overwrite_summary():
             return
-        fname = dialogue.main_window.ask_file_path(_("Enter file name"), existing=True)
+        fname = self.ask_file_path(_("Enter file name"), existing=True)
         self.load_text_fm_file(file_name=fname, already_checked=True)
     def _insert_text_from_acb(self, _action=None):
-        file_name = dialogue.main_window.ask_file_path(_("Enter file name"), existing=True)
+        file_name = self.ask_file_path(_("Enter file name"), existing=True)
         if file_name is not None:
             try:
                 text = open(file_name, "rb").read()
                 self.bfr.insert_at_cursor(text)
                 self.bfr.set_modified(True)
             except IOError:
-                dialogue.main_window.alert_user(_("Insert at cursor from file failed!"))
+                self.alert_user(_("Insert at cursor from file failed!"))
     def get_auto_save(self):
         return self.save_toggle_action.get_active()
     def set_auto_save(self, active=True):
@@ -230,7 +229,7 @@ class DbMessageWidget(MessageWidget):
         text = self.bfr.get_text(self.bfr.get_start_iter(), self.bfr.get_end_iter())
         result = self.set_text_in_db(text)
         if not result.is_ok:
-            dialogue.main_window.report_any_problems(result)
+            self.report_any_problems(result)
         else:
             # get the tidied up version of the text
             self.load_text_fm_db(False)
@@ -241,7 +240,7 @@ class DbMessageWidget(MessageWidget):
             if clear_digest:
                 self._save_file_digest = None
         except CmdFailure as failure:
-            dialogue.main_window.report_failure(failure)
+            self.report_failure(failure)
     def _reload_text_acb(self, *args):
         if self._ok_to_overwrite_summary():
             self.load_text_fm_db()

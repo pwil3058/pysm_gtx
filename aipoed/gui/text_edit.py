@@ -15,23 +15,12 @@
 
 import shlex
 import os
-
-GTKSPELL_AVAILABLE = False
-SPELL_CHECKER_AVAILABLE = False
-try:
-    import gtkspell
-    GTKSPELL_AVAILABLE = True
-except ImportError:
-    try:
-        from gtkspellcheck import SpellChecker
-        SPELL_CHECKER_AVAILABLE = True
-        import locale
-    except ImportError:
-        pass
+import locale
 
 from gi.repository import Gtk
 from gi.repository import Pango
 from gi.repository import GObject
+from gi.repository import GtkSpell
 
 from .. import CmdFailure
 from .. import utils
@@ -50,10 +39,9 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager):
         actions.CAGandUIManager.__init__(self)
         self.view.set_cursor_visible(True)
         self.view.set_editable(True)
-        if GTKSPELL_AVAILABLE:
-            gtkspell.Spell(self.view)
-        elif SPELL_CHECKER_AVAILABLE:
-            SpellChecker(self.view, locale.getdefaultlocale()[0])
+        self.spell_checker = GtkSpell.Checker()
+        self.spell_checker.attach(self.view)
+        self.spell_checker.set_language(locale.getdefaultlocale()[0])
         # Set up file stuff
         self._save_interval = 1000 # milliseconds
         self._save_file_name = save_file_name

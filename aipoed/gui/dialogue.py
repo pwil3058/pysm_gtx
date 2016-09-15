@@ -333,6 +333,29 @@ class EnterFilePathWidget(_EnterPathWidget):
 class EnterFilePathDialog(_EnterPathDialog):
     WIDGET = EnterFilePathWidget
 
+class ReadMultiTextDialog(CancelOKDialog):
+    def __init__(self, prompts_and_suggestions, title=None, parent=None):
+        CancelOKDialog.__init__(self, title, parent)
+        self.set_default_response(Gtk.ResponseType.OK)
+        self.hbox = Gtk.HBox()
+        self.vbox.pack_start(self.hbox, expand=False, fill=True, padding=0)
+        self.hbox.show()
+        self.entries = []
+        for prompt, suggestion in prompts_and_suggestions:
+            self.hbox.pack_start(Gtk.Label(prompt), fill=False, expand=False, padding=0)
+            entry = Gtk.Entry()
+            if suggestion:
+                entry.set_text(suggestion)
+                entry.set_position(len(suggestion))
+                entry.select_region(0, -1)
+            entry.set_width_chars(16)
+            self.entries.append(entry)
+            self.hbox.pack_start(entry, expand=True, fill=True, padding=0)
+        self.entries[-1].set_activates_default(True)
+        self.show_all()
+    def get_texts(self):
+        return [entry.get_text() for entry in self.entries]
+
 CANCEL_OK_BUTTONS = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK)
 NO_YES_BUTTONS = (Gtk.STOCK_NO, Gtk.ResponseType.NO, Gtk.STOCK_YES, Gtk.ResponseType.YES)
 
@@ -384,6 +407,16 @@ class AskerMixin:
         file_path = dialog.path if dialog.run() == Gtk.ResponseType.OK else None
         dialog.destroy()
         return file_path
+    def ask_multiple_texts(self, prompts_and_suggestions):
+        dialog = ReadMultiTextDialog(prompts_and_suggestions, parent=self.get_toplevel())
+        if dialog.run() == Gtk.ResponseType.OK:
+            texts = dialog.get_texts()
+        else:
+            texts = [None for i in range(len(prompts_and_suggestions))]
+        dialog.destroy()
+        return texts
+    def ask_text(self, prompt, suggestion=None):
+        return self.ask_multiple_texts([(prompt, suggestion)])[0]
     def confirm_list_action(self, alist, qtn):
         return self.ask_ok_cancel('\n'.join(alist + ['\n', qtn]))
     def accept_suggestion_or_cancel(self, result, expln="", suggestions=ALL_SUGGESTIONS):

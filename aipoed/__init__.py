@@ -1,7 +1,5 @@
 ### -*- coding: utf-8 -*-
 ###
-###  aipoed/__init__.py
-###
 ###  Copyright 2016 Peter Williams <pwil3058@gmail.com>
 ###
 ###

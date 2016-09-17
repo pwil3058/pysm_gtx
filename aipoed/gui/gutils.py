@@ -81,23 +81,6 @@ class RadioButtonFramedVBox(Gtk.Frame):
                 return index
         return None
 
-class PopupUser:
-    def __init__(self):
-        self._gtk_window = None
-    def _get_gtk_window(self):
-        if not self._gtk_window:
-            try:
-                temp = self.get_parent()
-            except AttributeError:
-                return None
-            while temp:
-                self._gtk_window = temp
-                try:
-                    temp = temp.get_parent()
-                except AttributeError:
-                    return None
-        return self._gtk_window
-
 class MappedManager:
     def __init__(self):
         self.is_mapped = False

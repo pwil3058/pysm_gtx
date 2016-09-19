@@ -84,24 +84,6 @@ def add_own_stock_icons(name, stock_item_list, find_icon_directory=find_app_icon
 
 add_own_stock_icons(PACKAGE_NAME, _STOCK_ITEMS_OWN_PNG, find_pkg_icon_directory)
 
-StockAlias = collections.namedtuple("StockAlias", ["name", "alias", "text"])
-
-def add_stock_aliases(stock_alias_list):
-    factory = Gtk.IconFactory()
-    factory.add_default()
-    def make_pixbuf(alias):
-        return Gtk.Image.new_from_stock(alias, Gtk.IconSize.MENU).get_pixbuf()
-    for item in stock_alias_list:
-        factory.add(item.name, Gtk.IconSet(make_pixbuf(item.alias)))
-
-# Icons that are aliased to Gtk or other stock items
-STOCK_RENAME = _PREFIX + "stock_rename"
-STOCK_INSERT = _PREFIX + "_stock_insert"
-
-# Icons that have to be designed eventually (using GtK stock in the meantime)
-_STOCK_ALIAS_LIST = [
-    StockAlias(name=STOCK_RENAME, alias=Gtk.STOCK_PASTE, text=""),
-    StockAlias(name=STOCK_INSERT, alias=Gtk.STOCK_ADD, text=_("Insert")),
-]
-
-add_stock_aliases(_STOCK_ALIAS_LIST)
+# Icons that have to be designed eventually (using aliased GtK stock in the meantime)
+STOCK_RENAME = Gtk.STOCK_PASTE
+STOCK_INSERT= Gtk.STOCK_ADD

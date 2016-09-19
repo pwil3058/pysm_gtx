@@ -1,2 +1,2 @@
 # aipoed
-Application Independent PyObject Extensions Development
+Application Independent PyGObject Extensions Development

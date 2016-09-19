@@ -97,8 +97,8 @@ class MappedManager:
     def unmap_action(self):
         pass
 
-_KEYVAL_UP_ARROW = Gdk.keyval_from_name('Up')
-_KEYVAL_DOWN_ARROW = Gdk.keyval_from_name('Down')
+_KEYVAL_UP_ARROW = lambda : Gdk.keyval_from_name('Up')
+_KEYVAL_DOWN_ARROW = lambda : Gdk.keyval_from_name('Down')
 
 class EntryWithHistory(Gtk.Entry):
     def __init__(self, max_chars=0):

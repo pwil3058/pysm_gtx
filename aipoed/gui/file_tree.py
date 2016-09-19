@@ -405,9 +405,9 @@ class FileTreeView(tlview.View, actions.CAGandUIManager, doop.DoOperationMixin):
       </popup>
     </ui>
     """
-    KEYVAL_c = Gdk.keyval_from_name("c")
-    KEYVAL_C = Gdk.keyval_from_name("C")
-    KEYVAL_ESCAPE = Gdk.keyval_from_name("Escape")
+    KEYVAL_c = lambda : Gdk.keyval_from_name("c")
+    KEYVAL_C = lambda : Gdk.keyval_from_name("C")
+    KEYVAL_ESCAPE = lambda : Gdk.keyval_from_name("Escape")
     AUTO_EXPAND = False
     DIRS_SELECTABLE = True
     ASK_BEFORE_DELETE = True

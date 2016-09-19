@@ -24,6 +24,7 @@ from . import i18n
 
 HOME = os.path.expanduser("~")
 PKG_NAME = "aipoed"
+VERSION = "0.1.0"
 LOCALE_DIR = i18n.find_locale_dir()
 
 gettext.install(PKG_NAME, LOCALE_DIR)

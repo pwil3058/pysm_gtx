@@ -108,7 +108,7 @@ class Listener:
         Record a token to facilitate deletion at a later time.
 
         Arguments:
-        events   -- the set of events for which the callback should be callded.
+        events   -- the set of events for which the callback should be called.
         callback -- the procedure to be called.
 
         Return a token that identifies the callback to facilitate deletion.

@@ -52,10 +52,6 @@ def playground_type(dirpath=None):
             return bname
     return None
 
-def get_ifce(dirpath=None):
-    pgt = playground_type(dirpath)
-    return _NULL_BACKEND if pgt is None else _BACKEND[pgt]
-
 def create_new_playground(pgdir, backend):
     return _BACKEND[backend].create_new_playground(pgdir)
 
@@ -212,6 +208,14 @@ class _NULL_BACKEND:
     @staticmethod
     def launch_extdiff_for_top_patch(file_path_list=None):
         return
+
+PM = _NULL_BACKEND
+
+def get_ifce(dirpath=None):
+    global PM
+    pgt = playground_type(dirpath)
+    PM = _NULL_BACKEND if pgt is None else _BACKEND[pgt]
+    return PM
 
 PatchData = collections.namedtuple('PatchData', ['name', 'state', 'guards'])
 

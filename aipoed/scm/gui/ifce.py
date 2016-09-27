@@ -49,10 +49,6 @@ def playground_type(dir_path=None):
             return bname
     return None
 
-def get_ifce(dir_path=None):
-    pgt = playground_type(dir_path)
-    return _NULL_BACKEND if pgt is None else _BACKEND[pgt]
-
 def create_new_playground(pgnd_dir, backend):
     return _BACKEND[backend].do_init_dir(pgnd_dir)
 
@@ -167,3 +163,11 @@ class _NULL_BACKEND:
         Is the SCM in a position to accept an import?
         '''
         return (False, _("No (or unsupported) underlying SCM."))
+
+SCM = _NULL_BACKEND
+
+def get_ifce(dir_path=None):
+    global SCM
+    pgt = playground_type(dir_path)
+    SCM = _NULL_BACKEND if pgt is None else _BACKEND[pgt]
+    return SCM

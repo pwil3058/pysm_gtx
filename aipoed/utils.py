@@ -24,6 +24,24 @@ def create_flag_generator():
         yield 2 ** next_flag_num
         next_flag_num += 1
 
+def path_rel_home(path):
+    """Return the given path as a path relative to user's home directory."""
+    import os
+    import urllib
+    pr = urllib.parse.urlparse(path)
+    if pr.scheme and pr.scheme != "file":
+        return path
+    if pr.path.startswith("~" + os.sep):
+        return pr.path
+    return os.path.join("~", os.path.relpath(os.path.abspath(pr.path), os.getenv("HOME")))
+
+def cwd_rel_home():
+    """Return path of current working directory relative to user's home
+    directory.
+    """
+    import os
+    return path_rel_home(os.getcwd())
+
 quote_if_needed = lambda string: string if string.count(" ") == 0 else "\"" + string + "\""
 
 quoted_join = lambda strings, joint=" ": joint.join((quote_if_needed(file_path) for file_path in strings))
@@ -41,17 +59,6 @@ def samefile(filepath1, filepath2):
         return os.path.samefile(filepath1, filepath2)
     except AttributeError:
         return os.path.abspath(filepath1) == os.path.abspath(filepath2)
-
-def path_rel_home(path):
-    """Return the given path as a path relative to user's home directory."""
-    import os
-    import urllib
-    pr = urllib.parse.urlparse(path)
-    if pr.scheme and pr.scheme != "file":
-        return path
-    if pr.path.startswith("~" + os.sep):
-        return pr.path
-    return os.path.join("~", os.path.relpath(os.path.abspath(pr.path), os.getenv("HOME")))
 
 def get_first_in_envar(envar_list, default=""):
     import os

@@ -57,6 +57,7 @@ def find_pkg_icon_directory(pkg_name):
 
 _PREFIX = PACKAGE_NAME + "_"
 
+STOCK_DIFF = _PREFIX + "stock_diff"
 STOCK_FILE_REFRESHED = _PREFIX + "stock_file_refreshed"
 STOCK_FILE_NEEDS_REFRESH = _PREFIX + "stock_file_needs_refresh"
 STOCK_FILE_UNREFRESHABLE = _PREFIX + "stock_file_unrefreshable"
@@ -64,6 +65,7 @@ STOCK_FILE_PROBLEM = STOCK_FILE_UNREFRESHABLE
 STOCK_REFRESH_PATCH = _PREFIX + "stock_refresh_patch"
 
 _STOCK_ITEMS_OWN_PNG = [
+    (STOCK_DIFF, _("Diff"), 0, 0, None),
     (STOCK_FILE_REFRESHED, _("Refreshed"), 0, 0, None),
     (STOCK_FILE_NEEDS_REFRESH, _("Needs Refresh"), 0, 0, None),
     (STOCK_FILE_UNREFRESHABLE, _("Unrefreshable"), 0, 0, None),

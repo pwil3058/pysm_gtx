@@ -258,18 +258,22 @@ class Interface:
         cmd = ["git", "reset", "HEAD", "--"] + file_list
         return _do_action_cmd(cmd, scm.E_INDEX_MOD, None, [])
     @staticmethod
-    def do_remove_files_in_index(file_list, force=False):
+    def do_remove_files_in_index(file_list, force=False, cache=False):
         if force:
+            assert not cache
             cmd = ["git", "rm", "-f", "--"] + file_list
+        elif cache:
+            assert not force
+            cmd = ["git", "rm", "--cache", "--"] + file_list
         else:
             cmd = ["git", "rm", "--"] + file_list
-        return _do_action_cmd(cmd, scm.E_INDEX_MOD, None, [("or -f to force removal", CmdResult.Suggest.FORCE)])
+        return _do_action_cmd(cmd, scm.E_INDEX_MOD, None, [("--cache", CmdResult.Suggest.CACHE), ("or -f to force removal", CmdResult.Suggest.FORCE)])
     @staticmethod
     def do_rename_file_in_index(file_path, destn, overwrite=False):
         if overwrite:
             cmd = ["git", "mv", "-f", file_path, destn]
         else:
-            cmd = ["git", "mv", "-f", file_path, destn]
+            cmd = ["git", "mv", file_path, destn]
         return _do_action_cmd(cmd, scm.E_INDEX_MOD, None, [("or -f to force", CmdResult.Suggest.OVERWRITE)])
     @staticmethod
     def do_set_tag(tag, annotated=False, msg=None, signed=False, key_id=None, target=None, force=False):

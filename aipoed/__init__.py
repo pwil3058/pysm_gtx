@@ -37,7 +37,7 @@ class Result:
     MASK = OK | WARNING | ERROR
 
 class Suggestion:
-    NFLAGS = 11
+    NFLAGS = 12
     FORCE, \
     REFRESH, \
     RECOVER, \
@@ -47,6 +47,7 @@ class Suggestion:
     EDIT, \
     MERGE, \
     OVERWRITE, \
+    CACHE, \
     SKIP, \
     SKIP_ALL = [2 ** flag_num for flag_num in range(Result._NFLAGS, NFLAGS + Result._NFLAGS)]
     ALL = 2 ** (NFLAGS + Result._NFLAGS) - 1 - Result.MASK
@@ -54,6 +55,7 @@ class Suggestion:
     OVERWRITE_OR_RENAME = OVERWRITE | RENAME
     FORCE_OR_REFRESH = FORCE | REFRESH
     FORCE_OR_ABSORB = FORCE | ABSORB
+    FORCE_OR_CACHE = FORCE | CACHE
     FORCE_ABSORB_OR_REFRESH = FORCE | ABSORB | REFRESH
     MERGE_OR_DISCARD = MERGE | DISCARD
 

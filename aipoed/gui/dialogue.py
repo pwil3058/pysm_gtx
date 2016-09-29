@@ -372,6 +372,7 @@ SUGGESTION_LABEL_MAP = {
     Suggestion.EDIT : _("Edit"),
     Suggestion.MERGE : _("Merge"),
     Suggestion.OVERWRITE : _("Overwrite"),
+    Suggestion.CACHE : _("Cache"),
     Suggestion.SKIP : _("Skip"),
     Suggestion.SKIP_ALL : _("Skip All"),
 }

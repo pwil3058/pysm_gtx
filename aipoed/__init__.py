@@ -56,6 +56,7 @@ class Suggestion:
     FORCE_OR_REFRESH = FORCE | REFRESH
     FORCE_OR_ABSORB = FORCE | ABSORB
     FORCE_OR_CACHE = FORCE | CACHE
+    FORCE_OR_RENAME = FORCE | RENAME
     FORCE_ABSORB_OR_REFRESH = FORCE | ABSORB | REFRESH
     MERGE_OR_DISCARD = MERGE | DISCARD
 
@@ -103,6 +104,9 @@ class _OperationsMixin:
     @property
     def suggests_force(self):
         return self.ecode & Suggestion.FORCE
+    @property
+    def suggests_cache(self):
+        return self.ecode & Suggestion.CACHE
     @property
     def suggests_skip(self):
         return self.ecode & Suggestion.SKIP

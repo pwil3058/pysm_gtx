@@ -17,8 +17,6 @@
 
 import collections
 
-BranchListRow = collections.namedtuple("BranchListRow", ["name", "is_current", "is_merged", "rev", "synopsis"])
-
 LogListRow = collections.namedtuple("LogListRow",    ["commit", "abbrevcommit", "author", "when", "subject"])
 
 RemotesListRow = collections.namedtuple("RemotesListRow",    ["name", "inbound_url", "outbound_url"])

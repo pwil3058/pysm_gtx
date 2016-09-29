@@ -15,6 +15,15 @@
 ### along with this program; if not, write to the Free Software
 ### Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-from . import diff
-from . import fsdb_git
-from . import branches
+from ...gui import doop
+
+from .ifce import SCM
+
+class DoOpnMixin(doop.DoOperationMixin):
+    def git_do_checkout_branch(self, branch_name):
+        with self.showing_busy():
+            result = SCM.do_checkout_branch(branch=branch_name)
+        self.report_any_problems(result)
+    def git_do_create_branch(self, branch_name, target):
+        do_op = lambda branch, force: SCM.do_create_branch(branch=branch, target=target, force=force)
+        self.do_op_rename_force_or_cancel(branch_name, do_op)

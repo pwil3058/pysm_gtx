@@ -57,26 +57,6 @@ def _do_action_cmd(cmd, success_emask, fail_emask, eflag_modifiers):
                 eflags |= suggestion
         return CmdResult(eflags, result.stdout, result.stderr)
 
-class BranchTableData(table.TableData):
-    RE = re.compile("(([^ (]+)|(\([^)]+\)))\s+([a-fA-F0-9]{7}[a-fA-F0-9]*)?\s*([^\s].*)")
-    def _get_data_text(self, h):
-        all_branches_text = runext.run_get_cmd(["git", "branch", "-v"], default="")
-        h.update(all_branches_text.encode())
-        merged_branches_text = runext.run_get_cmd(["git", "branch", "--merged"], default="")
-        h.update(merged_branches_text.encode())
-        return (all_branches_text, merged_branches_text)
-    def _finalize(self, pdt):
-        all_branches_text, merged_branches_text = pdt
-        self._lines = all_branches_text.splitlines()
-        self._merged_branches = {line[2:].strip() for line in merged_branches_text.splitlines()}
-    def iter_rows(self):
-        from .named_tuples import BranchListRow
-        for line in self._lines:
-            is_current = line[0]
-            name, rev, synopsis = self.RE.match(line[2:]).group(1, 4, 5)
-            is_merged = name in self._merged_branches
-            yield BranchListRow(name=name, is_current=is_current, is_merged=is_merged, rev=rev, synopsis=synopsis)
-
 class TagTableData(table.TableData):
     def _get_data_text(self, h):
         text = runext.run_get_cmd(["git", "tag"], default="")
@@ -218,7 +198,7 @@ class Interface:
         cmd.append(branch)
         if target:
             cmd.append(target)
-        return _do_action_cmd(cmd, scm.E_BRANCH, None, [("already exists", CmdResult.Suggest.FORCE)])
+        return _do_action_cmd(cmd, scm.E_BRANCH, None, [("already exists", CmdResult.Suggest.FORCE_OR_RENAME)])
     @classmethod
     def do_import_patch(cls, patch_filepath):
         ok_to_import, msg = cls.is_ready_for_import()
@@ -343,9 +323,6 @@ class Interface:
             name = utils.get_first_in_envar(["GIT_AUTHOR_NAME", "LOGNAME", "GECOS"], default=_("unknown"))
         return email.utils.formataddr((name, email_addr))
     @staticmethod
-    def get_branches_table_data():
-        return BranchTableData()
-    @staticmethod
     def get_clean_contents(file_path):
         return runext.run_get_cmd(["git", "cat-file", "blob", "HEAD:{}".format(file_path)], do_rstrip=False, default=None, decode_stdout=False)
     @staticmethod
@@ -431,5 +408,6 @@ def index_is_empty():
             return False
     return True
 
+SCM = Interface()
 from ...scm.gui import ifce as scm_ifce
-scm_ifce.add_back_end(Interface())
+scm_ifce.add_back_end(SCM)

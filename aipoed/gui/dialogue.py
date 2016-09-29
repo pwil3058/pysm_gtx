@@ -435,6 +435,8 @@ class AskerMixin:
         return self.accept_suggestion_or_cancel(result, expln, [Suggestion.FORCE, Suggestion.REFRESH, Suggestion.ABSORB])
     def ask_recover_or_cancel(self, result, expln=""):
         return self.accept_suggestion_or_cancel(result, expln, [Suggestion.RECOVER])
+    def ask_rename_or_cancel(self, result, expln=""):
+        return self.accept_suggestion_or_cancel(result, expln, [Suggestion.RENAME])
     def ask_rename_force_or_cancel(self, result, expln=""):
         return self.accept_suggestion_or_cancel(result, expln, [Suggestion.RENAME, Suggestion.FORCE])
     def ask_rename_force_or_skip(self, result, expln=""):

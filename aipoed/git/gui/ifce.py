@@ -323,6 +323,9 @@ class Interface:
             name = utils.get_first_in_envar(["GIT_AUTHOR_NAME", "LOGNAME", "GECOS"], default=_("unknown"))
         return email.utils.formataddr((name, email_addr))
     @staticmethod
+    def get_signing_key():
+        email_addr = runext.run_get_cmd(["git", "config", "user.signingkey"], default="")
+    @staticmethod
     def get_clean_contents(file_path):
         return runext.run_get_cmd(["git", "cat-file", "blob", "HEAD:{}".format(file_path)], do_rstrip=False, default=None, decode_stdout=False)
     @staticmethod

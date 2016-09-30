@@ -312,7 +312,7 @@ class Interface:
         return _do_action_cmd(cmd, scm.E_STASH, None, [])
     @staticmethod
     def get_author_name_and_email():
-        import email
+        import email.utils
         email_addr = runext.run_get_cmd(["git", "config", "user.email"], default=None)
         if not email_addr:
             email_addr = os.environ.get("GIT_AUTHOR_EMAIL", None)

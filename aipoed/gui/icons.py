@@ -65,6 +65,7 @@ STOCK_FILE_NEEDS_REFRESH = _PREFIX + "stock_file_needs_refresh"
 STOCK_FILE_UNREFRESHABLE = _PREFIX + "stock_file_unrefreshable"
 STOCK_FILE_PROBLEM = STOCK_FILE_UNREFRESHABLE
 STOCK_REFRESH_PATCH = _PREFIX + "stock_refresh_patch"
+STOCK_TAG = _PREFIX + "stock_tag"
 
 _STOCK_ITEMS_OWN_PNG = [
     (STOCK_BRANCH, _("Branch"), 0, 0, None),
@@ -74,6 +75,7 @@ _STOCK_ITEMS_OWN_PNG = [
     (STOCK_FILE_NEEDS_REFRESH, _("Needs Refresh"), 0, 0, None),
     (STOCK_FILE_UNREFRESHABLE, _("Unrefreshable"), 0, 0, None),
     (STOCK_REFRESH_PATCH, _("Refresh"), 0, 0, None),
+    (STOCK_TAG, _("Tag"), 0, 0, None),
 ]
 
 def add_own_stock_icons(name, stock_item_list, find_icon_directory=find_app_icon_directory):

@@ -179,6 +179,19 @@ class ReadTextAndToggleDialog(ReadTextDialog):
         self._rtw.pack_start(self.toggle, expand=True, fill=True, padding=0)
         self.show_all()
 
+class ReadTextAndTogglesDialog(ReadTextDialog):
+    PROMPT = None
+    TOGGLE_PROMPT_LIST = []
+    def __init__(self, title=None, suggestion="", toggle_start_states=None, parent=None):
+        toggle_start_states = toggle_start_states if toggle_start_states else {}
+        ReadTextDialog.__init__(self, title=title, prompt=self.PROMPT, suggestion=suggestion, parent=parent)
+        self.toggles = {}
+        for toggle_prompt in self.TOGGLE_PROMPT_LIST:
+            self.toggles[toggle_prompt] = Gtk.CheckButton(label=toggle_prompt)
+            self.toggles[toggle_prompt].set_active(toggle_start_states.get(toggle_prompt, False))
+            self._rtw.pack_start(self.toggles[toggle_prompt], expand=False, fill=True, padding=0)
+        self.show_all()
+
 class PathSelectorMixin:
     # TODO: fix relative paths in PathSelectorMixin results i.e. use "./" at start
     def select_file(self, prompt, suggestion=None, existing=True, absolute=False):

@@ -88,7 +88,7 @@ class MessageWidget(text_edit.MessageWidget):
       </toolbar>
     </ui>
     """
-    get_user_name_and_email = lambda _self: ifce.get_author_name_and_email()
+    get_user_name_and_email = lambda _self: ifce.SCM.get_author_name_and_email()
 
 class AnnotationDataWidget(Gtk.VBox):
     def __init__(self):
@@ -123,26 +123,27 @@ class AnnotationDataWidget(Gtk.VBox):
         if togglebutton.get_active() and not self.key_id.get_text():
             self.key_id.set_text(ifce.SCM.get_signing_key())
 
-class SetTagDialog(dialogue.ReadTextAndToggleDialog):
+class SetTagDialog(dialogue.ReadTextAndTogglesDialog, dialogue.ClientMixin):
+    PROMPT = ("Tag:")
+    TOGGLE_PROMPT_LIST = [_("Annotated"), _("Force")]
     def __init__(self, target=None, parent=None):
         self._target = target
-        dialogue.ReadTextAndToggleDialog.__init__(self, title=_("gwsmgitd: Set Tag"),
-            prompt=_("Tag:"), toggle_prompt=_("Annotated"), toggle_state=False, parent=parent)
+        dialogue.ReadTextAndTogglesDialog.__init__(self, title=_("gwsmgitd: Set Tag"), parent=parent)
         self.annotation_data = AnnotationDataWidget()
         self.vbox.pack_start(self.annotation_data, expand=True, fill=True, padding=0)
-        self.toggle.connect("toggled", self._toggled_cb)
+        self.toggles[_("Annotated")].connect("toggled", self._toggled_cb)
         self.connect("response", self._response_cb)
         self.show_all()
-        self._toggled_cb(self.toggle)
+        self._toggled_cb(self.toggles[_("Annotated")])
     def _toggled_cb(self, togglebutton):
         self.annotation_data.set_sensitive(togglebutton.get_active())
     def _response_cb(self, dialog, response_id):
-        self.hide()
         if response_id == Gtk.ResponseType.CANCEL:
             self.destroy()
         else:
             tag = self.entry.get_text()
-            annotated = self.toggle.get_active()
+            annotated = self.toggles[_("Annotated")].get_active()
+            force = self.toggles[_("Force")].get_active()
             if annotated:
                 msg = self.annotation_data.get_msg()
                 signed = self.annotation_data.get_signed()
@@ -150,26 +151,16 @@ class SetTagDialog(dialogue.ReadTextAndToggleDialog):
             else:
                 msg = signed = key_id = None
             with self.showing_busy():
-                result = ifce.SCM.do_set_tag(tag=tag, annotated=annotated, msg=msg, signed=signed, key_id=key_id, target=self._target, force=False)
-            if result.suggests_force:
-                ans = dialogue.main_window.ask_rename_force_or_cancel(result)
-                if ans == dialogue.Response.RENAME:
-                    self.show()
-                    return
-                if ans == dialogue.Response.FORCE:
-                    with self.showing_busy():
-                        result = ifce.SCM.do_set_tag(tag=tag, annotated=annotated, msg=msg, signed=signed, key_id=key_id, target=self._target, force=True)
-                    dialogue.main_window.report_any_problems(result)
-            else:
-                dialogue.main_window.report_any_problems(result)
-            self.destroy()
-
-def tag_head_acb(_action=None):
-    SetTagDialog(parent=dialogue.main_window).show()
+                result = ifce.SCM.do_set_tag(tag=tag, annotated=annotated, msg=msg, signed=signed, key_id=key_id, target=self._target, force=force)
+            self.report_any_problems(result)
+            if result.is_ok:
+                self.destroy()
 
 # TODO: be more fussy about when set tag enabled?
 actions.CLASS_INDEP_AGS[scm.gui.actions.AC_IN_SCM_PGND].add_actions(
     [
         ("git_tag_current_head", icons.STOCK_TAG, _("Tag"), None,
-         _("Set a tag on the current HEAD"), tag_head_acb),
+         _("Set a tag on the current HEAD"),
+         lambda _action: SetTagDialog().show()
+        ),
     ])

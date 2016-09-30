@@ -139,7 +139,7 @@ class BranchList(table.TableWidget):
 class CreateBranchDialog(dialogue.ReadTextAndToggleDialog, do_opn.DoOpnMixin):
     def __init__(self, target=None, parent=None):
         self._target = target
-        dialogue.ReadTextAndToggleDialog.__init__(self, title=_("gwsmgitd: Set Branch"),
+        dialogue.ReadTextAndToggleDialog.__init__(self, title=_("git: Set Branch"),
             prompt=_("Branch:"), toggle_prompt=_("Checkout"), toggle_state=False, parent=parent)
         self.connect("response", self._response_cb)
         self.show_all()

@@ -324,7 +324,11 @@ class Interface:
         return email.utils.formataddr((name, email_addr))
     @staticmethod
     def get_signing_key():
-        email_addr = runext.run_get_cmd(["git", "config", "user.signingkey"], default="")
+        return runext.run_get_cmd(["git", "config", "user.signingkey"], default="")
+    @staticmethod
+    def get_commit_template():
+        file_path = runext.run_get_cmd(["git", "config", "commit.template"], default="")
+        return open(file_path).read() if os.path.exists(file_path) else ""
     @staticmethod
     def get_clean_contents(file_path):
         return runext.run_get_cmd(["git", "cat-file", "blob", "HEAD:{}".format(file_path)], do_rstrip=False, default=None, decode_stdout=False)

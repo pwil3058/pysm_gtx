@@ -89,6 +89,8 @@ class MessageWidget(text_edit.MessageWidget):
     </ui>
     """
     get_user_name_and_email = lambda _self: ifce.SCM.get_author_name_and_email()
+    def set_initial_contents(self):
+        self.set_contents(ifce.SCM.get_commit_template())
 
 class AnnotationDataWidget(Gtk.VBox):
     def __init__(self):

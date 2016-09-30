@@ -48,6 +48,7 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager, dialogue.ClientMix
         self._save_file_digest = None
         self.save_toggle_action.set_active(auto_save)
         self._update_action_sensitivities()
+        self.set_initial_contents()
     def populate_action_groups(self):
         # Set up action groups
         # TODO: self.conditional_action_group = Gtk.ActionGroup("save file dependent")
@@ -199,6 +200,8 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager, dialogue.ClientMix
             self.save_text_to_file()
         if clear_save and self._save_file_name:
             self.save_text_to_file("")
+    def set_initial_contents(self):
+        pass
 
 class DbMessageWidget(MessageWidget):
     UI_DESCR = ""

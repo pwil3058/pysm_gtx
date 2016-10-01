@@ -65,6 +65,12 @@ STOCK_FILE_NEEDS_REFRESH = _PREFIX + "stock_file_needs_refresh"
 STOCK_FILE_UNREFRESHABLE = _PREFIX + "stock_file_unrefreshable"
 STOCK_FILE_PROBLEM = STOCK_FILE_UNREFRESHABLE
 STOCK_REFRESH_PATCH = _PREFIX + "stock_refresh_patch"
+STOCK_STASH_APPLY = _PREFIX + "stock_stash_apply"
+STOCK_STASH_BRANCH = _PREFIX + "stock_stash_branch"
+STOCK_STASH_DROP = _PREFIX + "stock_stash_drop"
+STOCK_STASH_POP = _PREFIX + "stock_stash_pop"
+STOCK_STASH_SAVE = _PREFIX + "stock_stash_save"
+STOCK_STASH_SHOW = _PREFIX + "stock_stash_show"
 STOCK_TAG = _PREFIX + "stock_tag"
 
 _STOCK_ITEMS_OWN_PNG = [
@@ -75,6 +81,12 @@ _STOCK_ITEMS_OWN_PNG = [
     (STOCK_FILE_NEEDS_REFRESH, _("Needs Refresh"), 0, 0, None),
     (STOCK_FILE_UNREFRESHABLE, _("Unrefreshable"), 0, 0, None),
     (STOCK_REFRESH_PATCH, _("Refresh"), 0, 0, None),
+    (STOCK_STASH_APPLY, _("Apply Stash"), 0, 0, None),
+    (STOCK_STASH_BRANCH, _("Branch From Stash"), 0, 0, None),
+    (STOCK_STASH_DROP, _("Drop From Stash"), 0, 0, None),
+    (STOCK_STASH_POP, _("Pop Stash"), 0, 0, None),
+    (STOCK_STASH_SAVE, _("Save To Stash"), 0, 0, None),
+    (STOCK_STASH_SHOW, _("Show Stash"), 0, 0, None),
     (STOCK_TAG, _("Tag"), 0, 0, None),
 ]
 
@@ -96,4 +108,3 @@ add_own_stock_icons(PACKAGE_NAME, _STOCK_ITEMS_OWN_PNG, find_pkg_icon_directory)
 STOCK_CHECKOUT = Gtk.STOCK_EXECUTE
 STOCK_INSERT= Gtk.STOCK_ADD
 STOCK_RENAME = Gtk.STOCK_PASTE
-

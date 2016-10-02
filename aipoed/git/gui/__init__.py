@@ -20,3 +20,4 @@ from . import fsdb_git
 from . import branches
 from . import tags
 from . import stashes
+from . import remotes

@@ -19,8 +19,4 @@ import collections
 
 LogListRow = collections.namedtuple("LogListRow",    ["commit", "abbrevcommit", "author", "when", "subject"])
 
-RemotesListRow = collections.namedtuple("RemotesListRow",    ["name", "inbound_url", "outbound_url"])
-
-StashListRow = collections.namedtuple("StashListRow",    ["name", "branch", "commit"])
-
 TagListRow = collections.namedtuple("TagListRow",    ["name", "annotation"])

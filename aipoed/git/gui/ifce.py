@@ -57,25 +57,6 @@ def _do_action_cmd(cmd, success_emask, fail_emask, eflag_modifiers):
                 eflags |= suggestion
         return CmdResult(eflags, result.stdout, result.stderr)
 
-class TagTableData(table.TableData):
-    def _get_data_text(self, h):
-        text = runext.run_get_cmd(["git", "tag"], default="")
-        h.update(text.encode())
-        return text
-    def _finalize(self, pdt):
-        self._lines = pdt.splitlines()
-    def _get_annotation(self, name):
-        result = runext.run_cmd(["git", "rev-parse", name])
-        result = runext.run_cmd(["git", "cat-file", "-p", result.stdout.strip()])
-        if result.stdout.startswith("object"):
-            cat_lines = result.stdout.splitlines()
-            return cat_lines[5] if len(cat_lines) > 5 else ""
-        return ""
-    def iter_rows(self):
-        from .named_tuples import TagListRow
-        for line in self._lines:
-            yield TagListRow(name=line, annotation=self._get_annotation(line))
-
 class LogTableData(table.TableData):
     def _get_data_text(self, h):
         text = runext.run_get_cmd(["git", "log", "--pretty=format:%H%n%h%n%an%n%cr%n%s"], default="")
@@ -366,7 +347,8 @@ class Interface:
         return stashes.StashTableData()
     @staticmethod
     def get_tags_table_data():
-        return TagTableData()
+        from . import tags
+        return tags.TagTableData()
     @staticmethod
     def get_wd_file_db():
         return fsdb_git.WsFileDb()

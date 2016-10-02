@@ -14,10 +14,12 @@
 ### Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import collections
+
 from gi.repository import Gtk
 from gi.repository import GObject
 
 from ... import enotify
+from ... import runext
 from ... import scm
 
 from ...gui import actions
@@ -29,6 +31,24 @@ from ...gui import icons
 from . import ifce
 
 TagListRow = collections.namedtuple("TagListRow",    ["name", "annotation"])
+
+class TagTableData(table.TableData):
+    def _get_data_text(self, h):
+        text = runext.run_get_cmd(["git", "tag"], default="")
+        h.update(text.encode())
+        return text
+    def _finalize(self, pdt):
+        self._lines = pdt.splitlines()
+    def _get_annotation(self, name):
+        result = runext.run_cmd(["git", "rev-parse", name])
+        result = runext.run_cmd(["git", "cat-file", "-p", result.stdout.strip()])
+        if result.stdout.startswith("object"):
+            cat_lines = result.stdout.splitlines()
+            return cat_lines[5] if len(cat_lines) > 5 else ""
+        return ""
+    def iter_rows(self):
+        for line in self._lines:
+            yield TagListRow(name=line, annotation=self._get_annotation(line))
 
 class TagListView(table.MapManagedTableView, scm.gui.actions.WDListenerMixin):
     class MODEL(table.MapManagedTableView.MODEL):

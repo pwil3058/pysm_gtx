@@ -76,24 +76,6 @@ class TagTableData(table.TableData):
         for line in self._lines:
             yield TagListRow(name=line, annotation=self._get_annotation(line))
 
-class RemoteRepoTableData(table.TableData):
-    _VREMOTE_RE = re.compile(r"(\S+)\s+(\S+)\s*(\S*)")
-    def _get_data_text(self, h):
-        text = runext.run_get_cmd(["git", "remote", "-v"], default="")
-        h.update(text.encode())
-        return text
-    def _finalize(self, pdt):
-        self._lines = pdt.splitlines()
-    def iter_rows(self):
-        from .named_tuples import RemotesListRow
-        for i, line in enumerate(self._lines):
-            m = self._VREMOTE_RE.match(line)
-            if i % 2 == 0:
-                name, inbound_url = m.group(1, 2)
-            else:
-                assert name == m.group(1)
-                yield RemotesListRow(name=name, inbound_url=inbound_url, outbound_url=m.group(2))
-
 class LogTableData(table.TableData):
     def _get_data_text(self, h):
         text = runext.run_get_cmd(["git", "log", "--pretty=format:%H%n%h%n%an%n%cr%n%s"], default="")
@@ -115,20 +97,6 @@ class LogTableData(table.TableData):
                 when = line
             else:
                 yield LogListRow(commit=commit, abbrevcommit=abbrevcommit, author=author, when=when, subject=line)
-
-class StashTableData(table.TableData):
-    RE = re.compile("^(stash@{\d+}):\s*([^:]+):(.*)")
-    def _get_data_text(self, h):
-        text = runext.run_get_cmd(["git", "stash", "list"], default="")
-        h.update(text.encode())
-        return text
-    def _finalize(self, pdt):
-        self._lines = pdt.splitlines()
-    def iter_rows(self):
-        from .named_tuples import StashListRow
-        for line in self._lines:
-            m = self.RE.match(line)
-            yield StashListRow(*m.groups())
 
 @singleton
 class Interface:
@@ -380,9 +348,9 @@ class Interface:
                 if not basename:
                     break
         return None
-    @staticmethod
     def get_remotes_table_data():
-        return RemoteRepoTableData()
+        from . import remotes
+        return remote.RemoteRepoTableData()
     @staticmethod
     def get_revision(filepath=None):
         cmd = ["git", "show",]
@@ -394,7 +362,8 @@ class Interface:
         return runext.run_get_cmd(["git", "stash", "show", "-p"] + runext.OPTNL_ARG(stash), default="", do_rstrip=False)
     @staticmethod
     def get_stashes_table_data():
-        return StashTableData()
+        from . import stashes
+        return stashes.StashTableData()
     @staticmethod
     def get_tags_table_data():
         return TagTableData()

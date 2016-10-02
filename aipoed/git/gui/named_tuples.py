@@ -18,5 +18,3 @@
 import collections
 
 LogListRow = collections.namedtuple("LogListRow",    ["commit", "abbrevcommit", "author", "when", "subject"])
-
-TagListRow = collections.namedtuple("TagListRow",    ["name", "annotation"])

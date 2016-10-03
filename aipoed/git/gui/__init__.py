@@ -21,3 +21,5 @@ from . import branches
 from . import tags
 from . import stashes
 from . import remotes
+from . import log
+from . import commit

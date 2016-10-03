@@ -89,11 +89,11 @@ class Interface:
             os.chdir(orig_dir_path)
         return result.is_ok
     @staticmethod
-    def do_add_files_to_index(file_list, force=False):
+    def do_add_fsis_to_index(fsi_list, force=False):
         if force:
-            cmd = ["git", "add", "-f", "--"] + file_list
+            cmd = ["git", "add", "-f", "--"] + fsi_list
         else:
-            cmd = ["git", "add", "--"] + file_list
+            cmd = ["git", "add", "--"] + fsi_list
         return _do_action_cmd(cmd, scm.E_INDEX_MOD|scm.E_FILE_CHANGES, None, [("Use -f if you really want to add them.", CmdResult.Suggest.FORCE)])
     @staticmethod
     def do_amend_commit(msg):
@@ -176,11 +176,11 @@ class Interface:
             cmd = ["git", "rm", "--"] + file_list
         return _do_action_cmd(cmd, scm.E_INDEX_MOD, None, [("--cache", CmdResult.Suggest.CACHE), ("or -f to force removal", CmdResult.Suggest.FORCE)])
     @staticmethod
-    def do_rename_file_in_index(file_path, destn, overwrite=False):
+    def do_rename_fsi_in_index(fsi_path, destn, overwrite=False):
         if overwrite:
-            cmd = ["git", "mv", "-f", file_path, destn]
+            cmd = ["git", "mv", "-f", fsi_path, destn]
         else:
-            cmd = ["git", "mv", file_path, destn]
+            cmd = ["git", "mv", fsi_path, destn]
         return _do_action_cmd(cmd, scm.E_INDEX_MOD, None, [("or -f to force", CmdResult.Suggest.OVERWRITE)])
     @staticmethod
     def do_set_tag(tag, annotated=False, msg=None, signed=False, key_id=None, target=None, force=False):

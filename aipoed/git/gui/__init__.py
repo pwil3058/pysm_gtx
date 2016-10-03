@@ -23,3 +23,4 @@ from . import stashes
 from . import remotes
 from . import log
 from . import commit
+from . import do_opn

@@ -57,7 +57,9 @@ def find_pkg_icon_directory(pkg_name):
 
 _PREFIX = PACKAGE_NAME + "_"
 
+STOCK_AMEND_COMMIT = _PREFIX + "stock_amend_commit"
 STOCK_BRANCH = _PREFIX + "stock_branch"
+STOCK_COMMIT = _PREFIX + "stock_commit"
 STOCK_CURRENT_BRANCH = _PREFIX + "stock_current_branch"
 STOCK_DIFF = _PREFIX + "stock_diff"
 STOCK_FILE_REFRESHED = _PREFIX + "stock_file_refreshed"
@@ -74,7 +76,9 @@ STOCK_STASH_SHOW = _PREFIX + "stock_stash_show"
 STOCK_TAG = _PREFIX + "stock_tag"
 
 _STOCK_ITEMS_OWN_PNG = [
+    (STOCK_AMEND_COMMIT, _("Amend"), 0, 0, None),
     (STOCK_BRANCH, _("Branch"), 0, 0, None),
+    (STOCK_COMMIT, _("Commit"), 0, 0, None),
     (STOCK_CURRENT_BRANCH, _("Current Branch"), 0, 0, None),
     (STOCK_DIFF, _("Diff"), 0, 0, None),
     (STOCK_FILE_REFRESHED, _("Refreshed"), 0, 0, None),

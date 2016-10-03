@@ -57,28 +57,6 @@ def _do_action_cmd(cmd, success_emask, fail_emask, eflag_modifiers):
                 eflags |= suggestion
         return CmdResult(eflags, result.stdout, result.stderr)
 
-class LogTableData(table.TableData):
-    def _get_data_text(self, h):
-        text = runext.run_get_cmd(["git", "log", "--pretty=format:%H%n%h%n%an%n%cr%n%s"], default="")
-        h.update(text.encode())
-        return text
-    def _finalize(self, pdt):
-        self._lines = pdt.splitlines()
-    def iter_rows(self):
-        from .named_tuples import LogListRow
-        for i, line in enumerate(self._lines):
-            chooser = i % 5
-            if chooser == 0:
-                commit = line
-            elif chooser == 1:
-                abbrevcommit = line
-            elif chooser == 2:
-                author = line
-            elif chooser == 3:
-                when = line
-            else:
-                yield LogListRow(commit=commit, abbrevcommit=abbrevcommit, author=author, when=when, subject=line)
-
 @singleton
 class Interface:
     name = "git"
@@ -283,7 +261,8 @@ class Interface:
         return runext.run_get_cmd(["git", "cat-file", "blob", "HEAD:{}".format(file_path)], do_rstrip=False, default=None, decode_stdout=False)
     @staticmethod
     def get_log_table_data():
-        return LogTableData()
+        from . import log
+        return log.LogTableData()
     @staticmethod
     def get_commit_message(commit=None):
         cmd = ["git", "log", "-n", "1", "--pretty=format:%s%n%n%b"]

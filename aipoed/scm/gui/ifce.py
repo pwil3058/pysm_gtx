@@ -35,7 +35,8 @@ def backend_requirements():
     msg += _("are the ones that are usnderstood.")
     return msg
 
-def report_backend_requirements(parent=None):
+def report_backend_requirements():
+    from ...gui import dialogue
     dialogue.main_window.inform_user(backend_requirements(), parent=parent)
 
 def avail_backends():
@@ -54,6 +55,16 @@ def create_new_playground(pgnd_dir, backend):
 
 def clone_repo_as(repo_path, dir_path, backend):
     return _BACKEND[backend].do_clone_as(repo_path, dir_path)
+
+def choose_scm_backend():
+    bel = avail_backends()
+    if len(bel) == 0:
+        report_backend_requirements()
+        return None
+    elif len(bel) == 1:
+        return bel[0]
+    from ...gui import dialogue
+    return dialogue.SelectFromListDialog(olist=bel, prompt=_('Choose SCM back end:')).make_selection()
 
 class DummyTableData:
     is_current = True

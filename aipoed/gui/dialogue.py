@@ -369,6 +369,24 @@ class ReadMultiTextDialog(CancelOKDialog):
     def get_texts(self):
         return [entry.get_text() for entry in self.entries]
 
+class SelectFromListDialog(CancelOKDialog):
+    def __init__(self, prompt, olist, **kwargs):
+        CancelOKDialog.__init__(self, **kwargs)
+        self.combo_box = Gtk.ComboBoxText()
+        for option in olist:
+            self.combo_box.append_text(option)
+        hbox = Gtk.HBox()
+        hbox.pack_start(Gtk.Label(prompt), expand=False, fill=True, padding=0)
+        hbox.pack_start(self.combo_box, expand=False, fill=True, padding=0)
+        self.show_all()
+    def get_selection(self):
+        return self.combo_box.get_active_text()
+    def make_selection(self):
+        if self.run() == Gtk.ResponseType.OK:
+            return self.get_selection()
+        else:
+            return None
+
 CANCEL_OK_BUTTONS = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK)
 NO_YES_BUTTONS = (Gtk.STOCK_NO, Gtk.ResponseType.NO, Gtk.STOCK_YES, Gtk.ResponseType.YES)
 

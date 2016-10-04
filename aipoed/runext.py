@@ -118,7 +118,7 @@ def run_get_cmd(cmd, input_text=None, sanitize_stderr=None, default=CmdFailure, 
     result = run_cmd(cmd, input_text=input_text, sanitize_stderr=sanitize_stderr, decode_stdout=decode_stdout)
     if not result.is_ok:
         if default is CmdFailure:
-            raise CmdFailure(result.msg)
+            raise CmdFailure(result.message)
         else:
             return default
     return result.stdout.rstrip() if (decode_stdout and do_rstrip) else result.stdout

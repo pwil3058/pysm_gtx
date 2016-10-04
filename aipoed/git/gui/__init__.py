@@ -25,3 +25,4 @@ from . import log
 from . import commit
 from . import do_opn
 from . import index
+from . import wd

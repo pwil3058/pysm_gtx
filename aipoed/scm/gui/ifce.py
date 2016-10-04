@@ -182,3 +182,27 @@ def get_ifce(dir_path=None):
     pgt = playground_type(dir_path)
     SCM = _NULL_BACKEND if pgt is None else _BACKEND[pgt]
     return SCM
+
+def check_interfaces(args):
+    from ... import enotify
+    events = 0
+    curr_scm = SCM
+    get_ifce()
+    if curr_scm != SCM:
+        from ...scm.events import E_NEW_SCM
+        events |= E_NEW_SCM
+        if SCM.in_valid_pgnd:
+            import os
+            from ... import options
+            newdir = SCM.get_playground_root()
+            if not os.path.samefile(newdir, os.getcwd()):
+                os.chdir(newdir)
+                events |= enotify.E_CHANGE_WD
+            options.load_pgnd_options()
+    from ...pm.gui import ifce as pm_ifce
+    curr_pm = pm_ifce.PM
+    pm_ifce.get_ifce()
+    if curr_pm != pm_ifce.PM and not enotify.E_CHANGE_WD & events:
+        from ...pm.events import E_NEW_PM
+        events |= E_NEW_PM
+    return events

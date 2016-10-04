@@ -25,6 +25,7 @@ from . import actions
 initialize_event_flags = lambda args: 0
 
 def set_initialize_event_flags(func):
+    global initialize_event_flags
     # NB: need extra level of function to avoid import loop/gridlock
     initialize_event_flags = func
 

@@ -147,7 +147,7 @@ class Interface:
         cmd = ["git", "init"]
         if tgtdir is not None:
             cmd += ["--", tgtdir]
-        return _do_action_cmd(cmd, ifce.E_NEW_SCM, None, [])
+        return _do_action_cmd(cmd, scm.E_NEW_SCM, None, [])
     @staticmethod
     def do_pull_from_repo(repo=None):
         cmd = ["git", "pull"]

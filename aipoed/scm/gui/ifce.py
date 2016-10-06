@@ -51,7 +51,10 @@ def playground_type(dir_path=None):
     return None
 
 def create_new_playground(pgnd_dir, backend):
-    return _BACKEND[backend].do_init_dir(pgnd_dir)
+    if backend:
+        return _BACKEND[backend].do_init_dir(pgnd_dir)
+    else:
+        return SCM.do_init_dir(pgnd_dir)
 
 def clone_repo_as(repo_path, dir_path, backend):
     return _BACKEND[backend].do_clone_as(repo_path, dir_path)
@@ -194,10 +197,14 @@ def check_interfaces(args):
         if SCM.in_valid_pgnd:
             import os
             from ... import options
+            from ...gui import recollect
+            from . import wspce
             newdir = SCM.get_playground_root()
             if not os.path.samefile(newdir, os.getcwd()):
                 os.chdir(newdir)
                 events |= enotify.E_CHANGE_WD
+            wspce.add_workspace_path(newdir)
+            recollect.set("workspace", "last_used", newdir)
             options.load_pgnd_options()
     from ...pm.gui import ifce as pm_ifce
     curr_pm = pm_ifce.PM
@@ -206,3 +213,29 @@ def check_interfaces(args):
         from ...pm.events import E_NEW_PM
         events |= E_NEW_PM
     return events
+
+def init_current_dir(backend):
+    import os
+    from ... import enotify
+    result = create_new_playground(os.getcwd(), backend)
+    events = 0
+    curr_scm = SCM
+    get_ifce()
+    if curr_scm != SCM:
+        from ...scm.events import E_NEW_SCM
+        events |= E_NEW_SCM
+    from ...pm.gui import ifce as pm_ifce
+    curr_pm = pm_ifce.PM
+    pm_ifce.get_ifce()
+    if curr_pm != pm_ifce.PM:
+        from ...pm.events import E_NEW_PM
+        events |= E_NEW_PM
+    if SCM.in_valid_pgnd:
+        from . import wspce
+        from ...gui import recollect
+        CURDIR = os.getcwd()
+        wspce.add_workspace_path(CURDIR)
+        recollect.set("workspace", "last_used", CURDIR)
+    if events:
+        enotify.notify_events(events)
+    return result

@@ -53,7 +53,10 @@ def playground_type(dirpath=None):
     return None
 
 def create_new_playground(pgdir, backend):
-    return _BACKEND[backend].create_new_playground(pgdir)
+    if backend:
+        return _BACKEND[backend].create_new_playground(pgdir)
+    else:
+        return PM.create_new_playground(pgdir)
 
 class PatchListData:
     def __init__(self, **kwargs):

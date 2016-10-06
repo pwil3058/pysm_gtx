@@ -64,7 +64,7 @@ class MessageWidget(text_edit.MessageWidget):
           </toolbar>
         </ui>
         '''
-    get_user_name_and_email = lambda _self: ifce.get_author_name_and_email()
+    get_user_name_and_email = lambda _self: ifce.SCM.get_author_name_and_email()
     def populate_action_groups(self):
         self.action_groups[0].add_actions(
             [

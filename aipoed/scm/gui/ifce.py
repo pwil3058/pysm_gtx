@@ -233,9 +233,44 @@ def init_current_dir(backend):
     if SCM.in_valid_pgnd:
         from . import wspce
         from ...gui import recollect
-        CURDIR = os.getcwd()
-        wspce.add_workspace_path(CURDIR)
-        recollect.set("workspace", "last_used", CURDIR)
+        curr_dir = os.getcwd()
+        wspce.add_workspace_path(curr_dir)
+        recollect.set("workspace", "last_used", curr_dir)
     if events:
         enotify.notify_events(events)
     return result
+
+def init():
+    import os
+    from ... import options
+    from ... import enotify
+    orig_dir = os.getcwd()
+    options.load_global_options()
+    get_ifce()
+    if SCM.in_valid_pgnd:
+        root = SCM.get_playground_root()
+        os.chdir(root)
+        from . import wspce
+        from ...gui import recollect
+        wspce.add_workspace_path(root)
+        recollect.set("workspace", "last_used", root)
+    from ...pm.gui import ifce as pm_ifce
+    pm_ifce.get_ifce()
+    curr_dir = os.getcwd()
+    options.reload_pgnd_options()
+    from ...gui.console import LOG
+    LOG.start_cmd("Working Directory: {0}\n".format(curr_dir))
+    if SCM.in_valid_pgnd:
+        LOG.append_stdout('In valid repository\n')
+    else:
+        LOG.append_stderr('NOT in valid repository\n')
+    LOG.end_cmd()
+    # NB: need to send either enotify.E_CHANGE_WD or E_NEW_SCM|E_NEW_PM to ensure action sates get set
+    if not os.path.samefile(orig_dir, curr_dir):
+        enotify.notify_events(enotify.E_CHANGE_WD, new_wd=curr_dir)
+    else:
+        from ...scm.events import E_NEW_SCM
+        from ...pm.events import E_NEW_PM
+        enotify.notify_events(E_NEW_SCM|E_NEW_PM)
+    from ...gui import auto_update
+    auto_update.set_initialize_event_flags(check_interfaces)

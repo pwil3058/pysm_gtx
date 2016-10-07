@@ -51,15 +51,6 @@ def strings_to_quoted_list_string(strings):
         return quote_if_needed(strings[0])
     return quoted_join(strings[:-1], ", ") + _(" and ") + quote_if_needed(strings[-1])
 
-# handle the fact os.path.samefile is not available on all operating systems
-def samefile(filepath1, filepath2):
-    import os
-    """Return whether the given paths refer to the same file or not."""
-    try:
-        return os.path.samefile(filepath1, filepath2)
-    except AttributeError:
-        return os.path.abspath(filepath1) == os.path.abspath(filepath2)
-
 def get_first_in_envar(envar_list, default=""):
     import os
     for envar in envar_list:

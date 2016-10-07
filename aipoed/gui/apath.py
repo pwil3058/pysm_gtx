@@ -95,7 +95,7 @@ class AliasPathView(table.EditableEntriesView):
         return os.path.exists(os.path.expanduser(path))
     @staticmethod
     def _same_paths(path1, path2):
-        return utils.samefile(os.path.expanduser(path1), path2)
+        return os.path.samefile(os.path.expanduser(path1), path2)
     @staticmethod
     def _default_alias(path):
         return os.path.basename(path)

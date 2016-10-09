@@ -58,6 +58,7 @@ def find_pkg_icon_directory(pkg_name):
 _PREFIX = PACKAGE_NAME + "_"
 
 STOCK_AMEND_COMMIT = _PREFIX + "stock_amend_commit"
+STOCK_APPLIED = _PREFIX + "stock_applied"
 STOCK_BRANCH = _PREFIX + "stock_branch"
 STOCK_COMMIT = _PREFIX + "stock_commit"
 STOCK_CURRENT_BRANCH = _PREFIX + "stock_current_branch"
@@ -77,6 +78,7 @@ STOCK_TAG = _PREFIX + "stock_tag"
 
 _STOCK_ITEMS_OWN_PNG = [
     (STOCK_AMEND_COMMIT, _("Amend"), 0, 0, None),
+    (STOCK_APPLIED, _("Applied"), 0, 0, None),
     (STOCK_BRANCH, _("Branch"), 0, 0, None),
     (STOCK_COMMIT, _("Commit"), 0, 0, None),
     (STOCK_CURRENT_BRANCH, _("Current Branch"), 0, 0, None),
@@ -110,5 +112,8 @@ add_own_stock_icons(PACKAGE_NAME, _STOCK_ITEMS_OWN_PNG, find_pkg_icon_directory)
 
 # Icons that have to be designed eventually (using aliased GtK stock in the meantime)
 STOCK_CHECKOUT = Gtk.STOCK_EXECUTE
+STOCK_CLONE = Gtk.STOCK_COPY
+STOCK_INIT = STOCK_APPLIED
 STOCK_INSERT= Gtk.STOCK_ADD
+STOCK_NEW_WORKSPACE = Gtk.STOCK_NEW
 STOCK_RENAME = Gtk.STOCK_PASTE

@@ -21,6 +21,7 @@ from gi.repository import Gtk
 
 from . import dialogue
 
+# TODO: remove inheritence to make mix and match easier
 class DoOperationMixin(dialogue.ClientMixin):
     def ask_destination(self, file_paths, prompt=_("Enter destination path:")):
         if len(file_paths) > 1:

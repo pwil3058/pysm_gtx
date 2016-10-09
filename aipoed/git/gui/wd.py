@@ -104,6 +104,10 @@ class WDTreeView(file_tree.FileTreeView, enotify.Listener, scm.gui.actions.WDLis
         else:
             self.set_popup(self.DEFAULT_POPUP)
     def populate_action_groups(self):
+        self.action_groups[actions.AC_DONT_CARE].add_actions(
+            [
+                ('wd_files_menu_files', None, _('Working Directory')),
+            ])
         self.action_groups[scm.gui.actions.AC_IN_SCM_PGND|pm.gui.actions.AC_NOT_PMIC|actions.AC_SELN_UNIQUE|file_tree.AC_ONLY_FILES_SELECTED].add_actions(
             [
                 ("copy_file_to_index", Gtk.STOCK_COPY, _("Copy"), None,

@@ -457,6 +457,8 @@ class AskerMixin:
             if result.suggests(suggestion):
                 buttons += (SUGGESTION_LABEL_MAP[suggestion], suggestion)
         return self.ask_question(result.message, expln, buttons)
+    def choose_from_list(self, alist, prompt):
+        return dialogue.SelectFromListDialog(olist=alist, prompt=prompt, parent=self.get_toplevel()).make_selection()
     # Commonly encountered suggestion combinations
     def ask_edit_force_or_cancel(self, result, expln=""):
         return self.accept_suggestion_or_cancel(result, expln, [Suggestion.EDIT, Suggestion.FORCE])

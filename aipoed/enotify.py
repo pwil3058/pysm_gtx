@@ -13,9 +13,8 @@
 ### along with this program; if not, write to the Free Software
 ### Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-"""
-Provide mechanism for notifying components of events that require them
-to update their displayed/cached data
+"""Provide mechanism for notifying components of events that require
+them to update their displayed/cached data.
 """
 
 from . import utils
@@ -23,23 +22,38 @@ from . import utils
 _flag_generator = utils.create_flag_generator()
 
 def new_event_flags_and_mask(count):
+    """Generate a specified number of new (unique) flags for
+    related and their bitwise mask (which provides a convenience
+    method fore refering to them as a group).
+
+    Arguments:
+    count -- the number of new flags to be created
+    Returns:
+    a count + 1 tuple containing the flags and their mask
+    Example:
+    ADD_FILE, DEL_FILE, MOVE_FILE = new_event_flags_and_mask(2)
+    will result in two unique flags ADD_FILE and DEL_FILE and
+    MOVE_FILE will be equal to ADD_FILE|DEL_FILE which signifies
+    both events.
+    """
     flags = [next(_flag_generator) for _i in range(count)]
     return tuple(flags + [sum(flags)])
 
 def new_event_flag():
+    """Generate a new (unique) event flag."""
     return next(_flag_generator)
 
 # Some general use events
 E_CHANGE_WD = new_event_flag()
+"""Event flag to notify a change of working directory."""
 
 _NOTIFICATION_CBS = []
 
 def add_notification_cb(events, callback):
-    """
-    Register a callback for notification of the specified events.
+    """Register a callback for notification of the specified events.
 
     Arguments:
-    events   -- the set of events for which the callback should be callded.
+    events   -- the set of events for which the callback should be called.
     callback -- the procedure to be called.
 
     Return a token that identifies the callback to facilitate deletion.
@@ -50,8 +64,7 @@ def add_notification_cb(events, callback):
 
 
 def del_notification_cb(cb_token):
-    """
-    Cancel the registration of a notification callback.
+    """Cancel the registration of a notification callback.
 
     Argument:
     cb_token -- the token that specifies the callback to be cancelled.
@@ -65,8 +78,7 @@ def del_notification_cb(cb_token):
         pass
 
 def notify_events(events, **kwargs):
-    """
-    Notify interested parties of events that have occured.
+    """Notify interested parties of events that have occured.
 
     Argument:
     events -- a set of events that have just occured.
@@ -103,8 +115,7 @@ class Listener:
             pass
 
     def add_notification_cb(self, events, callback):
-        """
-        Register a callback for notification of the specified events.
+        """Register a callback for notification of the specified events.
         Record a token to facilitate deletion at a later time.
 
         Arguments:

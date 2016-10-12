@@ -24,21 +24,21 @@ import errno
 
 from gi.repository import Pango
 
-from ... import CmdResult
-from ... import runext
-from ... import enotify
-from ... import scm
-from ... import utils
+from aipoed import CmdResult
+from aipoed import runext
+from aipoed import enotify
+from aipoed import scm
+from aipoed import utils
 
-from ...decorators import singleton
-from ...patch_diff import patchlib
+from aipoed.decorators import singleton
+from aipoed.patch_diff import patchlib
 
-from ...gui import table
+from aipoed.gui import table
 
-from . import fsdb_git
+from aipoed.git.gui import fsdb_git
 
 def _do_action_cmd(cmd, success_emask, fail_emask, eflag_modifiers):
-    from ...gui import console
+    from aipoed.gui import console
     # TODO: improve _do_action_cmd() and move to runext
     result = runext.run_cmd_in_console(console.LOG, cmd)
     if result.is_ok:
@@ -261,7 +261,7 @@ class Interface:
         return runext.run_get_cmd(["git", "cat-file", "blob", "HEAD:{}".format(file_path)], do_rstrip=False, default=None, decode_stdout=False)
     @staticmethod
     def get_log_table_data():
-        from . import log
+        from aipoed.git.gui import log
         return log.LogTableData()
     @staticmethod
     def get_commit_message(commit=None):
@@ -309,7 +309,7 @@ class Interface:
                     break
         return None
     def get_remotes_table_data():
-        from . import remotes
+        from aipoed.git.gui import remotes
         return remote.RemoteRepoTableData()
     @staticmethod
     def get_revision(filepath=None):
@@ -322,11 +322,11 @@ class Interface:
         return runext.run_get_cmd(["git", "stash", "show", "-p"] + runext.OPTNL_ARG(stash), default="", do_rstrip=False)
     @staticmethod
     def get_stashes_table_data():
-        from . import stashes
+        from aipoed.git.gui import stashes
         return stashes.StashTableData()
     @staticmethod
     def get_tags_table_data():
-        from . import tags
+        from aipoed.git.gui import tags
         return tags.TagTableData()
     @staticmethod
     def get_wd_file_db():
@@ -346,5 +346,5 @@ def index_is_empty():
     return True
 
 SCM = Interface()
-from ...scm.gui import ifce as scm_ifce
+from aipoed.scm.gui import ifce as scm_ifce
 scm_ifce.add_back_end(SCM)

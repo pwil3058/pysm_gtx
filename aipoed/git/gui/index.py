@@ -20,17 +20,17 @@ import shutil
 from gi.repository import Gtk
 from gi.repository import GObject
 
-from ... import scm
-from ... import utils
+from aipoed import scm
+from aipoed import utils
 
-from ...gui import actions
-from ...gui import dialogue
-from ...gui import file_tree
-from ...gui import icons
+from aipoed.gui import actions
+from aipoed.gui import dialogue
+from aipoed.gui import file_tree
+from aipoed.gui import icons
 
-from ... import enotify
+from aipoed import enotify
 
-from . import ifce
+from aipoed.git.gui import ifce
 
 class IndexFileTreeModel(file_tree.FileTreeModel):
     REPOPULATE_EVENTS = scm.E_CHECKOUT|enotify.E_CHANGE_WD

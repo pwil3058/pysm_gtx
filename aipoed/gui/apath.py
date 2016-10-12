@@ -21,12 +21,12 @@ from gi.repository import GObject
 from gi.repository import Gtk
 from gi.repository import Gdk
 
-from .. import utils
+from aipoed import utils
 
-from . import dialogue
-from . import gutils
-from . import tlview
-from . import table
+from aipoed.gui import dialogue
+from aipoed.gui import gutils
+from aipoed.gui import tlview
+from aipoed.gui import table
 
 class AliasPathModel(tlview.NamedListStore):
     ROW = collections.namedtuple("ROW", ["Alias", "Path"])
@@ -215,7 +215,7 @@ class PathSelectDialog(dialogue.Dialog, dialogue.AskerMixin, dialogue.ReporterMi
     def _browse_cb(self, button=None):
         dir_path = self.select_directory(_("Browse for Directory"), existing=True)
         if dir_path:
-            from .. import HOME
+            from aipoed import HOME
             self._path.set_text("~" + os.sep + os.path.relpath(dir_path, HOME))
     def get_path(self):
         return os.path.expanduser(self._path.get_text())

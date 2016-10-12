@@ -20,20 +20,20 @@ import shutil
 from gi.repository import Gtk
 from gi.repository import GObject
 
-from ... import enotify
-from ... import os_utils
-from ... import scm
-from ... import pm
-from ... import utils
+from aipoed import enotify
+from aipoed import os_utils
+from aipoed import scm
+from aipoed import pm
+from aipoed import utils
 
-from ...gui import actions
-from ...gui import dialogue
-from ...gui import file_tree
-from ...gui import xtnl_edit
-from ...gui import icons
+from aipoed.gui import actions
+from aipoed.gui import dialogue
+from aipoed.gui import file_tree
+from aipoed.gui import xtnl_edit
+from aipoed.gui import icons
 
-from . import ifce
-from . import do_opn
+from aipoed.git.gui import ifce
+from aipoed.git.gui import do_opn
 
 class WDTreeModel(file_tree.FileTreeModel):
     UPDATE_EVENTS = os_utils.E_FILE_CHANGES|scm.E_NEW_SCM|scm.E_FILE_CHANGES|pm.E_FILE_CHANGES|pm.E_PATCH_STACK_CHANGES|pm.E_PATCH_REFRESH|pm.E_POP|pm.E_PUSH|scm.E_WD_CHANGES

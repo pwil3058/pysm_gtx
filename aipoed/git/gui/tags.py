@@ -18,17 +18,17 @@ import collections
 from gi.repository import Gtk
 from gi.repository import GObject
 
-from ... import enotify
-from ... import runext
-from ... import scm
+from aipoed import enotify
+from aipoed import runext
+from aipoed import scm
 
-from ...gui import actions
-from ...gui import dialogue
-from ...gui import table
-from ...gui import text_edit
-from ...gui import icons
+from aipoed.gui import actions
+from aipoed.gui import dialogue
+from aipoed.gui import table
+from aipoed.gui import text_edit
+from aipoed.gui import icons
 
-from . import ifce
+from aipoed.git.gui import ifce
 
 TagListRow = collections.namedtuple("TagListRow",    ["name", "annotation"])
 

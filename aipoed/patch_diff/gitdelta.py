@@ -18,7 +18,7 @@
 
 import copy
 
-from . import c_idioms
+from aipoed.patch_diff import c_idioms
 
 def byte_0(arg):
     return arg & 0xFF

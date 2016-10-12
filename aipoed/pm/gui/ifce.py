@@ -19,7 +19,7 @@ import os
 import collections
 import hashlib
 
-from ... import CmdResult
+from aipoed import CmdResult
 
 _BACKEND = {}
 _MISSING_BACKEND = {}
@@ -38,7 +38,7 @@ def backend_requirements():
     return msg
 
 def report_backend_requirements(parent=None):
-    from ...gui import dialogue
+    from aipoed.gui import dialogue
     dialogue.main_window.inform_user(backend_requirements(), parent=parent)
 
 def avail_backends():
@@ -129,7 +129,7 @@ class _NULL_BACKEND:
         return ""
     @staticmethod
     def get_combined_patch_file_db():
-        from ...gui import fsdb
+        from aipoed.gui import fsdb
         return fsdb.NullFileDb()
     @staticmethod
     def get_default_new_patch_save_file():
@@ -151,7 +151,7 @@ class _NULL_BACKEND:
         return ""
     @staticmethod
     def get_patch_file_db(patch_name):
-        from ...gui import fsdb
+        from aipoed.gui import fsdb
         return fsdb.NullFileDb()
     @staticmethod
     def get_patch_file_path(patch_name):
@@ -182,7 +182,7 @@ class _NULL_BACKEND:
         return ""
     @staticmethod
     def get_top_patch_file_db():
-        from ...gui import fsdb
+        from aipoed.gui import fsdb
         return fsdb.NullFileDb()
     @staticmethod
     def get_ws_update_clean_up_ready(applied_count=None):
@@ -229,12 +229,12 @@ class PatchState:
     APPLIED_UNREFRESHABLE = '!'
 
 def generic_delete_files(file_paths):
-    from ... import os_utils
+    from aipoed import os_utils
     return os_utils.os_delete_files(file_paths, events=E_FILE_DELETED)
 
 def set_patch_file_description(patch_file_path, description, overwrite=False):
-    from ...patch_diff import patchlib
-    from ... import utils
+    from aipoed.patch_diff import patchlib
+    from aipoed import utils
     if os.path.isfile(patch_file_path):
         try:
             patch_obj = patchlib.Patch.parse_text(utils.get_file_contents(patch_file_path))
@@ -253,8 +253,8 @@ def set_patch_file_description(patch_file_path, description, overwrite=False):
 
 def get_patch_file_description(patch_file_path):
     assert os.path.isfile(patch_file_path), _("Patch file \"{0}\" does not exist\n").format(patch_file_path)
-    from ...patch_diff import patchlib
-    from ... import utils
+    from aipoed.patch_diff import patchlib
+    from aipoed import utils
     pobj = patchlib.Patch.parse_text(utils.get_file_contents(patch_file_path))
     return pobj.get_description()
 
@@ -281,7 +281,7 @@ class InterfaceMixin:
         return utils.set_file_contents(export_file_name, cls.get_patch_text(patch_name))
     @classmethod
     def do_set_patch_description(cls, patch_name, description, overwrite=False):
-        from ...gui import console
+        from aipoed.gui import console
         result = set_patch_file_description(cls.get_patch_file_path(patch_name), description, overwrite=overwrite)
         if result.is_ok:
             console.LOG.append_entry(_("set description for \"{0}\" patch.\n{1}\n").format(patch_name, description))

@@ -36,7 +36,7 @@ def backend_requirements():
     return msg
 
 def report_backend_requirements():
-    from ...gui import dialogue
+    from aipoed.gui import dialogue
     dialogue.main_window.inform_user(backend_requirements(), parent=parent)
 
 def avail_backends():
@@ -66,7 +66,7 @@ def choose_scm_backend():
         return None
     elif len(bel) == 1:
         return bel[0]
-    from ...gui import dialogue
+    from aipoed.gui import dialogue
     return dialogue.SelectFromListDialog(olist=bel, prompt=_('Choose SCM back end:')).make_selection()
 
 class DummyTableData:
@@ -187,18 +187,18 @@ def get_ifce(dir_path=None):
     return SCM
 
 def check_interfaces(args):
-    from ... import enotify
+    from aipoed import enotify
     events = 0
     curr_scm = SCM
     get_ifce()
     if curr_scm != SCM:
-        from ...scm.events import E_NEW_SCM
+        from aipoed.scm.events import E_NEW_SCM
         events |= E_NEW_SCM
         if SCM.in_valid_pgnd:
             import os
-            from ... import options
-            from ...gui import recollect
-            from . import wspce
+            from aipoed import options
+            from aipoed.gui import recollect
+            from aipoed.scm.gui import wspce
             newdir = SCM.get_playground_root()
             if not os.path.samefile(newdir, os.getcwd()):
                 os.chdir(newdir)
@@ -206,33 +206,33 @@ def check_interfaces(args):
             wspce.add_workspace_path(newdir)
             recollect.set("workspace", "last_used", newdir)
             options.load_pgnd_options()
-    from ...pm.gui import ifce as pm_ifce
+    from aipoed.pm.gui import ifce as pm_ifce
     curr_pm = pm_ifce.PM
     pm_ifce.get_ifce()
     if curr_pm != pm_ifce.PM and not enotify.E_CHANGE_WD & events:
-        from ...pm.events import E_NEW_PM
+        from aipoed.pm.events import E_NEW_PM
         events |= E_NEW_PM
     return events
 
 def init_current_dir(backend):
     import os
-    from ... import enotify
+    from aipoed import enotify
     result = create_new_playground(os.getcwd(), backend)
     events = 0
     curr_scm = SCM
     get_ifce()
     if curr_scm != SCM:
-        from ...scm.events import E_NEW_SCM
+        from aipoed.scm.events import E_NEW_SCM
         events |= E_NEW_SCM
-    from ...pm.gui import ifce as pm_ifce
+    from aipoed.pm.gui import ifce as pm_ifce
     curr_pm = pm_ifce.PM
     pm_ifce.get_ifce()
     if curr_pm != pm_ifce.PM:
-        from ...pm.events import E_NEW_PM
+        from aipoed.pm.events import E_NEW_PM
         events |= E_NEW_PM
     if SCM.in_valid_pgnd:
-        from . import wspce
-        from ...gui import recollect
+        from aipoed.scm.gui import wspce
+        from aipoed.gui import recollect
         curr_dir = os.getcwd()
         wspce.add_workspace_path(curr_dir)
         recollect.set("workspace", "last_used", curr_dir)
@@ -242,23 +242,23 @@ def init_current_dir(backend):
 
 def init():
     import os
-    from ... import options
-    from ... import enotify
+    from aipoed import options
+    from aipoed import enotify
     orig_dir = os.getcwd()
     options.load_global_options()
     get_ifce()
     if SCM.in_valid_pgnd:
         root = SCM.get_playground_root()
         os.chdir(root)
-        from . import wspce
-        from ...gui import recollect
+        from aipoed.scm.gui import wspce
+        from aipoed.gui import recollect
         wspce.add_workspace_path(root)
         recollect.set("workspace", "last_used", root)
-    from ...pm.gui import ifce as pm_ifce
+    from aipoed.pm.gui import ifce as pm_ifce
     pm_ifce.get_ifce()
     curr_dir = os.getcwd()
     options.reload_pgnd_options()
-    from ...gui.console import LOG
+    from aipoed.gui.console import LOG
     LOG.start_cmd("Working Directory: {0}\n".format(curr_dir))
     if SCM.in_valid_pgnd:
         LOG.append_stdout('In valid repository\n')
@@ -269,8 +269,8 @@ def init():
     if not os.path.samefile(orig_dir, curr_dir):
         enotify.notify_events(enotify.E_CHANGE_WD, new_wd=curr_dir)
     else:
-        from ...scm.events import E_NEW_SCM
-        from ...pm.events import E_NEW_PM
+        from aipoed.scm.events import E_NEW_SCM
+        from aipoed.pm.events import E_NEW_PM
         enotify.notify_events(E_NEW_SCM|E_NEW_PM)
-    from ...gui import auto_update
+    from aipoed.gui import auto_update
     auto_update.set_initialize_event_flags(check_interfaces)

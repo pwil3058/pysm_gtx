@@ -17,10 +17,10 @@
 Workspace status action groups
 '''
 
-from ... import enotify
-from ... import scm
+from aipoed import enotify
+from aipoed import scm
 
-from ...gui import actions
+from aipoed.gui import actions
 
 AC_NOT_IN_SCM_PGND, AC_IN_SCM_PGND, AC_IN_SCM_PGND_MASK = actions.ActionCondns.new_flags_and_mask(2)
 

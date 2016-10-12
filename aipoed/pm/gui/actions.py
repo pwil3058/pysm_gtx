@@ -17,10 +17,10 @@
 Workspace status action groups
 '''
 
-from ... import enotify
-from ... import pm
+from aipoed import enotify
+from aipoed import pm
 
-from ...gui import actions
+from aipoed.gui import actions
 
 AC_NOT_IN_PM_PGND, AC_IN_PM_PGND, AC_IN_PM_PGND_MUTABLE, AC_IN_PM_PGND_MASK = actions.ActionCondns.new_flags_and_mask(3)
 AC_NOT_PMIC, AC_PMIC, AC_PMIC_MASK = actions.ActionCondns.new_flags_and_mask(2)

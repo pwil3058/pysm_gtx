@@ -20,10 +20,10 @@ import urllib.parse
 
 from gi.repository import Gtk
 
-from ... import utils
+from aipoed import utils
 
-from ...gui import apath
-from ...gui import gutils
+from aipoed.gui import apath
+from aipoed.gui import gutils
 
 _APP_NAME = None
 

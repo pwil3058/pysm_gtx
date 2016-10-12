@@ -21,16 +21,16 @@ from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import Pango
 
-from ... import CmdResult, CmdFailure
-from ... import runext
-from ... import options
+from aipoed import CmdResult, CmdFailure
+from aipoed import runext
+from aipoed import options
 
 from .. import patchlib
 
-from ...gui import dialogue
-from ...gui import gutils
-from ...gui import textview
-from ...gui import icons
+from aipoed.gui import dialogue
+from aipoed.gui import gutils
+from aipoed.gui import textview
+from aipoed.gui import icons
 
 class FileAndRefreshActions:
     def __init__(self):

@@ -17,7 +17,7 @@
 
 import os
 
-from ...gui import doop
+from aipoed.gui import doop
 
 from .ifce import SCM
 
@@ -41,8 +41,8 @@ class DoOpnMixin(doop.DoOperationMixin):
             return
         while os.path.exists(as_file_path):
             from gi.repository import Gtk
-            from ... import CmdResult
-            from ...gui import dialogue
+            from aipoed import CmdResult
+            from aipoed.gui import dialogue
             result = CmdResult.error(stderr="{0}: already exists".format(as_file_path)) | CmdResult.Suggest.OVERWRITE_OR_RENAME
             resp = self.ask_rename_overwrite_or_cancel(result)
             if resp == Gtk.ResponseType.CANCEL:
@@ -54,7 +54,7 @@ class DoOpnMixin(doop.DoOperationMixin):
                 if as_file_path is None:
                     return
         import shutil
-        from ...gui import console
+        from aipoed.gui import console
         console.LOG.start_cmd('cp -p {0} {1}'.format(file_path, as_file_path))
         try:
             shutil.copy2(file_path, as_file_path)

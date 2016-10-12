@@ -19,10 +19,10 @@ import os
 
 from gi.repository import Gtk
 
-from ...gui import icons
+from aipoed.gui import icons
 
-from . import ifce as scm_ifce
-from . import wspce
+from aipoed.scm.gui import ifce as scm_ifce
+from aipoed.scm.gui import wspce
 
 # NB: this relies on dialogue.ClientMixin or equivalent also bein "mixed in"
 class DoOpnMixin:
@@ -33,7 +33,7 @@ class DoOpnMixin:
             return None
         elif len(available_backends) == 1:
             return available_backends[0]
-        from ...gui import dialogue
+        from aipoed.gui import dialogue
         return self.choose_from_list(alist=available_backends, prompt=_("Choose SCM back end:"))
     def scm_do_create_new_wspce(self):
         req_backend = self.scm_choose_backend()
@@ -58,7 +58,7 @@ class DoOpnMixin:
         req_backend = self.scm_choose_backend()
         if not req_backend:
             return
-        from . import repos
+        from aipoed.scm.gui import repos
         clone_dialog = repos.RepoSelectDialog(self.get_toplevel())
         if clone_dialog.run() == Gtk.ResponseType.OK:
             cloned_path = clone_dialog.get_path()
@@ -79,7 +79,7 @@ class DoOpnMixin:
         else:
             clone_dialog.destroy()
     def populate_action_groups(self):
-        from ...gui.actions import AC_DONT_CARE
+        from aipoed.gui.actions import AC_DONT_CARE
         from .actions import AC_NOT_IN_SCM_PGND
         self.action_groups[AC_DONT_CARE].add_actions(
             [

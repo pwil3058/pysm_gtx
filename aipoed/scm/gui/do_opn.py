@@ -78,9 +78,17 @@ class DoOpnMixin:
             clone_dialog.destroy()
         else:
             clone_dialog.destroy()
+    def scm_do_pull_from_default_repo(self):
+        with self.showing_busy():
+            result = scm_ifce.SCM.do_pull_from_repo(None)
+        self.report_any_problems(result)
+    def scm_do_push_to_default_repo(self):
+        with self.showing_busy():
+            result = scm_ifce.SCM.do_push_to_repo(None)
+        self.report_any_problems(result)
     def populate_action_groups(self):
         from aipoed.gui.actions import AC_DONT_CARE
-        from .actions import AC_NOT_IN_SCM_PGND
+        from .actions import AC_NOT_IN_SCM_PGND, AC_IN_SCM_PGND
         self.action_groups[AC_DONT_CARE].add_actions(
             [
                 ("scm_create_new_workspace", icons.STOCK_NEW_WORKSPACE, _("New"), "",
@@ -98,5 +106,15 @@ class DoOpnMixin:
                  _("Clone an existing repository."),
                  lambda _action=None: self.scm_do_clone_repo()
                 ),
-            ]
-        )
+            ])
+        self.action_groups[AC_IN_SCM_PGND].add_actions(
+            [
+                ("scm_pull_from_default_repo", icons.STOCK_PULL, _("Pull"), None,
+                 _("Pull from the default remote repository"),
+                 lambda _action=None: self.scm_do_pull_from_default_repo()
+                ),
+                ("scm_push_to_default_repo", icons.STOCK_PUSH, _("Push"), None,
+                 _("Push to the default remote repository"),
+                 lambda _action=None: self.scm_do_push_to_default_repo()
+                ),
+            ])

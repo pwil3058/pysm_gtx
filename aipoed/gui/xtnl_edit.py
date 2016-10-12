@@ -23,13 +23,13 @@ import shlex
 from gi.repository import GObject
 from gi.repository import Gtk
 
-from .. import runext
+from aipoed import runext
 
-from . import actions
-from . import dialogue
-from . import gutils
-from . import table
-from . import tlview
+from aipoed.gui import actions
+from aipoed.gui import dialogue
+from aipoed.gui import gutils
+from aipoed.gui import table
+from aipoed.gui import tlview
 
 EDITORS_THAT_NEED_A_TERMINAL = ["vi", "joe", "vim"]
 DEFAULT_EDITOR = "gedit"

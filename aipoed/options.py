@@ -20,7 +20,7 @@ import os
 import collections
 import configparser
 
-from . import CmdResult
+from aipoed import CmdResult
 
 _GLOBAL_CFG_FILE_PATH = ""
 GLOBAL_OPTIONS = configparser.SafeConfigParser()
@@ -122,7 +122,7 @@ def _set_option(options, cfg_file_path, section, oname, value):
     if not options.has_section(section):
         options.add_section(section)
     if isinstance(value, str) or isinstance(value, bytes):
-        from . import utils
+        from aipoed import utils
         svalue = utils.make_utf8_compliant(value)
     elif isinstance(value, bool):
         svalue = "true" if value else "false"

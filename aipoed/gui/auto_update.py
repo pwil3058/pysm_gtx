@@ -17,10 +17,10 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
-from .. import enotify
+from aipoed import enotify
 
-from . import gutils
-from . import actions
+from aipoed.gui import gutils
+from aipoed.gui import actions
 
 initialize_event_flags = lambda args: 0
 

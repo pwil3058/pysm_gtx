@@ -15,23 +15,23 @@
 
 from gi.repository import Gtk
 
-from ... import enotify
-from ... import CmdFailure
-from ... import scm
-from ... import utils
+from aipoed import enotify
+from aipoed import CmdFailure
+from aipoed import scm
+from aipoed import utils
 
-from ...patch_diff import patchlib
+from aipoed.patch_diff import patchlib
 
-from ...gui import actions
-from ...gui import dialogue
-from ...gui import gutils
-from ...gui import textview
-from ...gui import text_edit
-from ...gui import icons
+from aipoed.gui import actions
+from aipoed.gui import dialogue
+from aipoed.gui import gutils
+from aipoed.gui import textview
+from aipoed.gui import text_edit
+from aipoed.gui import icons
 
-from ...patch_diff.gui import diff
+from aipoed.patch_diff.gui import diff
 
-from . import ifce
+from aipoed.git.gui import ifce
 
 class StagedDiffNotebook(diff.DiffTextsWidget):
     def __init__(self):

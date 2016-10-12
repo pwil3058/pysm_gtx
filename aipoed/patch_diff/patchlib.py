@@ -22,7 +22,7 @@ import email
 import zlib
 import hashlib
 
-from . import gitbase85
+from aipoed.patch_diff import gitbase85
 
 #TODO: convert methods that return lists to iterators
 

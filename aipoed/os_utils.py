@@ -17,9 +17,9 @@ import os
 import shutil
 import errno
 
-from . import CmdResult, Suggestion
+from aipoed import CmdResult, Suggestion
 
-from . import enotify
+from aipoed import enotify
 
 E_FILE_ADDED, E_FILE_DELETED, E_FILE_CHANGES = enotify.new_event_flags_and_mask(2)
 E_FILE_MOVED = E_FILE_ADDED | E_FILE_DELETED
@@ -48,7 +48,7 @@ def get_destn_file_paths(file_paths, destn):
         return [os.path.join(destn, os.path.basename(file_path)) for file_path in file_paths]
 
 def check_for_overwrites(destn_file_paths):
-    from . import utils
+    from aipoed import utils
     overwritten = [file_path for file_path in destn_file_paths if os.path.exists(file_path)]
     if overwritten:
         stderr = _("File(s):\n")
@@ -88,7 +88,7 @@ def os_create_file(file_path):
     return result
 
 def os_delete_fs_items(fsi_paths, events=E_FILE_DELETED, force=False):
-    from . import utils
+    from aipoed import utils
     _CONSOLE_LOG.start_cmd(_('delete {0}').format(utils.quoted_join(fsi_paths)))
     serr = ""
     errorcode = CmdResult.ERROR
@@ -163,7 +163,7 @@ def os_move_or_copy_fs_item(fsi_path, destn, opsym, overwrite=False, force=False
 def os_move_or_copy_fs_items(fsi_paths, destn, opsym, overwrite=False, force=False, verbose=False):
     assert opsym in (Relation.MOVED_TO, Relation.COPIED_TO), _("Invalid operation requested")
     assert len(fsi_paths) > 1
-    from . import utils
+    from aipoed import utils
     def _overwrite_msg(overwrites):
         if len(overwrites) == 0:
             return ""

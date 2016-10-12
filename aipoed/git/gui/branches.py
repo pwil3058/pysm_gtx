@@ -19,17 +19,17 @@ import re
 from gi.repository import Gtk
 from gi.repository import GObject
 
-from ... import enotify
-from ... import runext
-from ... import scm
+from aipoed import enotify
+from aipoed import runext
+from aipoed import scm
 
-from ...gui import actions
-from ...gui import dialogue
-from ...gui import table
-from ...gui import tlview
-from ...gui import icons
+from aipoed.gui import actions
+from aipoed.gui import dialogue
+from aipoed.gui import table
+from aipoed.gui import tlview
+from aipoed.gui import icons
 
-from . import do_opn
+from aipoed.git.gui import do_opn
 
 BranchListRow = collections.namedtuple("BranchListRow", ["name", "is_current", "is_merged", "rev", "synopsis"])
 

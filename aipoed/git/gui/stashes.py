@@ -19,22 +19,22 @@ import re
 from gi.repository import Gtk
 from gi.repository import GObject
 
-from ... import enotify
-from ... import CmdFailure
-from ... import runext
-from ... import scm
+from aipoed import enotify
+from aipoed import CmdFailure
+from aipoed import runext
+from aipoed import scm
 
-from ...gui import actions
-from ...gui import dialogue
-from ...gui import table
-from ...gui import text_edit
-from ...gui import icons
+from aipoed.gui import actions
+from aipoed.gui import dialogue
+from aipoed.gui import table
+from aipoed.gui import text_edit
+from aipoed.gui import icons
 
-from ...patch_diff.gui import diff
+from aipoed.patch_diff.gui import diff
 
-from ... import utils
+from aipoed import utils
 
-from . import ifce
+from aipoed.git.gui import ifce
 
 StashListRow = collections.namedtuple("StashListRow",    ["name", "branch", "commit"])
 

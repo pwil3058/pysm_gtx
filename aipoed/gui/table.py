@@ -25,14 +25,14 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 from gi.repository import Gdk
 
-from .. import enotify
+from aipoed import enotify
 
-from . import gutils
-from . import actions
-from . import tlview
-from . import icons
-from . import dialogue
-from . import auto_update
+from aipoed.gui import gutils
+from aipoed.gui import actions
+from aipoed.gui import tlview
+from aipoed.gui import icons
+from aipoed.gui import dialogue
+from aipoed.gui import auto_update
 
 AC_MODIFIED, AC_NOT_MODIFIED, AC_MODIFIED_MASK = actions.ActionCondns.new_flags_and_mask(2)
 

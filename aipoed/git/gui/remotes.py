@@ -19,12 +19,12 @@ import re
 from gi.repository import Gtk
 from gi.repository import GObject
 
-from ... import enotify
-from ... import runext
-from ... import scm
+from aipoed import enotify
+from aipoed import runext
+from aipoed import scm
 
-from ...gui import actions
-from ...gui import table
+from aipoed.gui import actions
+from aipoed.gui import table
 
 RemotesListRow = collections.namedtuple("RemotesListRow",    ["name", "inbound_url", "outbound_url"])
 

@@ -23,7 +23,7 @@ from gi.repository import Gtk
 from gi.repository import Pango
 from gi.repository import GObject
 
-from .. import utils
+from aipoed import utils
 
 class Buffer(Gtk.TextBuffer):
     def __init__(self, *args, **kwargs):

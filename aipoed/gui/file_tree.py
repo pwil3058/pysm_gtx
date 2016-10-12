@@ -21,21 +21,21 @@ from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GObject
 
-from .. import CmdResult, CmdFailure
+from aipoed import CmdResult, CmdFailure
 
-from .. import utils
-from .. import os_utils
-from .. import enotify
+from aipoed import utils
+from aipoed import os_utils
+from aipoed import enotify
 
-from . import fsdb
-from . import tlview
-from . import gutils
-from . import actions
-from . import dialogue
-from . import icons
-from . import auto_update
-from . import xtnl_edit
-from . import doop
+from aipoed.gui import fsdb
+from aipoed.gui import tlview
+from aipoed.gui import gutils
+from aipoed.gui import actions
+from aipoed.gui import dialogue
+from aipoed.gui import icons
+from aipoed.gui import auto_update
+from aipoed.gui import xtnl_edit
+from aipoed.gui import doop
 
 AC_FILES_SELECTED, AC_NO_FILES_SELECTED, \
 AC_DIRS_SELECTED, AC_NO_DIRS_SELECTED, \

@@ -15,7 +15,7 @@
 ### along with this program; if not, write to the Free Software
 ### Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-from .. import enotify
+from aipoed import enotify
 
 E_FILE_ADDED, E_FILE_DELETED, E_FILE_MODIFIED, E_FILE_CHANGES = enotify.new_event_flags_and_mask(3)
 E_FILE_MOVED = E_FILE_ADDED|E_FILE_DELETED

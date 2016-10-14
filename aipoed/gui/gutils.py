@@ -97,9 +97,6 @@ class MappedManager:
     def unmap_action(self):
         pass
 
-_KEYVAL_UP_ARROW = lambda : Gdk.keyval_from_name('Up')
-_KEYVAL_DOWN_ARROW = lambda : Gdk.keyval_from_name('Down')
-
 class EntryWithHistory(Gtk.Entry):
     def __init__(self, max_chars=0):
         Gtk.Entry.__init__(self)
@@ -110,6 +107,8 @@ class EntryWithHistory(Gtk.Entry):
         self._saved_text = ''
         self._key_press_cb_id = self.connect("key_press_event", self._key_press_cb)
     def _key_press_cb(self, widget, event):
+        _KEYVAL_UP_ARROW = Gdk.keyval_from_name('Up')
+        _KEYVAL_DOWN_ARROW = Gdk.keyval_from_name('Down')
         if event.keyval in [_KEYVAL_UP_ARROW, _KEYVAL_DOWN_ARROW]:
             if event.keyval == _KEYVAL_UP_ARROW:
                 if self._history_index < self._history_len:

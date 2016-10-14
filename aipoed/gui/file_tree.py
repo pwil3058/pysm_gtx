@@ -405,9 +405,6 @@ class FileTreeView(tlview.View, actions.CAGandUIManager, doop.DoOperationMixin):
       </popup>
     </ui>
     """
-    KEYVAL_c = lambda : Gdk.keyval_from_name("c")
-    KEYVAL_C = lambda : Gdk.keyval_from_name("C")
-    KEYVAL_ESCAPE = lambda : Gdk.keyval_from_name("Escape")
     AUTO_EXPAND = False
     DIRS_SELECTABLE = True
     ASK_BEFORE_DELETE = True
@@ -415,7 +412,7 @@ class FileTreeView(tlview.View, actions.CAGandUIManager, doop.DoOperationMixin):
     @staticmethod
     def _handle_control_c_key_press_cb(widget, event):
         if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
-            if event.keyval in [FileTreeView.KEYVAL_c, FileTreeView.KEYVAL_C]:
+            if event.keyval in [Gdk.keyval_from_name(ch) for ch in "cC"]:
                 widget.add_selected_fsi_paths_to_clipboard()
                 return True
         return False

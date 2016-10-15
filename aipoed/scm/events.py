@@ -20,7 +20,7 @@ from aipoed import enotify
 E_FILE_ADDED, E_FILE_DELETED, E_FILE_MODIFIED, E_FILE_CHANGES = enotify.new_event_flags_and_mask(3)
 E_FILE_MOVED = E_FILE_ADDED|E_FILE_DELETED
 
-E_INDEX_MOD, E_COMMIT, E_BACKOUT, E_BRANCH, E_TAG, E_PUSH, E_PULL, E_INIT, E_CLONE, E_STASH, E_CS_CHANGES = enotify.new_event_flags_and_mask(10)
+E_INDEX_MOD, E_COMMIT, E_BACKOUT, E_BRANCH, E_TAG, E_PUSH, E_PULL, E_INIT, E_CLONE, E_STASH, E_FETCH, E_CS_CHANGES = enotify.new_event_flags_and_mask(11)
 E_NEW_SCM = E_INIT|E_CLONE
 
 E_CHECKOUT, E_BISECT, E_MERGE, E_UPDATE, E_WD_CHANGES = enotify.new_event_flags_and_mask(4)

@@ -24,6 +24,8 @@ from aipoed import runext
 from aipoed import scm
 
 from aipoed.gui import actions
+from aipoed.gui import dialogue
+from aipoed.gui import icons
 from aipoed.gui import table
 
 RemotesListRow = collections.namedtuple("RemotesListRow",    ["name", "inbound_url", "outbound_url"])
@@ -79,3 +81,78 @@ class RemotesListView(table.MapManagedTableView, scm.gui.actions.WDListenerMixin
 
 class RemotesList(table.TableWidget):
     VIEW = RemotesListView
+
+class RemotesComboBox(Gtk.ComboBoxText):
+    def __init__(self):
+        Gtk.ComboBoxText.__init__(self)
+        for line in runext.run_get_cmd(["git", "remote"], default="").splitlines():
+            self.append_text(line)
+
+class FetchWidget(Gtk.VBox):
+    def __init__(self):
+        from aipoed.git.gui import branches
+        Gtk.VBox.__init__(self)
+        self._all_flag = Gtk.CheckButton.new_with_label("--all")
+        self._all_flag.set_tooltip_text(_("Fetch from all remotes"))
+        self._all_flag.connect("toggled", self._all_toggle_cb)
+        self._remote = RemotesComboBox()
+        self._remote.connect("changed", self._remote_changed_cb)
+        self._branch = branches.BranchesComboBox()
+        hbox = Gtk.HBox()
+        hbox.pack_start(self._all_flag, expand=False, fill=True, padding=0)
+        hbox.pack_start(Gtk.Label(_("Remote:")), expand=False, fill=True, padding=0)
+        hbox.pack_start(self._remote, expand=True, fill=True, padding=0)
+        hbox.pack_start(Gtk.Label(_("Branch:")), expand=False, fill=True, padding=0)
+        hbox.pack_start(self._branch, expand=True, fill=True, padding=0)
+        self.pack_start(hbox, expand=False, fill=False, padding=0)
+        self.show_all()
+        self._all_toggle_cb(self._all_flag)
+    def _all_toggle_cb(self, button):
+        if button.get_active():
+            for widget in [self._remote, self._branch]:
+                widget.set_sensitive(False)
+        else:
+            self._remote.set_sensitive(True)
+            self._remote_changed_cb(self._remote)
+    def _remote_changed_cb(self, combo_box):
+        valid_remote_seln = combo_box.get_active() != -1
+        self._branch.set_sensitive(valid_remote_seln)
+    def do_fetch(self):
+        from aipoed.git.gui import ifce
+        cmd = ["git", "fetch"]
+        if self._all_flag.get_active():
+            cmd += ["--all"]
+        else:
+            remote = self._remote.get_active_text()
+            if remote:
+                cmd += [remote]
+                branch = self._branch.get_active_text()
+                if branch:
+                    cmd += [branch]
+        return ifce.do_action_cmd(cmd, scm.E_FETCH, None, [])
+
+class FetchDialog(dialogue.CancelOKDialog, dialogue.ClientMixin):
+    def __init__(self, **kwargs):
+        dialogue.CancelOKDialog.__init__(self, **kwargs)
+        self.fetch_widget = FetchWidget()
+        self.get_content_area().add(self.fetch_widget)
+        self.connect("response", self._response_cb)
+        self.show_all()
+    def _response_cb(self, _dialog, response):
+        if response == Gtk.ResponseType.CANCEL:
+            self.destroy()
+        else:
+            assert response == Gtk.ResponseType.OK
+            with self.showing_busy():
+                result = self.fetch_widget.do_fetch()
+            self.report_any_problems(result)
+            if result.is_less_than_error:
+                self.destroy()
+
+actions.CLASS_INDEP_AGS[scm.gui.actions.AC_IN_SCM_PGND].add_actions(
+    [
+        ("git_fetch_from_remote", icons.STOCK_FETCH, _("Fetch"), None,
+         _("Fetch from a selected remote repository"),
+         lambda _action=None: FetchDialog().show()
+        ),
+    ])

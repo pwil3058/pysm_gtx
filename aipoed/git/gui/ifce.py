@@ -37,17 +37,16 @@ from aipoed.gui import table
 
 from aipoed.git.gui import fsdb_git
 
-def _do_action_cmd(cmd, success_emask, fail_emask, eflag_modifiers):
+def do_action_cmd(cmd, success_emask, fail_emask, eflag_modifiers):
     from aipoed.gui import console
-    # TODO: improve _do_action_cmd() and move to runext
+    # TODO: improve do_action_cmd() and move to runext
     result = runext.run_cmd_in_console(console.LOG, cmd)
-    if result.is_ok:
+    # Because git uses stderr to report progress etc we should consider
+    # a warning a success
+    if result.is_less_than_error:
         if success_emask:
             enotify.notify_events(success_emask)
-        if result.stderr:
-            return CmdResult.warning(result.stdout, result.stderr)
-        else:
-            return CmdResult.ok()
+        return result
     else:
         if fail_emask:
             enotify.notify_events(fail_emask)
@@ -94,29 +93,29 @@ class Interface:
             cmd = ["git", "add", "-f", "--"] + fsi_list
         else:
             cmd = ["git", "add", "--"] + fsi_list
-        return _do_action_cmd(cmd, scm.E_INDEX_MOD|scm.E_FILE_CHANGES, None, [("Use -f if you really want to add them.", CmdResult.Suggest.FORCE)])
+        return do_action_cmd(cmd, scm.E_INDEX_MOD|scm.E_FILE_CHANGES, None, [("Use -f if you really want to add them.", CmdResult.Suggest.FORCE)])
     @staticmethod
     def do_amend_commit(msg):
         cmd = ['git', 'commit', '--amend', '-m', msg]
-        return _do_action_cmd(cmd, scm.E_INDEX_MOD|scm.E_COMMIT|scm.E_FILE_CHANGES, None, [])
+        return do_action_cmd(cmd, scm.E_INDEX_MOD|scm.E_COMMIT|scm.E_FILE_CHANGES, None, [])
     @staticmethod
     def do_checkout_branch(branch):
         cmd = ["git", "checkout", branch]
-        return _do_action_cmd(cmd, scm.E_BRANCH|enotify.E_CHANGE_WD, None, [])
+        return do_action_cmd(cmd, scm.E_BRANCH|enotify.E_CHANGE_WD, None, [])
     @staticmethod
     def do_checkout_tag(tag):
         cmd = ["git", "checkout", tag]
-        return _do_action_cmd(cmd, scm.E_TAG|enotify.E_CHANGE_WD, None, [])
+        return do_action_cmd(cmd, scm.E_TAG|enotify.E_CHANGE_WD, None, [])
     @staticmethod
     def do_clone_as(repo, tgtdir=None):
         cmd = ["git", "clone", repo]
         if tgtdir is not None:
             cmd.append(tgtdir)
-        return _do_action_cmd(cmd, scm.E_CLONE, None, [])
+        return do_action_cmd(cmd, scm.E_CLONE, None, [])
     @staticmethod
     def do_commit_staged_changes(msg):
         cmd = ["git", "commit", "-m", msg]
-        return _do_action_cmd(cmd, scm.E_INDEX_MOD|scm.E_COMMIT|scm.E_FILE_CHANGES, None, [])
+        return do_action_cmd(cmd, scm.E_INDEX_MOD|scm.E_COMMIT|scm.E_FILE_CHANGES, None, [])
     @staticmethod
     def do_create_branch(branch, target=None, force=False):
         cmd = ["git", "branch"]
@@ -125,7 +124,7 @@ class Interface:
         cmd.append(branch)
         if target:
             cmd.append(target)
-        return _do_action_cmd(cmd, scm.E_BRANCH, None, [("already exists", CmdResult.Suggest.FORCE_OR_RENAME)])
+        return do_action_cmd(cmd, scm.E_BRANCH, None, [("already exists", CmdResult.Suggest.FORCE_OR_RENAME)])
     @classmethod
     def do_import_patch(cls, patch_filepath):
         ok_to_import, msg = cls.is_ready_for_import()
@@ -147,23 +146,23 @@ class Interface:
         cmd = ["git", "init"]
         if tgtdir is not None:
             cmd += ["--", tgtdir]
-        return _do_action_cmd(cmd, scm.E_NEW_SCM, None, [])
+        return do_action_cmd(cmd, scm.E_NEW_SCM, None, [])
     @staticmethod
     def do_pull_from_repo(repo=None):
         cmd = ["git", "pull"]
         if repo is not None:
             cmd.append(repo)
-        return _do_action_cmd(cmd, scm.E_PULL, None, [])
+        return do_action_cmd(cmd, scm.E_PULL, None, [])
     @staticmethod
     def do_push_to_repo(repo=None):
         cmd = ["git", "push"]
         if repo is not None:
             cmd.append(repo)
-        return _do_action_cmd(cmd, scm.E_PUSH, None, [])
+        return do_action_cmd(cmd, scm.E_PUSH, None, [])
     @staticmethod
     def do_remove_files_from_index(file_list):
         cmd = ["git", "reset", "HEAD", "--"] + file_list
-        return _do_action_cmd(cmd, scm.E_INDEX_MOD, None, [])
+        return do_action_cmd(cmd, scm.E_INDEX_MOD, None, [])
     @staticmethod
     def do_remove_files_in_index(file_list, force=False, cache=False):
         if force:
@@ -174,14 +173,14 @@ class Interface:
             cmd = ["git", "rm", "--cache", "--"] + file_list
         else:
             cmd = ["git", "rm", "--"] + file_list
-        return _do_action_cmd(cmd, scm.E_INDEX_MOD, None, [("--cache", CmdResult.Suggest.CACHE), ("or -f to force removal", CmdResult.Suggest.FORCE)])
+        return do_action_cmd(cmd, scm.E_INDEX_MOD, None, [("--cache", CmdResult.Suggest.CACHE), ("or -f to force removal", CmdResult.Suggest.FORCE)])
     @staticmethod
     def do_rename_fsi_in_index(fsi_path, destn, overwrite=False):
         if overwrite:
             cmd = ["git", "mv", "-f", fsi_path, destn]
         else:
             cmd = ["git", "mv", fsi_path, destn]
-        return _do_action_cmd(cmd, scm.E_INDEX_MOD, None, [("or -f to force", CmdResult.Suggest.OVERWRITE)])
+        return do_action_cmd(cmd, scm.E_INDEX_MOD, None, [("or -f to force", CmdResult.Suggest.OVERWRITE)])
     @staticmethod
     def do_set_tag(tag, annotated=False, msg=None, signed=False, key_id=None, target=None, force=False):
         cmd = ["git", "tag"]
@@ -196,7 +195,7 @@ class Interface:
         cmd.append(tag)
         if target:
             cmd.append(target)
-        return _do_action_cmd(cmd, scm.E_TAG, None, [("already exists", CmdResult.Suggest.FORCE)])
+        return do_action_cmd(cmd, scm.E_TAG, None, [("already exists", CmdResult.Suggest.FORCE)])
     @staticmethod
     def do_stash_apply(reinstate_index=False, stash=None):
         cmd = ["git", "stash", "apply"]
@@ -204,19 +203,19 @@ class Interface:
             cmd.append("--index")
         if stash:
             cmd.append(stash)
-        return _do_action_cmd(cmd, scm.E_STASH|scm.E_FILE_CHANGES, None, [])
+        return do_action_cmd(cmd, scm.E_STASH|scm.E_FILE_CHANGES, None, [])
     @staticmethod
     def do_stash_branch(branch_name, stash=None):
         cmd = ["git", "stash", "branch", branch_name]
         if stash:
             cmd.append(stash)
-        return _do_action_cmd(cmd, scm.E_STASH, None, [])
+        return do_action_cmd(cmd, scm.E_STASH, None, [])
     @staticmethod
     def do_stash_drop(stash=None):
         cmd = ["git", "stash", "drop"]
         if stash:
             cmd.append(stash)
-        return _do_action_cmd(cmd, scm.E_STASH, None, [])
+        return do_action_cmd(cmd, scm.E_STASH, None, [])
     @staticmethod
     def do_stash_pop(reinstate_index=False, stash=None):
         cmd = ["git", "stash", "pop"]
@@ -224,7 +223,7 @@ class Interface:
             cmd.append("--index")
         if stash:
             cmd.append(stash)
-        return _do_action_cmd(cmd, scm.E_STASH, None, [])
+        return do_action_cmd(cmd, scm.E_STASH, None, [])
     @staticmethod
     def do_stash_save(keep_index=False, include_untracked=False, include_all=False, msg=None):
         cmd = ["git", "stash", "save"]
@@ -236,7 +235,7 @@ class Interface:
             cmd.append("--all")
         if msg:
             cmd.append(msg)
-        return _do_action_cmd(cmd, scm.E_STASH, None, [])
+        return do_action_cmd(cmd, scm.E_STASH, None, [])
     @staticmethod
     def get_author_name_and_email():
         import email.utils

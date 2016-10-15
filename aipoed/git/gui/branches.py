@@ -161,3 +161,13 @@ actions.CLASS_INDEP_AGS[scm.gui.actions.AC_IN_SCM_PGND].add_actions(
          lambda _action=None: CreateBranchDialog().show()
         ),
     ])
+
+class BranchesComboBox(Gtk.ComboBoxText):
+    def __init__(self):
+        Gtk.ComboBoxText.__init__(self)
+        current_branch_index = None
+        for i, line in enumerate(runext.run_get_cmd(["git", "branch"], default="").splitlines()):
+            if line.startswith("*"):
+                current_branch_index = i
+            self.append_text(line[2:])
+        self.set_active(current_branch_index)

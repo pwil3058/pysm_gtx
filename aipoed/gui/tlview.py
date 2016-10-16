@@ -283,6 +283,13 @@ def mark_up_cell(model, fld):
         attributes = {"markup" : model.col_index(fld)}
     )
 
+def handle_control_c_key_press_cb(widget, event):
+    if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
+        if event.keyval in [Gdk.keyval_from_name(ch) for ch in "cC"]:
+            widget.handle_control_c_key_press_cb()
+            return True
+    return False
+
 class View(Gtk.TreeView):
     __g_type_name__ = "View"
     # TODO: bust View() up into a number of "mix ins" for more flexibility
@@ -305,6 +312,7 @@ class View(Gtk.TreeView):
             self._view_add_column(col_d)
         self.connect("button_press_event", self._handle_clear_selection_cb)
         self.connect("key_press_event", self._handle_clear_selection_cb)
+        self.connect("key_press_event", handle_control_c_key_press_cb)
         self._connect_model_changed_cbs()
         self._modified_cbs = []
     def _connect_model_changed_cbs(self):
@@ -337,6 +345,8 @@ class View(Gtk.TreeView):
         for signal_name, signal_handler in cell_renderer_spec.signal_handlers.items():
             cell.connect(signal_name, signal_handler)
         return cell
+    def handle_control_c_key_press_cb(self):
+        pass
     def _view_add_column(self, col_d):
         col = Gtk.TreeViewColumn(col_d.title)
         self.append_column(col)

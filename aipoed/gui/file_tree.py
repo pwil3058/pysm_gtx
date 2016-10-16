@@ -409,13 +409,8 @@ class FileTreeView(tlview.View, actions.CAGandUIManager, doop.DoOperationMixin):
     DIRS_SELECTABLE = True
     ASK_BEFORE_DELETE = True
     OPEN_NEW_FILES_FOR_EDIT = True
-    @staticmethod
-    def _handle_control_c_key_press_cb(widget, event):
-        if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
-            if event.keyval in [Gdk.keyval_from_name(ch) for ch in "cC"]:
-                widget.add_selected_fsi_paths_to_clipboard()
-                return True
-        return False
+    def handle_control_c_key_press_cb(self):
+        return self.add_selected_fsi_paths_to_clipboard()
     @staticmethod
     def _handle_double_click_cb(tree_view, tree_path, tree_column):
         # TODO: think about making double click on directory change directories
@@ -427,7 +422,7 @@ class FileTreeView(tlview.View, actions.CAGandUIManager, doop.DoOperationMixin):
         tlview.TreeView.__init__(self)
         actions.CAGandUIManager.__init__(self, selection=self.get_selection(), popup=self.DEFAULT_POPUP)
         self.model.set_view(self)
-        self.connect("key_press_event", self._handle_control_c_key_press_cb)
+        #self.connect("key_press_event", self._handle_control_c_key_press_cb)
         self.connect("row-activated", self._handle_double_click_cb)
         seln = self.get_selection()
         seln.set_select_function(self._selection_filter_func)

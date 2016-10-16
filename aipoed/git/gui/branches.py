@@ -17,11 +17,13 @@ import collections
 import re
 
 from gi.repository import Gtk
+from gi.repository import Gdk
 from gi.repository import GObject
 
 from aipoed import enotify
 from aipoed import runext
 from aipoed import scm
+from aipoed import utils
 
 from aipoed.gui import actions
 from aipoed.gui import dialogue
@@ -106,7 +108,7 @@ class BranchListView(table.MapManagedTableView, scm.gui.actions.WDListenerMixin,
             "rules_hint" : False,
             "headers-visible" : True,
         },
-        selection_mode=Gtk.SelectionMode.SINGLE,
+        selection_mode=Gtk.SelectionMode.MULTIPLE,
         columns=[
             tlview.simple_column("", tlview.stock_icon_cell(BranchListModel, "icon")),
             tlview.simple_column(_("Name"), tlview.mark_up_cell(BranchListModel, "markup")),
@@ -128,10 +130,21 @@ class BranchListView(table.MapManagedTableView, scm.gui.actions.WDListenerMixin,
         for row in table.MapManagedTableView._fetch_contents(self, **kwargs):
             yield _mark_up_row(row)
     def get_selected_branch(self):
-        store, store_iter = self.get_selection().get_selected()
-        return None if store_iter is None else store.get_branch_name(store_iter)
+        store, selection = self.get_selection().get_selected_rows()
+        if not selection:
+            return None
+        else:
+            assert len(selection) == 1
+        return store.get_branch_name(store.get_iter(selection[0]))
+    def get_selected_branches(self):
+        store, selection = self.get_selection().get_selected_rows()
+        return [store.get_branch_name(store.get_iter(x)) for x in selection]
     def _get_table_db(self):
         return BranchTableData()
+    def handle_control_c_key_press_cb(self):
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        sel = utils.quoted_join(self.get_selected_branches())
+        clipboard.set_text(sel, len(sel))
 
 class BranchList(table.TableWidget):
     VIEW = BranchListView

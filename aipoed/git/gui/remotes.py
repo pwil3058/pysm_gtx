@@ -15,6 +15,7 @@
 
 import collections
 import re
+import shlex
 
 from gi.repository import Gtk
 from gi.repository import GObject
@@ -90,33 +91,34 @@ class RemotesComboBox(Gtk.ComboBoxText):
 
 class FetchWidget(Gtk.VBox):
     def __init__(self):
-        from aipoed.git.gui import branches
+        from aipoed.gui import gutils
         Gtk.VBox.__init__(self)
         self._all_flag = Gtk.CheckButton.new_with_label("--all")
         self._all_flag.set_tooltip_text(_("Fetch from all remotes"))
         self._all_flag.connect("toggled", self._all_toggle_cb)
         self._remote = RemotesComboBox()
         self._remote.connect("changed", self._remote_changed_cb)
-        self._branch = branches.BranchesComboBox()
+        self._refspec = gutils.EntryWithHistory()
         hbox = Gtk.HBox()
         hbox.pack_start(self._all_flag, expand=False, fill=True, padding=0)
-        hbox.pack_start(Gtk.Label(_("Remote:")), expand=False, fill=True, padding=0)
-        hbox.pack_start(self._remote, expand=True, fill=True, padding=0)
-        hbox.pack_start(Gtk.Label(_("Branch:")), expand=False, fill=True, padding=0)
-        hbox.pack_start(self._branch, expand=True, fill=True, padding=0)
-        self.pack_start(hbox, expand=False, fill=False, padding=0)
+        hbox.pack_start(Gtk.Separator.new(Gtk.Orientation.VERTICAL), expand=False, fill=True, padding=5)
+        hbox.pack_start(Gtk.Label(_("Remote:")), expand=False, fill=True, padding=2)
+        hbox.pack_start(self._remote, expand=False, fill=True, padding=2)
+        hbox.pack_start(Gtk.Label(_("RefSpec(s):")), expand=False, fill=True, padding=2)
+        hbox.pack_start(self._refspec, expand=True, fill=True, padding=2)
+        self.pack_start(hbox, expand=False, fill=False, padding=2)
         self.show_all()
         self._all_toggle_cb(self._all_flag)
     def _all_toggle_cb(self, button):
         if button.get_active():
-            for widget in [self._remote, self._branch]:
+            for widget in [self._remote, self._refspec]:
                 widget.set_sensitive(False)
         else:
             self._remote.set_sensitive(True)
             self._remote_changed_cb(self._remote)
     def _remote_changed_cb(self, combo_box):
         valid_remote_seln = combo_box.get_active() != -1
-        self._branch.set_sensitive(valid_remote_seln)
+        self._refspec.set_sensitive(valid_remote_seln)
     def do_fetch(self):
         from aipoed.git.gui import ifce
         cmd = ["git", "fetch"]
@@ -125,10 +127,7 @@ class FetchWidget(Gtk.VBox):
         else:
             remote = self._remote.get_active_text()
             if remote:
-                cmd += [remote]
-                branch = self._branch.get_active_text()
-                if branch:
-                    cmd += [branch]
+                cmd += [remote] + shlex.split(self._refspec.get_text())
         return ifce.do_action_cmd(cmd, scm.E_FETCH, None, [])
 
 class FetchDialog(dialogue.CancelOKDialog, dialogue.ClientMixin):

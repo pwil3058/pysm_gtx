@@ -90,6 +90,64 @@ class RemotesComboBox(Gtk.ComboBoxText):
             self.append_text(line)
 
 class FetchWidget(Gtk.VBox):
+    FLAGS = [
+            ("--append",
+             "Append ref names and object names of fetched refs to"
+             + " the existing contents of .git/FETCH_HEAD. Without"
+             + " this option old data in .git/FETCH_HEAD will be overwritten."
+            ),
+            ("--force",
+             "When git fetch is used with <rbranch>:<lbranch> refspec,"
+             + " it refuses to update the local branch <lbranch>"
+             + " unless the remote branch <rbranch> it fetches is a"
+             + " descendant of <lbranch>. This option overrides that check."
+            ),
+            ("--keep",
+             "Keep downloaded pack."
+            ),
+            ("--prune",
+             "Before fetching, remove any remote-tracking references"
+             + " that no longer exist on the remote."
+             + " Tags are not subject to pruning if they are fetched"
+             + " only because of the default tag auto-following or"
+             + " due to a --tags option. However, if tags are fetched"
+             + " due to an explicit refspec (either on the command line"
+             + " or in the remote configuration, for example if the remote"
+             + " was cloned with the --mirror option), then they are"
+             + " also subject to pruning."
+            ),
+            ("--no-tags",
+             "By default, tags that point at objects that are"
+             + " downloaded from the remote repository are fetched"
+             + " and stored locally. This option disables this automatic"
+             + " tag following. The default behavior for a remote may"
+             + " be specified with the remote.<name>.tagOpt setting."
+             + " See git-config[1]."
+            ),
+            ("--tags",
+             "Fetch all tags from the remote (i.e., fetch remote"
+             + " tags refs/tags/* into local tags with the same name),"
+             + " in addition to whatever else would otherwise be fetched."
+             + " Using this option alone does not subject tags to pruning,"
+             + " even if --prune is used (though tags may be pruned anyway"
+             + " if they are also the destination of an explicit refspec; see --prune)."
+            ),
+        ]
+    REFSPEC_TT_TEXT = \
+        "Specifies which refs to fetch and which local refs to update." \
+        + " When no <refspec>s are given, the refs to fetch are read" \
+        + " from remote.<repository>.fetch variables instead" \
+        + " (see CONFIGURED REMOTE-TRACKING BRANCHES in 'git fetch --help').\n\n" \
+        + "The format of a <refspec> parameter is an optional plus +," \
+        + " followed by the source ref <src>, followed by a colon :," \
+        + " followed by the destination ref <dst>." \
+        + " The colon can be omitted when <dst> is empty.\n\n" \
+        + " tag <tag> means the same as refs/tags/<tag>:refs/tags/<tag>;" \
+        + " it requests fetching everything up to the given tag.\n\n" \
+        + "The remote ref that matches <src> is fetched, and if <dst>" \
+        + " is not empty string, the local ref that matches it is" \
+        + " fast-forwarded using <src>. If the optional plus + is used," \
+        + " the local ref is updated even if it does not result in a fast-forward update."
     def __init__(self):
         from aipoed.gui import gutils
         Gtk.VBox.__init__(self)
@@ -99,6 +157,7 @@ class FetchWidget(Gtk.VBox):
         self._remote = RemotesComboBox()
         self._remote.connect("changed", self._remote_changed_cb)
         self._refspec = gutils.EntryWithHistory()
+        self._refspec.set_tooltip_text(self.REFSPEC_TT_TEXT)
         hbox = Gtk.HBox()
         hbox.pack_start(self._all_flag, expand=False, fill=True, padding=0)
         hbox.pack_start(Gtk.Separator.new(Gtk.Orientation.VERTICAL), expand=False, fill=True, padding=5)
@@ -106,6 +165,15 @@ class FetchWidget(Gtk.VBox):
         hbox.pack_start(self._remote, expand=False, fill=True, padding=2)
         hbox.pack_start(Gtk.Label(_("RefSpec(s):")), expand=False, fill=True, padding=2)
         hbox.pack_start(self._refspec, expand=True, fill=True, padding=2)
+        self.pack_start(hbox, expand=False, fill=False, padding=2)
+        self.pack_start(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL), expand=False, fill=True, padding=2)
+        self._flags = list()
+        hbox = Gtk.HBox()
+        for flag_label, tt_text in self.FLAGS:
+            chbtn = Gtk.CheckButton.new_with_label(flag_label)
+            chbtn.set_tooltip_text(tt_text)
+            self._flags.append(chbtn)
+            hbox.pack_start(chbtn, expand=False, fill=True, padding=2)
         self.pack_start(hbox, expand=False, fill=False, padding=2)
         self.show_all()
         self._all_toggle_cb(self._all_flag)
@@ -121,7 +189,8 @@ class FetchWidget(Gtk.VBox):
         self._refspec.set_sensitive(valid_remote_seln)
     def do_fetch(self):
         from aipoed.git.gui import ifce
-        cmd = ["git", "fetch"]
+        flags = [chbtn.get_label() for chbtn in self._flags if chbtn.get_active()]
+        cmd = ["git", "fetch"] + flags
         if self._all_flag.get_active():
             cmd += ["--all"]
         else:

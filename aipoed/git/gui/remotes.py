@@ -23,6 +23,7 @@ from gi.repository import GObject
 from aipoed import enotify
 from aipoed import runext
 from aipoed import scm
+from aipoed import utils
 
 from aipoed.gui import actions
 from aipoed.gui import dialogue
@@ -201,6 +202,8 @@ class FetchWidget(Gtk.VBox):
 
 class FetchDialog(dialogue.CancelOKDialog, dialogue.ClientMixin):
     def __init__(self, **kwargs):
+        if "title" not in kwargs:
+            kwargs["title"] = "fetch: {}".format(utils.cwd_rel_home())
         dialogue.CancelOKDialog.__init__(self, **kwargs)
         self.fetch_widget = FetchWidget()
         self.get_content_area().add(self.fetch_widget)

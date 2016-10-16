@@ -68,7 +68,7 @@ class BranchListModel(table.MapManagedTableView.MODEL):
 class BranchTableData(table.TableData):
     RE = re.compile("(([^ (]+)|(\([^)]+\)))\s+([a-fA-F0-9]{7}[a-fA-F0-9]*)?\s*([^\s].*)")
     def _get_data_text(self, h):
-        all_branches_text = runext.run_get_cmd(["git", "branch", "-v"], default="")
+        all_branches_text = runext.run_get_cmd(["git", "branch", "-vv"], default="")
         h.update(all_branches_text.encode())
         merged_branches_text = runext.run_get_cmd(["git", "branch", "--merged"], default="")
         h.update(merged_branches_text.encode())

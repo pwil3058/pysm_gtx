@@ -28,6 +28,7 @@ from aipoed import utils
 
 from aipoed.gui import actions
 from aipoed.gui import dialogue
+from aipoed.gui import gutils
 from aipoed.gui import icons
 from aipoed.gui import table
 
@@ -99,30 +100,37 @@ class RemotesList(table.TableWidget):
 class RemotesComboBox(Gtk.ComboBoxText):
     def __init__(self):
         Gtk.ComboBoxText.__init__(self)
+        count = 0
         for line in runext.run_get_cmd(["git", "remote"], default="").splitlines():
             self.append_text(line)
+            count += 1
+        if count == 1:
+            self.set_active(0)
 
 class FetchWidget(Gtk.VBox):
-    FLAGS = [
+    FLAG_SPECS = [
+            ("--all",
+             _("Fetch all remotes")
+            ),
             ("--append",
-             "Append ref names and object names of fetched refs to"
+             _("Append ref names and object names of fetched refs to"
              + " the existing contents of .git/FETCH_HEAD. Without"
-             + " this option old data in .git/FETCH_HEAD will be overwritten."
+             + " this option old data in .git/FETCH_HEAD will be overwritten.")
             ),
             ("--dry-run",
-             "Show what would be done, without making any changes."
+             _("Show what would be done, without making any changes.")
             ),
             ("--force",
-             "When git fetch is used with <rbranch>:<lbranch> refspec,"
+             _("When git fetch is used with <rbranch>:<lbranch> refspec,"
              + " it refuses to update the local branch <lbranch>"
              + " unless the remote branch <rbranch> it fetches is a"
-             + " descendant of <lbranch>. This option overrides that check."
+             + " descendant of <lbranch>. This option overrides that check.")
             ),
             ("--keep",
              "Keep downloaded pack."
             ),
             ("--prune",
-             "Before fetching, remove any remote-tracking references"
+             _("Before fetching, remove any remote-tracking references"
              + " that no longer exist on the remote."
              + " Tags are not subject to pruning if they are fetched"
              + " only because of the default tag auto-following or"
@@ -130,27 +138,27 @@ class FetchWidget(Gtk.VBox):
              + " due to an explicit refspec (either on the command line"
              + " or in the remote configuration, for example if the remote"
              + " was cloned with the --mirror option), then they are"
-             + " also subject to pruning."
+             + " also subject to pruning.")
             ),
             ("--no-tags",
-             "By default, tags that point at objects that are"
+             _("By default, tags that point at objects that are"
              + " downloaded from the remote repository are fetched"
              + " and stored locally. This option disables this automatic"
              + " tag following. The default behavior for a remote may"
              + " be specified with the remote.<name>.tagOpt setting."
-             + " See git-config[1]."
+             + " See git-config[1].")
             ),
             ("--tags",
-             "Fetch all tags from the remote (i.e., fetch remote"
+             _("Fetch all tags from the remote (i.e., fetch remote"
              + " tags refs/tags/* into local tags with the same name),"
              + " in addition to whatever else would otherwise be fetched."
              + " Using this option alone does not subject tags to pruning,"
              + " even if --prune is used (though tags may be pruned anyway"
-             + " if they are also the destination of an explicit refspec; see --prune)."
+             + " if they are also the destination of an explicit refspec; see --prune).")
             ),
         ]
     REFSPEC_TT_TEXT = \
-        "Specifies which refs to fetch and which local refs to update." \
+        _("Specifies which refs to fetch and which local refs to update." \
         + " When no <refspec>s are given, the refs to fetch are read" \
         + " from remote.<repository>.fetch variables instead" \
         + " (see CONFIGURED REMOTE-TRACKING BRANCHES in 'git fetch --help').\n\n" \
@@ -163,18 +171,18 @@ class FetchWidget(Gtk.VBox):
         + "The remote ref that matches <src> is fetched, and if <dst>" \
         + " is not empty string, the local ref that matches it is" \
         + " fast-forwarded using <src>. If the optional plus + is used," \
-        + " the local ref is updated even if it does not result in a fast-forward update."
+        + " the local ref is updated even if it does not result in a fast-forward update.")
     def __init__(self):
         Gtk.VBox.__init__(self)
-        self._all_flag = Gtk.CheckButton.new_with_label("--all")
-        self._all_flag.set_tooltip_text(_("Fetch from all remotes"))
-        self._all_flag.connect("toggled", self._all_toggle_cb)
+        self._flag_btns = gutils.FlagButtonList(self.FLAG_SPECS)
+        all_flag = self._flag_btns["--all"]
+        all_flag.connect("toggled", self._all_toggle_cb)
         self._remote = RemotesComboBox()
         self._remote.connect("changed", self._remote_changed_cb)
         self._refspec = Gtk.Entry()
         self._refspec.set_tooltip_text(self.REFSPEC_TT_TEXT)
         hbox = Gtk.HBox()
-        hbox.pack_start(self._all_flag, expand=False, fill=True, padding=0)
+        hbox.pack_start(all_flag, expand=False, fill=True, padding=0)
         hbox.pack_start(Gtk.Separator.new(Gtk.Orientation.VERTICAL), expand=False, fill=True, padding=5)
         hbox.pack_start(Gtk.Label(_("Remote:")), expand=False, fill=True, padding=2)
         hbox.pack_start(self._remote, expand=False, fill=True, padding=2)
@@ -182,16 +190,12 @@ class FetchWidget(Gtk.VBox):
         hbox.pack_start(self._refspec, expand=True, fill=True, padding=2)
         self.pack_start(hbox, expand=False, fill=False, padding=2)
         self.pack_start(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL), expand=False, fill=True, padding=2)
-        self._flags = list()
         hbox = Gtk.HBox()
-        for flag_label, tt_text in self.FLAGS:
-            chbtn = Gtk.CheckButton.new_with_label(flag_label)
-            chbtn.set_tooltip_text(tt_text)
-            self._flags.append(chbtn)
-            hbox.pack_start(chbtn, expand=False, fill=True, padding=2)
+        for flag_btn in self._flag_btns[1:]:
+            hbox.pack_start(flag_btn, expand=False, fill=True, padding=2)
         self.pack_start(hbox, expand=False, fill=False, padding=2)
         self.show_all()
-        self._all_toggle_cb(self._all_flag)
+        self._all_toggle_cb(all_flag)
     def _all_toggle_cb(self, button):
         if button.get_active():
             for widget in [self._remote, self._refspec]:
@@ -202,18 +206,12 @@ class FetchWidget(Gtk.VBox):
     def _remote_changed_cb(self, combo_box):
         valid_remote_seln = combo_box.get_active() != -1
         self._refspec.set_sensitive(valid_remote_seln)
-    def flag_is_selected(self, flag_label):
-        for chbtn in self._flags:
-            if chbtn.get_label() == flag_label:
-                return chbtn.get_active()
-        return False
+    def flag_is_active(self, flag_label):
+        return self._flag_btns.flag_is_active(flag_label)
     def do_fetch(self):
         from aipoed.git.gui import ifce
-        flags = [chbtn.get_label() for chbtn in self._flags if chbtn.get_active()]
-        cmd = ["git", "fetch"] + flags
-        if self._all_flag.get_active():
-            cmd += ["--all"]
-        else:
+        cmd = ["git", "fetch"] + self._flag_btns.get_active_flags()
+        if "--all" not in cmd:
             remote = self._remote.get_active_text()
             if remote:
                 cmd += [remote] + shlex.split(self._refspec.get_text())
@@ -229,11 +227,8 @@ class FetchDialog(dialogue.CancelOKDialog, dialogue.ClientMixin):
         self.connect("response", self._response_cb)
         self.show_all()
     def _response_cb(self, _dialog, response):
-        if response == Gtk.ResponseType.CANCEL:
-            self.destroy()
-        else:
-            assert response == Gtk.ResponseType.OK
-            is_dry_run = self.fetch_widget.flag_is_selected("--dry-run")
+        if response == Gtk.ResponseType.OK:
+            is_dry_run = self.fetch_widget.flag_is_active("--dry-run")
             with self.showing_busy():
                 result = self.fetch_widget.do_fetch()
             if is_dry_run:
@@ -242,6 +237,8 @@ class FetchDialog(dialogue.CancelOKDialog, dialogue.ClientMixin):
                 self.report_any_problems(result)
                 if result.is_less_than_error:
                     self.destroy()
+        else:
+            self.destroy()
 
 actions.CLASS_INDEP_AGS[scm.gui.actions.AC_IN_SCM_PGND].add_actions(
     [

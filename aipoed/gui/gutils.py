@@ -350,3 +350,41 @@ class UIManager(Gtk.UIManager):
     def __init__(self):
         Gtk.UIManager.__init__(self)
         self.connect('connect-proxy', _ui_manager_connect_proxy)
+
+class FlagButton(Gtk.CheckButton):
+    def __init__(self, flag_text, tt_text=None):
+        Gtk.CheckButton.__init__(self, label=flag_text)
+        if tt_text:
+            self.set_tooltip_text(tt_text)
+
+class FlagButtonList:
+    def __init__(self, flag_btn_specs):
+        cbtns_iter = ((flag_text, FlagButton(flag_text, tt_text)) for flag_text, tt_text in flag_btn_specs)
+        self.__flag_btns = collections.OrderedDict(cbtns_iter)
+    def __iter__(self):
+        return iter(self.__flag_btns.values())
+    def __contains__(self, flag_text):
+        return flag_text in self.__flag_btns
+    def __getitem__(self, index):
+        if isinstance(index, str):
+            return self.__flag_btns[index]
+        elif isinstance(index, int):
+            for i, fbtn in enumerate(self.__flag_btns.values()):
+                if i == index:
+                    return fbtn
+            raise IndexError
+        else: # if not isinstance(index, slice) this should blow up which is what we want
+            assert index.step is None, "FlagButtonList doesn't do stepped slices"
+            if index.start is None:
+                if index.stop is None:
+                    return list(self.__flag_btns.values())
+                else:
+                    return [fbtn for i, fbtn in enumerate(self.__flag_btns.values()) if i < index.stop]
+            elif index.stop is None:
+                return [fbtn for i, fbtn in enumerate(self.__flag_btns.values()) if i >= index.start]
+            else:
+                return [fbtn for i, fbtn in enumerate(self.__flag_btns.values()) if i >= index.start and i < index.stop]
+    def flag_is_active(self, flag_text):
+        return self.__flag_btns[flag_text].get_active()
+    def get_active_flags(self):
+        return [flag_btn.get_label() for flag_btn in self.__flag_btns.values() if flag_btn.get_active()]

@@ -156,7 +156,7 @@ class EditedEntriesTable(Gtk.VBox):
     def seln(self):
         return self.view.get_selection()
 
-def simple_text_specification(model, *hdrs_flds_xalign):
+def simple_text_specification(model, *hdrs_flds_xalign, selection_mode=Gtk.SelectionMode.MULTIPLE):
     specification = tlview.ViewSpec(
         properties={
             "enable-grid-lines" : False,
@@ -164,7 +164,7 @@ def simple_text_specification(model, *hdrs_flds_xalign):
             "rules_hint" : False,
             "headers-visible" : True,
         },
-        selection_mode=Gtk.SelectionMode.SINGLE,
+        selection_mode=selection_mode,
         columns=[tlview.simple_column(hdr, tlview.fixed_text_cell(model, fld, xalign)) for hdr, fld, xalign in hdrs_flds_xalign]
     )
     return specification

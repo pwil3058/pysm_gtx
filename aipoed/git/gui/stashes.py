@@ -16,6 +16,7 @@
 import collections
 import re
 
+from gi.repository import Gdk
 from gi.repository import Gtk
 from gi.repository import GObject
 
@@ -23,6 +24,7 @@ from aipoed import enotify
 from aipoed import CmdFailure
 from aipoed import runext
 from aipoed import scm
+from aipoed import utils
 
 from aipoed.gui import actions
 from aipoed.gui import dialogue
@@ -55,7 +57,7 @@ class StashListView(table.MapManagedTableView, scm.gui.actions.WDListenerMixin):
     class MODEL(table.MapManagedTableView.MODEL):
         ROW = StashListRow
         TYPES = ROW(name=GObject.TYPE_STRING, branch=GObject.TYPE_STRING, commit=GObject.TYPE_STRING,)
-        def get_tag_name(self, plist_iter):
+        def get_stash_name(self, plist_iter):
             return self.get_value_named(plist_iter, "name")
         def get_branch(self, plist_iter):
             return self.get_value_named(plist_iter, "branch")
@@ -110,10 +112,21 @@ class StashListView(table.MapManagedTableView, scm.gui.actions.WDListenerMixin):
                 ),
             ])
     def get_selected_stash(self):
-        store, store_iter = self.get_selection().get_selected()
-        return None if store_iter is None else store.get_tag_name(store_iter)
+        store, selection = self.get_selection().get_selected_rows()
+        if not selection:
+            return None
+        else:
+            assert len(selection) == 1
+        return store.get_stash_name(store.get_iter(selection[0]))
+    def get_selected_stashes(self):
+        store, selection = self.get_selection().get_selected_rows()
+        return [store.get_stash_name(store.get_iter(x)) for x in selection]
     def _get_table_db(self):
         return ifce.SCM.get_stashes_table_data()
+    def handle_control_c_key_press_cb(self):
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        sel = utils.quoted_join(self.get_selected_stashes())
+        clipboard.set_text(sel, len(sel))
 
 class StashList(table.TableWidget):
     VIEW = StashListView

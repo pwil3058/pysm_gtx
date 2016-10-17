@@ -17,6 +17,7 @@ import collections
 import re
 import shlex
 
+from gi.repository import Gdk
 from gi.repository import Gtk
 from gi.repository import GObject
 
@@ -76,10 +77,21 @@ class RemotesListView(table.MapManagedTableView, scm.gui.actions.WDListenerMixin
         scm.gui.actions.WDListenerMixin.__init__(self)
         self.set_contents()
     def get_selected_remote(self):
-        store, store_iter = self.get_selection().get_selected()
-        return None if store_iter is None else store.get_remote_name(store_iter)
+        store, selection = self.get_selection().get_selected_rows()
+        if not selection:
+            return None
+        else:
+            assert len(selection) == 1
+        return store.get_remote_name(store.get_iter(selection[0]))
+    def get_selected_remotes(self):
+        store, selection = self.get_selection().get_selected_rows()
+        return [store.get_remote_name(store.get_iter(x)) for x in selection]
     def _get_table_db(self):
         return RemoteRepoTableData()
+    def handle_control_c_key_press_cb(self):
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        sel = utils.quoted_join(self.get_selected_remotes())
+        clipboard.set_text(sel, len(sel))
 
 class RemotesList(table.TableWidget):
     VIEW = RemotesListView

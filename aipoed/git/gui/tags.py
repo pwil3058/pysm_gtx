@@ -15,12 +15,14 @@
 
 import collections
 
+from gi.repository import Gdk
 from gi.repository import Gtk
 from gi.repository import GObject
 
 from aipoed import enotify
 from aipoed import runext
 from aipoed import scm
+from aipoed import utils
 
 from aipoed.gui import actions
 from aipoed.gui import dialogue
@@ -31,6 +33,14 @@ from aipoed.gui import icons
 from aipoed.git.gui import ifce
 
 TagListRow = collections.namedtuple("TagListRow",    ["name", "annotation"])
+
+class TagListModel(table.MapManagedTableView.MODEL):
+    ROW = TagListRow
+    TYPES = ROW(name=GObject.TYPE_STRING, annotation=GObject.TYPE_STRING,)
+    def get_tag_name(self, plist_iter):
+        return self.get_value_named(plist_iter, "name")
+    def get_annotation(self, plist_iter):
+        return self.get_value_named(plist_iter, "annotation")
 
 class TagTableData(table.TableData):
     def _get_data_text(self, h):
@@ -51,13 +61,7 @@ class TagTableData(table.TableData):
             yield TagListRow(name=line, annotation=self._get_annotation(line))
 
 class TagListView(table.MapManagedTableView, scm.gui.actions.WDListenerMixin):
-    class MODEL(table.MapManagedTableView.MODEL):
-        ROW = TagListRow
-        TYPES = ROW(name=GObject.TYPE_STRING, annotation=GObject.TYPE_STRING,)
-        def get_tag_name(self, plist_iter):
-            return self.get_value_named(plist_iter, "name")
-        def get_annotation(self, plist_iter):
-            return self.get_value_named(plist_iter, "annotation")
+    MODEL = TagListModel
     PopUp = "/tags_popup"
     SET_EVENTS = enotify.E_CHANGE_WD|scm.E_NEW_SCM
     REFRESH_EVENTS = scm.E_TAG
@@ -83,8 +87,15 @@ class TagListView(table.MapManagedTableView, scm.gui.actions.WDListenerMixin):
                  _("Checkout the selected tag in the current working directory"), self._checkout_seln_acb),
             ])
     def get_selected_tag(self):
-        store, store_iter = self.get_selection().get_selected()
-        return None if store_iter is None else store.get_tag_name(store_iter)
+        store, selection = self.get_selection().get_selected_rows()
+        if not selection:
+            return None
+        else:
+            assert len(selection) == 1
+        return store.get_tag_name(store.get_iter(selection[0]))
+    def get_selected_tags(self):
+        store, selection = self.get_selection().get_selected_rows()
+        return [store.get_tag_name(store.get_iter(x)) for x in selection]
     def _get_table_db(self):
         return ifce.SCM.get_tags_table_data()
     def _checkout_seln_acb(self, _action):
@@ -93,6 +104,10 @@ class TagListView(table.MapManagedTableView, scm.gui.actions.WDListenerMixin):
         with self.showing_busy():
             result = ifce.SCM.do_checkout_tag(tag=tag)
         dialogue.main_window.report_any_problems(result)
+    def handle_control_c_key_press_cb(self):
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        sel = utils.quoted_join(self.get_selected_tags())
+        clipboard.set_text(sel, len(sel))
 
 class TagList(table.TableWidget):
     VIEW = TagListView

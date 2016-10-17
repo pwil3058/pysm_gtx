@@ -15,12 +15,14 @@
 
 import collections
 
+from gi.repository import Gdk
 from gi.repository import Gtk
 from gi.repository import GObject
 
 from aipoed import enotify
 from aipoed import runext
 from aipoed import scm
+from aipoed import utils
 
 from aipoed.gui import actions
 from aipoed.gui import table
@@ -58,6 +60,8 @@ class LogListView(table.MapManagedTableView, scm.gui.actions.WDListenerMixin):
         TYPES = ROW(commit=GObject.TYPE_STRING, abbrevcommit=GObject.TYPE_STRING, author=GObject.TYPE_STRING, when=GObject.TYPE_STRING, subject=GObject.TYPE_STRING,)
         def get_commit_sha1(self, plist_iter):
             return self.get_value_named(plist_iter, "commit")
+        def get_commit_abbrev_sha1(self, plist_iter):
+            return self.get_value_named(plist_iter, "abbrevcommit")
     PopUp = "/log_popup"
     SET_EVENTS = enotify.E_CHANGE_WD|scm.E_NEW_SCM
     REFRESH_EVENTS = scm.E_COMMIT|scm.E_CHECKOUT|scm.E_BRANCH|scm.E_MERGE|scm.E_LOG
@@ -83,14 +87,25 @@ class LogListView(table.MapManagedTableView, scm.gui.actions.WDListenerMixin):
                  _("Show the details for the selected commit."), self._show_seln_acb),
             ])
     def get_selected_commit(self):
-        store, store_iter = self.get_selection().get_selected()
-        return None if store_iter is None else store.get_commit_sha1(store_iter)
+        store, selection = self.get_selection().get_selected_rows()
+        if not selection:
+            return None
+        else:
+            assert len(selection) == 1
+        return store.get_commit_abbrev_sha1(store.get_iter(selection[0]))
+    def get_selected_commits(self):
+        store, selection = self.get_selection().get_selected_rows()
+        return [store.get_commit_abbrev_sha1(store.get_iter(x)) for x in selection]
     def _get_table_db(self):
         return ifce.SCM.get_log_table_data()
     def _show_seln_acb(self, _action):
         # TODO: make show selected commit more user friendly
         commit_hash = self.get_selected_commit()
         commit.ShowCommitDialog(None, commit_hash).show()
+    def handle_control_c_key_press_cb(self):
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        sel = utils.quoted_join(self.get_selected_commits())
+        clipboard.set_text(sel, len(sel))
 
 class LogList(table.TableWidget):
     VIEW = LogListView

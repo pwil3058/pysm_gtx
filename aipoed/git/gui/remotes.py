@@ -162,14 +162,13 @@ class FetchWidget(Gtk.VBox):
         + " fast-forwarded using <src>. If the optional plus + is used," \
         + " the local ref is updated even if it does not result in a fast-forward update."
     def __init__(self):
-        from aipoed.gui import gutils
         Gtk.VBox.__init__(self)
         self._all_flag = Gtk.CheckButton.new_with_label("--all")
         self._all_flag.set_tooltip_text(_("Fetch from all remotes"))
         self._all_flag.connect("toggled", self._all_toggle_cb)
         self._remote = RemotesComboBox()
         self._remote.connect("changed", self._remote_changed_cb)
-        self._refspec = gutils.EntryWithHistory()
+        self._refspec = Gtk.Entry()
         self._refspec.set_tooltip_text(self.REFSPEC_TT_TEXT)
         hbox = Gtk.HBox()
         hbox.pack_start(self._all_flag, expand=False, fill=True, padding=0)

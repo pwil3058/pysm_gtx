@@ -223,7 +223,7 @@ class StashDiffNotebook(diff.DiffTextsWidget):
         return _("Stash \"{0}\" diff: {1}").format(self._stash, utils.cwd_rel_home())
 
 class StashDiffDialog(diff.GenericDiffDialog):
-    DIFF_TEXT_WIDGET = StashDiffNotebook
+    DIFFS_WIDGET = StashDiffNotebook
 
 def drop_named_stash(stash):
     if dialogue.main_window.ask_ok_cancel(_("Confirm Drop Stash: {0}?").format(stash)):

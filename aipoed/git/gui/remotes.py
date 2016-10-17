@@ -109,6 +109,9 @@ class FetchWidget(Gtk.VBox):
              + " the existing contents of .git/FETCH_HEAD. Without"
              + " this option old data in .git/FETCH_HEAD will be overwritten."
             ),
+            ("--dry-run",
+             "Show what would be done, without making any changes."
+            ),
             ("--force",
              "When git fetch is used with <rbranch>:<lbranch> refspec,"
              + " it refuses to update the local branch <lbranch>"
@@ -199,6 +202,11 @@ class FetchWidget(Gtk.VBox):
     def _remote_changed_cb(self, combo_box):
         valid_remote_seln = combo_box.get_active() != -1
         self._refspec.set_sensitive(valid_remote_seln)
+    def flag_is_selected(self, flag_label):
+        for chbtn in self._flags:
+            if chbtn.get_label() == flag_label:
+                return chbtn.get_active()
+        return False
     def do_fetch(self):
         from aipoed.git.gui import ifce
         flags = [chbtn.get_label() for chbtn in self._flags if chbtn.get_active()]
@@ -225,11 +233,15 @@ class FetchDialog(dialogue.CancelOKDialog, dialogue.ClientMixin):
             self.destroy()
         else:
             assert response == Gtk.ResponseType.OK
+            is_dry_run = self.fetch_widget.flag_is_selected("--dry-run")
             with self.showing_busy():
                 result = self.fetch_widget.do_fetch()
-            self.report_any_problems(result)
-            if result.is_less_than_error:
-                self.destroy()
+            if is_dry_run:
+                self.inform_user(_("Dry run output:\n") + result.message)
+            else:
+                self.report_any_problems(result)
+                if result.is_less_than_error:
+                    self.destroy()
 
 actions.CLASS_INDEP_AGS[scm.gui.actions.AC_IN_SCM_PGND].add_actions(
     [

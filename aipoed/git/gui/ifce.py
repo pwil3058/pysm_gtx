@@ -300,7 +300,7 @@ class Interface:
             return None
         dirpath = os.getcwd()
         while True:
-            if os.path.isdir(os.path.join(dirpath, ".git")):
+            if os.path.exists(os.path.join(dirpath, ".git")):
                 return dirpath
             else:
                 dirpath, basename = os.path.split(dirpath)

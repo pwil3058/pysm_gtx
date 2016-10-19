@@ -15,6 +15,7 @@
 ### along with this program; if not, write to the Free Software
 ### Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+import html
 import os
 
 from contextlib import contextmanager
@@ -22,10 +23,24 @@ from contextlib import contextmanager
 from gi.repository import Gtk
 from gi.repository import Gdk
 
+from ... import ISSUES_URL, ISSUES_EMAIL, ISSUES_VERSION
+
 from ..lib import enotify
 from ..lib.decorators import singleton
 
 from ..gui import yield_to_pending_events
+
+BUG_REPORT_REQUEST_MSG = \
+_("""<b>Please report this problem by either:
+  submitting a bug report at &lt;{url}&gt;
+or:
+  e-mailing &lt;{email}&gt;
+quoting version \"{version}\" and including a copy of the details
+below this message.
+
+Thank you.</b>
+""").format(url=html.escape(ISSUES_URL), email=html.escape(ISSUES_EMAIL), version=html.escape(ISSUES_VERSION))
+
 
 # parent for windows/dialogs that would otherwise be orphans
 main_window = None
@@ -450,7 +465,7 @@ class AskerMixin:
     def ask_text(self, prompt, suggestion=None):
         return self.ask_multiple_texts([(prompt, suggestion)])[0]
     def confirm_list_action(self, alist, qtn):
-        return self.ask_ok_cancel('\n'.join(alist + ['\n', qtn]))
+        return self.ask_ok_cancel("\n".join(alist + ["\n", qtn]))
     def accept_suggestion_or_cancel(self, result, expln="", suggestions=ALL_SUGGESTIONS):
         buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
         for suggestion in suggestions:
@@ -515,3 +530,12 @@ class MainWindow(Gtk.Window, BusyIndicator, AskerMixin, ReporterMixin, PathSelec
         Gtk.Window.__init__(self, *args, **kwargs)
         BusyIndicator.__init__(self)
         main_window = self
+
+def ask_for_bug_report(exc_data):
+    """Ask the user to report an uncaught exception."""
+    # TODO: add buttons for copyng info to the clipboard
+    import traceback
+    dialog = Gtk.MessageDialog(main_window, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE)
+    dialog.set_markup(BUG_REPORT_REQUEST_MSG)
+    dialog.format_secondary_text("".join(traceback.format_exception(exc_data[0], exc_data[1], exc_data[2])))
+    dialog.run()

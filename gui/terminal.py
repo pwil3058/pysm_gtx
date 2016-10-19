@@ -25,9 +25,9 @@ try:
     from gi.repository import Gdk
 
 
-    from aipoed import which
-    from aipoed import enotify
-    from aipoed import utils
+    from ..lib import which
+    from ..lib import enotify
+    from ..lib import utils
 
     AVAILABLE = True
 

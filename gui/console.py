@@ -20,13 +20,13 @@ from gi.repository import Gtk
 from gi.repository import Pango
 from gi.repository import GObject
 
-from aipoed import runext
-from aipoed.decorators import singleton
+from ..lib import runext
+from ..lib.decorators import singleton
 
-from aipoed.gui import dialogue
-from aipoed.gui import gutils
-from aipoed.gui import terminal
-from aipoed.gui import textview
+from ..gui import dialogue
+from ..gui import gutils
+from ..gui import terminal
+from ..gui import textview
 
 @singleton
 class ConsoleLog(textview.Widget):
@@ -123,7 +123,7 @@ class ConsoleLogWidget(Gtk.VBox, dialogue.BusyIndicatorUser):
     def append_entry(self, msg):
         return self._text_widget.append_entry(msg)
     def _cmd_entry_cb(self, entry):
-        from aipoed.gui import auto_update
+        from ..gui import auto_update
         text = entry.get_text_and_clear_to_history()
         if not text:
             return

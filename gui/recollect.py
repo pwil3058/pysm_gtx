@@ -13,24 +13,23 @@
 ### along with this program; if not, write to the Free Software
 ### Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-'''Manage configurable options'''
+"""Keep track of various GUI information that the user would like to
+be persistent but is too fiddly to put in "user options" e.g. the last
+workspace used, window placement, layout, size, etc.
+"""
 
+import collections
+import configparser
 import os
 import sys
-import collections
 
-import configparser
+from ... import CONFIG_DIR_PATH
 
-_RECOLLECTIONS_PATH = None
-
-def initialize(recollections_dir_path):
-    global _RECOLLECTIONS_PATH
-    _RECOLLECTIONS_PATH = os.path.join(recollections_dir_path, "guistate.mem")
-    load_recollections()
+_RECOLLECTIONS_PATH = os.path.join(CONFIG_DIR_PATH, "guistate.mem")
 
 RECOLLECTIONS = configparser.SafeConfigParser()
 
-Result = collections.namedtuple('Result', ['sucessful', 'why_not'])
+Result = collections.namedtuple("Result", ["sucessful", "why_not"])
 OK = Result(True, None)
 
 def load_recollections():
@@ -39,7 +38,7 @@ def load_recollections():
     try:
         RECOLLECTIONS.read(_RECOLLECTIONS_PATH)
     except configparser.ParsingError as edata:
-        return Result(False, _('Error reading user options: {0}\n').format(str(edata)))
+        return Result(False, _("Error reading user options: {0}\n").format(str(edata)))
     return OK
 
 def reload_recollections():
@@ -48,13 +47,13 @@ def reload_recollections():
     try:
         new_version.read(_RECOLLECTIONS_PATH)
     except configparser.ParsingError as edata:
-        return Result(False, _('Error reading user options: {0}\n').format(str(edata)))
+        return Result(False, _("Error reading user options: {0}\n").format(str(edata)))
     RECOLLECTIONS = new_version
     return OK
 
 class DuplicateDefn(Exception): pass
 
-Defn = collections.namedtuple('Defn', ['str_to_val', 'default'])
+Defn = collections.namedtuple("Defn", ["str_to_val", "default"])
 
 DEFINITIONS = {}
 
@@ -62,7 +61,7 @@ def define(section, oname, odefn):
     if not section in DEFINITIONS:
         DEFINITIONS[section] = {oname: odefn,}
     elif oname in DEFINITIONS[section]:
-        raise DuplicateDefn('{0}:{1} already defined'.format(section, oname))
+        raise DuplicateDefn("{0}:{1} already defined".format(section, oname))
     else:
         DEFINITIONS[section][oname] = odefn
 
@@ -82,6 +81,8 @@ def set(section, oname, val):
         if DEFINITIONS[section][oname]:
             RECOLLECTIONS.add_section(section)
         else:
-            raise LookupError('{0}:{1}'.format(section, oname))
+            raise LookupError("{0}:{1}".format(section, oname))
     RECOLLECTIONS.set(section, oname, val)
-    RECOLLECTIONS.write(open(_RECOLLECTIONS_PATH, 'w'))
+    RECOLLECTIONS.write(open(_RECOLLECTIONS_PATH, "w"))
+
+load_recollections()

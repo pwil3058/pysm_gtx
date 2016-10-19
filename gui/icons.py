@@ -21,7 +21,7 @@ from gi.repository import Gtk
 from gi.repository import Gio
 from gi.repository import GdkPixbuf
 
-PACKAGE_NAME = "aipoed"
+from ... import APP_NAME
 
 def find_app_icon_directory(app_name):
     # find the icons directory
@@ -37,25 +37,11 @@ def find_app_icon_directory(app_name):
             _prefix = os.path.dirname(_prefix)
     return icon_dir_path
 
-def find_pkg_icon_directory(pkg_name):
-    # find the icons directory
-    # first look in the source directory (so that we can run uninstalled)
-    for path in sys.path:
-        _prefix = path
-        if os.path.isdir(os.path.join(path, pkg_name)):
-            icon_dir_path = os.path.join(path, "pixmaps")
-            if os.path.isdir(icon_dir_path):
-                return icon_dir_path
-            break
-    _TAILEND = os.path.join("share", "pixmaps", pkg_name)
-    while _prefix:
-        icon_dir_path = os.path.join(_prefix, _TAILEND)
-        if os.path.exists(icon_dir_path) and os.path.isdir(icon_dir_path):
-            break
-        _prefix = os.path.dirname(_prefix)
-    return icon_dir_path
+APP_ICON = APP_NAME
+APP_ICON_FILE = os.path.join(os.path.dirname(find_app_icon_directory(APP_NAME)), APP_ICON + os.extsep + "png")
+APP_ICON_PIXBUF = GdkPixbuf.Pixbuf.new_from_file(APP_ICON_FILE)
 
-_PREFIX = PACKAGE_NAME + "_"
+_PREFIX = APP_NAME + "_"
 
 STOCK_AMEND_COMMIT = _PREFIX + "stock_amend_commit"
 STOCK_APPLIED = _PREFIX + "stock_applied"
@@ -96,8 +82,8 @@ _STOCK_ITEMS_OWN_PNG = [
     (STOCK_TAG, _("Tag"), 0, 0, None),
 ]
 
-def add_own_stock_icons(name, stock_item_list, find_icon_directory=find_app_icon_directory):
-    LIBDIR = find_icon_directory(name)
+def add_own_stock_icons(name, stock_item_list):
+    LIBDIR = find_app_icon_directory(name)
     OFFSET = len(name) + 1
     png_file_name = lambda item_name: os.path.join(LIBDIR, item_name[OFFSET:] + os.extsep + "png")
     def make_pixbuf(name):
@@ -108,7 +94,7 @@ def add_own_stock_icons(name, stock_item_list, find_icon_directory=find_app_icon
         _name = _item[0]
         factory.add(_name, Gtk.IconSet(make_pixbuf(_name)))
 
-add_own_stock_icons(PACKAGE_NAME, _STOCK_ITEMS_OWN_PNG, find_pkg_icon_directory)
+add_own_stock_icons(APP_NAME, _STOCK_ITEMS_OWN_PNG)
 
 # Icons that have to be designed eventually (using aliased GtK stock in the meantime)
 STOCK_CHECKOUT = Gtk.STOCK_EXECUTE

@@ -22,10 +22,10 @@ from contextlib import contextmanager
 from gi.repository import Gtk
 from gi.repository import Gdk
 
-from aipoed import enotify
-from aipoed.decorators import singleton
+from ..lib import enotify
+from ..lib.decorators import singleton
 
-from aipoed.gui import yield_to_pending_events
+from ..gui import yield_to_pending_events
 
 # parent for windows/dialogs that would otherwise be orphans
 main_window = None
@@ -390,7 +390,7 @@ class SelectFromListDialog(CancelOKDialog):
 CANCEL_OK_BUTTONS = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK)
 NO_YES_BUTTONS = (Gtk.STOCK_NO, Gtk.ResponseType.NO, Gtk.STOCK_YES, Gtk.ResponseType.YES)
 
-from aipoed import Suggestion
+from ..lib import Suggestion
 Response = Suggestion
 
 SUGGESTION_LABEL_MAP = {

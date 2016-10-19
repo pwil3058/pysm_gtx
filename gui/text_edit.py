@@ -22,13 +22,13 @@ from gi.repository import Pango
 from gi.repository import GObject
 from gi.repository import GtkSpell
 
-from aipoed import CmdFailure
-from aipoed import utils
+from ..lib import CmdFailure
+from ..lib import utils
 
-from aipoed.gui import actions
-from aipoed.gui import dialogue
-from aipoed.gui import gutils
-from aipoed.gui import textview
+from ..gui import actions
+from ..gui import dialogue
+from ..gui import gutils
+from ..gui import textview
 
 class MessageWidget(textview.Widget, actions.CAGandUIManager, dialogue.ClientMixin):
     UI_DESCR = ""
@@ -88,7 +88,7 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager, dialogue.ClientMix
     @staticmethod
     def get_user_name_and_email():
         import email.utils
-        from aipoed import options
+        from ..lib import options
         DEFAULT_NAME_EVARS = ["GECOS", "GIT_AUTHOR_NAME", "LOGNAME"]
         DEFAULT_EMAIL_EVARS = ["EMAIL_ADDRESS", "GIT_AUTHOR_EMAIL"]
         # first check for OUR definitions in the current pgnd

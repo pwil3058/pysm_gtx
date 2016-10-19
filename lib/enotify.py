@@ -17,7 +17,7 @@
 them to update their displayed/cached data.
 """
 
-from aipoed import utils
+from ..lib import utils
 
 _flag_generator = utils.create_flag_generator()
 

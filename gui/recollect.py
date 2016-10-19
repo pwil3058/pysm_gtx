@@ -1,7 +1,3 @@
-### -*- coding: utf-8 -*-
-###
-###  aipoed/gui/recollect.py
-###
 ### Copyright (C) 2010-2016 Peter Williams <pwil3058@gmail.com>
 ###
 ### This program is free software; you can redistribute it and/or modify

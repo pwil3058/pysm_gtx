@@ -31,6 +31,8 @@ from ..gui import gutils
 from ..gui import table
 from ..gui import tlview
 
+from ... import APP_NAME, CONFIG_DIR_PATH
+
 EDITORS_THAT_NEED_A_TERMINAL = ["vi", "joe", "vim"]
 DEFAULT_EDITOR = "gedit"
 DEFAULT_TERMINAL = "gnome-terminal"
@@ -57,19 +59,8 @@ for env in ["COLORTERM", "TERM"]:
     except KeyError:
         pass
 
-_APP_NAME = None
-_EDITOR_GLOB_FILE_PATH = None
-_PERUSER_GLOB_FILE_PATH = None
-
-def initialize(app_name, allocations_dir_path):
-    global _APP_NAME
-    global _EDITOR_GLOB_FILE_PATH
-    global _PERUSER_GLOB_FILE_PATH
-    _APP_NAME = app_name
-    _EDITOR_GLOB_FILE_PATH = os.sep.join([allocations_dir_path, "editors"])
-    _PERUSER_GLOB_FILE_PATH = os.sep.join([allocations_dir_path, "perusers"])
-    if not os.path.exists(_EDITOR_GLOB_FILE_PATH):
-        _write_editor_defs([("*", DEFAULT_EDITOR)], edeff=_EDITOR_GLOB_FILE_PATH)
+_EDITOR_GLOB_FILE_PATH = os.path.join(CONFIG_DIR_PATH, "editors")
+_PERUSER_GLOB_FILE_PATH = os.path.join(CONFIG_DIR_PATH, "perusers")
 
 def _read_editor_defs(edeff=None):
     edeff = edeff if edeff else _EDITOR_GLOB_FILE_PATH
@@ -91,6 +82,11 @@ def _write_editor_defs(edefs, edeff=None):
         fobj.write("=".join(edef))
         fobj.write(os.linesep)
     fobj.close()
+
+if not os.path.exists(_EDITOR_GLOB_FILE_PATH):
+    _write_editor_defs([("*", DEFAULT_EDITOR)], edeff=_EDITOR_GLOB_FILE_PATH)
+if not os.path.exists(_PERUSER_GLOB_FILE_PATH):
+    _write_editor_defs([("*", DEFAULT_PERUSER)], edeff=_PERUSER_GLOB_FILE_PATH)
 
 def _assign_extern_editors(file_list, edeff=None):
     edeff = edeff if edeff else _EDITOR_GLOB_FILE_PATH
@@ -194,7 +190,7 @@ class EditorAllocationTable(table.EditedEntriesTable):
     VIEW = EditorAllocationView
 
 class EditorAllocationDialog(dialogue.Dialog):
-    TITLE = _("{0}: Editor Allocation".format(_APP_NAME))
+    TITLE = _("{0}: Editor Allocation".format(APP_NAME))
     def __init__(self, parent=None):
         dialogue.Dialog.__init__(self, title=self.TITLE, parent=parent,
                                  flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
@@ -235,7 +231,7 @@ class PeruserAllocationTable(EditorAllocationTable):
 
 class PeruserAllocationDialog(EditorAllocationDialog):
     TABLE = PeruserAllocationTable
-    TITLE = _("{0}: Peruser Allocation".format(_APP_NAME))
+    TITLE = _("{0}: Peruser Allocation".format(APP_NAME))
 
 def peruse_files_extern(file_list):
     return _edit_files_extern(file_list, assign_extern_perusers(file_list))

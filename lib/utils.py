@@ -27,7 +27,7 @@ def create_flag_generator():
 def path_rel_home(path):
     """Return the given path as a path relative to user's home directory."""
     import os
-    import urllib
+    import urllib.parse
     pr = urllib.parse.urlparse(path)
     if pr.scheme and pr.scheme != "file":
         return path

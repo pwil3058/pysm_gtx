@@ -66,7 +66,7 @@ else:
         return CmdResult(ecode=sub.returncode, stdout=outd.decode() if decode_stdout else outd, stderr=errd.decode()).mapped_for_warning(sanitize_stderr=sanitize_stderr)
 
     def run_cmd_in_console(console, cmd, input_text=None, sanitize_stderr=None):
-        from ..utils import quote_if_needed
+        from ..lib.utils import quote_if_needed
         if isinstance(cmd, str):
             cmd = shlex.split(cmd)
         if IS_POSIX:

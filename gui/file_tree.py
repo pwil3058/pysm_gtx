@@ -107,7 +107,7 @@ class FileTreeModel(Gtk.TreeStore, enotify.Listener, auto_update.AutoUpdater, ac
                 [("toggled", self._toggle_show_buttons_cb),]
                 ),
                 ("hide_clean_files", Gtk.CheckButton(_("Hide Clean Files")),
-                _("Show/hide ignored files and those beginning with \".\""),
+                _("Hide files that are \"clean\" in this context"),
                 [("toggled", self._toggle_show_buttons_cb),]
                 ),
             ])

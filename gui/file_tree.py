@@ -102,11 +102,11 @@ class FileTreeModel(Gtk.TreeStore, enotify.Listener, auto_update.AutoUpdater, ac
     def populate_button_group(self):
         self.button_group.add_buttons(
             [
-                ("show_hidden_files", Gtk.CheckButton(_("Show Hidden Files")),
+                ("show_hidden_files", Gtk.CheckButton(_("Show Hidden")),
                 _("Show/hide ignored files and those beginning with \".\""),
                 [("toggled", self._toggle_show_buttons_cb),]
                 ),
-                ("hide_clean_files", Gtk.CheckButton(_("Hide Clean Files")),
+                ("hide_clean_files", Gtk.CheckButton(_("Hide Clean")),
                 _("Hide files that are \"clean\" in this context"),
                 [("toggled", self._toggle_show_buttons_cb),]
                 ),

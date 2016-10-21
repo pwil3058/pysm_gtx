@@ -18,14 +18,13 @@ try:
     gi.require_version("Vte", "2.91")
 
     import os
+    from shutil import which
 
     from gi.repository import Gtk
     from gi.repository import Vte
     from gi.repository import GLib
     from gi.repository import Gdk
 
-
-    from ..lib import which
     from ..lib import enotify
     from ..lib import utils
 

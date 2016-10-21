@@ -180,43 +180,5 @@ class CmdFailure(Exception):
     def __init__(self, result):
         self.result = result
 
-
-if os.name == 'nt' or os.name == 'dos':
-    def _which(cmd):
-        """Return the path of the executable for the given command"""
-        for dirpath in os.environ['PATH'].split(os.pathsep):
-            potential_path = os.path.join(dirpath, cmd)
-            if os.path.isfile(potential_path) and \
-               os.access(potential_path, os.X_OK):
-                return potential_path
-        return None
-
-
-    NT_EXTS = ['.bat', '.bin', '.exe']
-
-
-    def which(cmd):
-        """Return the path of the executable for the given command"""
-        path = _which(cmd)
-        if path:
-            return path
-        _, ext = os.path.splitext(cmd)
-        if ext in NT_EXTS:
-            return None
-        for ext in NT_EXTS:
-            path = _which(cmd + ext)
-            if path is not None:
-                return path
-        return None
-else:
-    def which(cmd):
-        """Return the path of the executable for the given command"""
-        for dirpath in os.environ['PATH'].split(os.pathsep):
-            potential_path = os.path.join(dirpath, cmd)
-            if os.path.isfile(potential_path) and \
-               os.access(potential_path, os.X_OK):
-                return potential_path
-        return None
-
 # import some modules
 from . import options

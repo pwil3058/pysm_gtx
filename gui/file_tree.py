@@ -74,7 +74,6 @@ class FileTreeModel(Gtk.TreeStore, enotify.Listener, auto_update.AutoUpdater, ac
     REPOPULATE_EVENTS = enotify.E_CHANGE_WD
     UPDATE_EVENTS = os_utils.E_FILE_CHANGES
     AU_FILE_CHANGE_EVENT = os_utils.E_FILE_CHANGES # event returned by auto_update() if changes found
-    _FILE_ICON = {True : Gtk.STOCK_DIRECTORY, False : Gtk.STOCK_FILE}
     @staticmethod
     def _get_file_db():
         return fsdb.OsFileDb()

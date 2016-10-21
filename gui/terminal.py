@@ -32,7 +32,7 @@ try:
 
     class Terminal(Gtk.ScrolledWindow, enotify.Listener):
         ARGV = [os.getenv("SHELL", "/bin/bash")]
-        def __init__(self):
+        def __init__(self, follow_chdir=True):
             Gtk.ScrolledWindow.__init__(self, None, None)
             enotify.Listener.__init__(self)
             self._vte = Vte.Terminal()
@@ -44,7 +44,8 @@ try:
             self.add(self._vte)
             self.show_all()
             self._pid = self._vte.spawn_sync(Vte.PtyFlags.DEFAULT, os.getcwd(), self.ARGV, [], GLib.SpawnFlags.DO_NOT_REAP_CHILD, None, None,)
-            self.add_notification_cb(enotify.E_CHANGE_WD, self._cwd_cb)
+            if follow_chdir:
+                self.add_notification_cb(enotify.E_CHANGE_WD, self._cwd_cb)
         def _cwd_cb(self, **kwargs):
             self.set_cwd(os.getcwd())
         def set_cwd(self, path):

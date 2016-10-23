@@ -23,6 +23,8 @@ import select
 
 from ..lib import CmdResult, CmdFailure
 
+# TODO: reimplement runext to usilise improved Python 3 subprocess module
+
 IS_POSIX = os.name == "posix"
 IS_MSFT = os.name == "nt" or os.name == "dos"
 

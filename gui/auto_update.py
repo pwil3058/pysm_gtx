@@ -17,7 +17,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
-from ..lib import enotify
+from ..bab import enotify
 
 from ..gui import gutils
 from ..gui import actions

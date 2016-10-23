@@ -22,8 +22,8 @@ from gi.repository import Pango
 from gi.repository import GObject
 from gi.repository import GtkSpell
 
-from ..lib import CmdFailure
-from ..lib import utils
+from ..bab import CmdFailure
+from ..bab import utils
 
 from ..gui import actions
 from ..gui import dialogue
@@ -88,7 +88,7 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager, dialogue.ClientMix
     @staticmethod
     def get_user_name_and_email():
         import email.utils
-        from ..lib import options
+        from ..bab import options
         DEFAULT_NAME_EVARS = ["GECOS", "GIT_AUTHOR_NAME", "LOGNAME"]
         DEFAULT_EMAIL_EVARS = ["EMAIL_ADDRESS", "GIT_AUTHOR_EMAIL"]
         # first check for OUR definitions in the current pgnd

@@ -21,7 +21,7 @@ from gi.repository import GObject
 from gi.repository import Gtk
 from gi.repository import Gdk
 
-from ..lib import utils
+from ..bab import utils
 
 from ..gui import dialogue
 from ..gui import gutils
@@ -215,7 +215,7 @@ class PathSelectDialog(dialogue.Dialog, dialogue.AskerMixin, dialogue.ReporterMi
     def _browse_cb(self, button=None):
         dir_path = self.select_directory(_("Browse for Directory"), existing=True)
         if dir_path:
-            from ..lib import HOME
+            from ..bab import HOME
             self._path.set_text("~" + os.sep + os.path.relpath(dir_path, HOME))
     def get_path(self):
         return os.path.expanduser(self._path.get_text())

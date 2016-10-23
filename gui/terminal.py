@@ -25,8 +25,8 @@ try:
     from gi.repository import GLib
     from gi.repository import Gdk
 
-    from ..lib import enotify
-    from ..lib import utils
+    from ..bab import enotify
+    from ..bab import utils
 
     AVAILABLE = True
 

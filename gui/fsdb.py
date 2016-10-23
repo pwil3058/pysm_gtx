@@ -22,8 +22,8 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Pango
 from gi.repository import Gtk
 
-from ..lib.nmd_tuples import PathAndRelation as RFD
-from ..lib.nmd_tuples import StyleAndForeground as Deco
+from ..bab.nmd_tuples import PathAndRelation as RFD
+from ..bab.nmd_tuples import StyleAndForeground as Deco
 
 FSTATUS_IGNORED = " "
 

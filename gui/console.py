@@ -20,8 +20,8 @@ from gi.repository import Gtk
 from gi.repository import Pango
 from gi.repository import GObject
 
-from ..lib import runext
-from ..lib.decorators import singleton
+from ..bab import runext
+from ..bab.decorators import singleton
 
 from ..gui import dialogue
 from ..gui import gutils

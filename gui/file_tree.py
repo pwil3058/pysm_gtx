@@ -21,11 +21,11 @@ from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GObject
 
-from ..lib import CmdResult, CmdFailure
+from ..bab import CmdResult, CmdFailure
 
-from ..lib import utils
-from ..lib import os_utils
-from ..lib import enotify
+from ..bab import utils
+from ..bab import os_utils
+from ..bab import enotify
 
 from ..gui import fsdb
 from ..gui import tlview

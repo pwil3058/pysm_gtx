@@ -25,8 +25,8 @@ from gi.repository import Gdk
 
 from ... import ISSUES_URL, ISSUES_EMAIL, ISSUES_VERSION
 
-from ..lib import enotify
-from ..lib.decorators import singleton
+from ..bab import enotify
+from ..bab.decorators import singleton
 
 from ..gui import yield_to_pending_events
 
@@ -405,7 +405,7 @@ class SelectFromListDialog(CancelOKDialog):
 CANCEL_OK_BUTTONS = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK)
 NO_YES_BUTTONS = (Gtk.STOCK_NO, Gtk.ResponseType.NO, Gtk.STOCK_YES, Gtk.ResponseType.YES)
 
-from ..lib import Suggestion
+from ..bab import Suggestion
 Response = Suggestion
 
 SUGGESTION_LABEL_MAP = {

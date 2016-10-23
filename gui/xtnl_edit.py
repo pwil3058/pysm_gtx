@@ -23,7 +23,7 @@ import shlex
 from gi.repository import GObject
 from gi.repository import Gtk
 
-from ..lib import runext
+from ..bab import runext
 
 from ..gui import actions
 from ..gui import dialogue

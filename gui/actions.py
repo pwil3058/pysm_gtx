@@ -34,7 +34,7 @@ class MaskedCondns(collections.namedtuple('MaskedCondns', ['condns', 'mask'])):
         return "MaskedCondns(condns={0:x}, mask={1:x})".format(self.condns, self.mask)
 
 class ActionCondns:
-    from ..lib import utils
+    from ..bab import utils
     _flag_generator = utils.create_flag_generator()
     @staticmethod
     def new_flags_and_mask(count):

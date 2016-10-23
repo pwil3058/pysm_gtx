@@ -105,8 +105,8 @@ class OsFileDb:
             self._subdirs = {}
             self._files_data = []
             self._subdirs_data = []
-            status = status if status is not False else self._get_initial_status()
-            clean_status = clean_status if clean_status is not False else self._get_initial_clean_status()
+            status = status if status is not False else self._get_initial_status(dir_path)
+            clean_status = clean_status if clean_status is not False else self._get_initial_clean_status(dir_path)
             self.data = self.DIR_DATA(dir_path, status, None, clean_status)
             self._dir_hash_digest = None
         def __getattr__(self, name):
@@ -194,6 +194,8 @@ class Snapshot:
         return self._status_set
     def __iter__(self):
         for file_path in self._relevant_keys:
+            if os.path.isdir(file_path):
+                continue # TODO: move this to git specific code
             status, related_file_data = self._file_status_data[file_path]
             yield (file_path, status, related_file_data)
         raise StopIteration
@@ -223,9 +225,9 @@ class GenericSnapshotWsFileDb(OsFileDb):
                 if not subdir.is_current:
                     return False
             return True
-        def _get_initial_status(self):
+        def _get_initial_status(self, dir_path):
             return self.DEFAULT_DIR_STATUS
-        def _get_initial_clean_status(self):
+        def _get_initial_clean_status(self, dir_path):
             return self.DEFAULT_DIR_STATUS
         def _get_current_status(self):
             # SCM related status changes will be detected at Db level

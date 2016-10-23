@@ -504,6 +504,7 @@ class ReporterMixin:
             dialog.format_secondary_text(expln)
         dialog.run()
         dialog.destroy()
+        return problem_type == Gtk.MessageType.ERROR
     def alert_user(self, msg, expln=None):
         return self.inform_user(msg=msg, expln=expln, problem_type=Gtk.MessageType.ERROR)
     def report_failure(self, failure):

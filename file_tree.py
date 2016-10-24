@@ -27,15 +27,15 @@ from ..bab import utils
 from ..bab import os_utils
 from ..bab import enotify
 
-from ..gui import fsdb
-from ..gui import tlview
-from ..gui import gutils
-from ..gui import actions
-from ..gui import dialogue
-from ..gui import icons
-from ..gui import auto_update
-from ..gui import xtnl_edit
-from ..gui import doop
+from . import fsdb
+from . import tlview
+from . import gutils
+from . import actions
+from . import dialogue
+from . import icons
+from . import auto_update
+from . import xtnl_edit
+from . import doop
 
 AC_FILES_SELECTED, AC_NO_FILES_SELECTED, \
 AC_DIRS_SELECTED, AC_NO_DIRS_SELECTED, \

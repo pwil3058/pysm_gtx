@@ -28,7 +28,7 @@ from ... import ISSUES_URL, ISSUES_EMAIL, ISSUES_VERSION
 from ..bab import enotify
 from ..bab.decorators import singleton
 
-from ..gui import yield_to_pending_events
+from . import yield_to_pending_events
 
 BUG_REPORT_REQUEST_MSG = \
 _("""<b>Please report this problem by either:

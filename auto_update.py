@@ -19,8 +19,8 @@ from gi.repository import Gtk
 
 from ..bab import enotify
 
-from ..gui import gutils
-from ..gui import actions
+from . import gutils
+from . import actions
 
 initialize_event_flags = lambda args: 0
 

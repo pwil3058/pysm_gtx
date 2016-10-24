@@ -27,12 +27,12 @@ from gi.repository import Gdk
 
 from ..bab import enotify
 
-from ..gui import gutils
-from ..gui import actions
-from ..gui import tlview
-from ..gui import icons
-from ..gui import dialogue
-from ..gui import auto_update
+from . import gutils
+from . import actions
+from . import tlview
+from . import icons
+from . import dialogue
+from . import auto_update
 
 AC_MODIFIED, AC_NOT_MODIFIED, AC_MODIFIED_MASK = actions.ActionCondns.new_flags_and_mask(2)
 

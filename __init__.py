@@ -18,3 +18,18 @@
 
 __all__ = []
 __author__ = "Peter Williams <pwil3058@gmail.com>"
+
+import gi
+gi.require_version("Gtk", "3.0")
+gi.require_version("GtkSpell", "3.0")
+from gi.repository import Gtk
+
+def yield_to_pending_events():
+    while True:
+        Gtk.main_iteration()
+        if not Gtk.events_pending():
+            break
+
+from ..bab import os_utils
+from . import console
+os_utils.set_console_log(console.LOG)

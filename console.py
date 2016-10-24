@@ -23,10 +23,10 @@ from gi.repository import GObject
 from ..bab import runext
 from ..bab.decorators import singleton
 
-from ..gui import dialogue
-from ..gui import gutils
-from ..gui import terminal
-from ..gui import textview
+from . import dialogue
+from . import gutils
+from . import terminal
+from . import textview
 
 @singleton
 class ConsoleLog(textview.Widget):
@@ -123,7 +123,7 @@ class ConsoleLogWidget(Gtk.VBox, dialogue.BusyIndicatorUser):
     def append_entry(self, msg):
         return self._text_widget.append_entry(msg)
     def _cmd_entry_cb(self, entry):
-        from ..gui import auto_update
+        from . import auto_update
         text = entry.get_text_and_clear_to_history()
         if not text:
             return

@@ -25,10 +25,10 @@ from gi.repository import GtkSpell
 from ..bab import CmdFailure
 from ..bab import utils
 
-from ..gui import actions
-from ..gui import dialogue
-from ..gui import gutils
-from ..gui import textview
+from . import actions
+from . import dialogue
+from . import gutils
+from . import textview
 
 class MessageWidget(textview.Widget, actions.CAGandUIManager, dialogue.ClientMixin):
     UI_DESCR = ""

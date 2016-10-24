@@ -19,7 +19,7 @@ Wrappers for common (but complex) "do" operations.
 
 from gi.repository import Gtk
 
-from ..gui import dialogue
+from . import dialogue
 
 # TODO: remove inheritence to make mix and match easier
 class DoOperationMixin(dialogue.ClientMixin):

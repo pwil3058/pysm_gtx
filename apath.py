@@ -23,10 +23,10 @@ from gi.repository import Gdk
 
 from ..bab import utils
 
-from ..gui import dialogue
-from ..gui import gutils
-from ..gui import tlview
-from ..gui import table
+from . import dialogue
+from . import gutils
+from . import tlview
+from . import table
 
 class AliasPathModel(tlview.NamedListStore):
     ROW = collections.namedtuple("ROW", ["Alias", "Path"])

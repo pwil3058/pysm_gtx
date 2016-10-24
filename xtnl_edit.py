@@ -25,11 +25,11 @@ from gi.repository import Gtk
 
 from ..bab import runext
 
-from ..gui import actions
-from ..gui import dialogue
-from ..gui import gutils
-from ..gui import table
-from ..gui import tlview
+from . import actions
+from . import dialogue
+from . import gutils
+from . import table
+from . import tlview
 
 from ... import APP_NAME, CONFIG_DIR_PATH
 

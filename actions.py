@@ -203,7 +203,7 @@ class ClientAndButtonsWidget(Gtk.VBox):
         Gtk.VBox.__init__(self)
         self.client = self.CLIENT(**kwargs)
         if self.SCROLLABLE:
-            from ..gui import gutils
+            from . import gutils
             self.pack_start(gutils.wrap_in_scrolled_window(self.client), expand=True, fill=True, padding=0)
         else:
             self.pack_start(self.client, expand=True, fill=True, padding=0)
@@ -286,7 +286,7 @@ class ConditionalActionGroups:
             string += '\tGroup({0:x},{1}): {2}\n'.format(condns, name, member_names)
         return string
     def create_action_button(self, action_name, use_underline=True):
-        from ..gui import gutils
+        from . import gutils
         action = self.get_action(action_name)
         return gutils.creat_button_from_action(action, use_underline=use_underline)
     def create_action_button_box(self, action_name_list, use_underline=True,

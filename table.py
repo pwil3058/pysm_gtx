@@ -30,7 +30,6 @@ from ..bab import enotify
 from . import gutils
 from . import actions
 from . import tlview
-from . import icons
 from . import dialogue
 from . import auto_update
 

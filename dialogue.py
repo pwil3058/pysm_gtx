@@ -23,7 +23,10 @@ from contextlib import contextmanager
 from gi.repository import Gtk
 from gi.repository import Gdk
 
-from ... import ISSUES_URL, ISSUES_EMAIL, ISSUES_VERSION
+try:
+    from .. import ISSUES_URL, ISSUES_EMAIL, ISSUES_VERSION
+except ImportError:
+    from ... import ISSUES_URL, ISSUES_EMAIL, ISSUES_VERSION
 
 from ..bab import enotify
 from ..bab.decorators import singleton

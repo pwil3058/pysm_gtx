@@ -21,7 +21,10 @@ from gi.repository import Gtk
 from gi.repository import Gio
 from gi.repository import GdkPixbuf
 
-from ... import APP_NAME
+try:
+    from .. import APP_NAME
+except ImportError:
+    from ... import APP_NAME
 
 def find_app_icon_directory(app_name):
     # find the icons directory
@@ -99,10 +102,25 @@ add_own_stock_icons(APP_NAME, _STOCK_ITEMS_OWN_PNG)
 # Icons that have to be designed eventually (using aliased GtK stock in the meantime)
 STOCK_CHECKOUT = Gtk.STOCK_EXECUTE
 STOCK_CLONE = Gtk.STOCK_COPY
+STOCK_DIR = Gtk.STOCK_DIRECTORY
+STOCK_DIR_LINK = Gtk.STOCK_DIRECTORY
+STOCK_EDIT_INCLUDES = Gtk.STOCK_EDIT
+STOCK_EDIT_EXCLUDE_DIRS = Gtk.STOCK_EDIT
+STOCK_EDIT_EXCLUDE_FILES = Gtk.STOCK_EDIT
+STOCK_EXTRACT = None
 STOCK_FETCH = Gtk.STOCK_GO_FORWARD
+STOCK_FILE = Gtk.STOCK_FILE
+STOCK_FILE_LINK = Gtk.STOCK_FILE
 STOCK_INIT = STOCK_APPLIED
 STOCK_INSERT= Gtk.STOCK_ADD
+STOCK_NEW_ARCHIVE = Gtk.STOCK_NEW
+STOCK_NEW_REPO = Gtk.STOCK_NEW
 STOCK_NEW_WORKSPACE = Gtk.STOCK_NEW
+STOCK_OPEN_SNAPSHOT_FILE = Gtk.STOCK_OPEN
 STOCK_PULL = Gtk.STOCK_GO_FORWARD
 STOCK_PUSH = Gtk.STOCK_GO_BACK
 STOCK_RENAME = Gtk.STOCK_PASTE
+STOCK_REPO_DELETE = Gtk.STOCK_DELETE
+STOCK_REPO_PRUNE = Gtk.STOCK_CUT
+STOCK_REPO_SHOW = None
+STOCK_RESTORE = None

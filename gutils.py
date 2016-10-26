@@ -19,6 +19,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 from gi.repository import GObject
+from gi.repository import Gio
 from gi.repository import Gdk
 
 def get_gtk_window(widget):
@@ -388,3 +389,140 @@ class FlagButtonList:
         return self.__flag_btns[flag_text].get_active()
     def get_active_flags(self):
         return [flag_btn.get_label() for flag_btn in self.__flag_btns.values() if flag_btn.get_active()]
+
+
+class ProgressThingy(Gtk.ProgressBar):
+    __g_type_name__ = "ProgressThingy"
+    def set_expected_total(self, total):
+        nsteps = min(100, max(total, 1))
+        self._numerator = 0.0
+        self._denominator = max(float(total), 1.0)
+        self._step = self._denominator / float(nsteps)
+        self._next_kick = self._step
+        self.set_fraction(0.0)
+        yield_to_pending_events()
+    def increment_count(self, by=1):
+        self._numerator += by
+        if self._numerator >= self._next_kick:
+            self.set_fraction(min(self._numerator / self._denominator, 1.0))
+            self._next_kick += self._step
+            yield_to_pending_events()
+    def finished(self):
+        self.set_fraction(1.0)
+        yield_to_pending_events()
+    def start(self, only_every=1):
+        self._pulse_count = 0
+        self._only_every = only_every
+        self.set_fraction(0.0)
+        yield_to_pending_events()
+    def pulse(self):
+        self._pulse_count += 1
+        if self._pulse_count % self._only_every == 0:
+            Gtk.ProgressBar.pulse(self)
+            yield_to_pending_events()
+
+class PretendWOFile(Gtk.ScrolledWindow):
+    __g_type_name__ = "PretendWOFile"
+    def __init__(self):
+        Gtk.ScrolledWindow.__init__(self)
+        self.set_hexpand(True)
+        self.set_vexpand(True)
+        self._view = Gtk.TextView()
+        self.add(self._view)
+        self.show_all()
+    def write(self, text):
+        bufr = self._view.get_buffer()
+        bufr.insert(bufr.get_end_iter(), text)
+    def write_lines(self, lines):
+        # take advantage of default "insert-text" handler's updating the iterator
+        bufr = self._view.get_buffer()
+        bufr_iter = bufr.get_end_iter()
+        for line in lines:
+            bufr.insert(bufr_iter, line)
+
+class NotebookWithDelete(Gtk.Notebook):
+    __g_type_name__ = "NotebookWithDelete"
+    def __init__(self, tab_delete_tooltip=_("Delete this page."), **kwargs):
+        self._tab_delete_tooltip = tab_delete_tooltip
+        Gtk.Notebook.__init__(self, **kwargs)
+    def append_deletable_page(self, page, tab_label):
+        label_widget = self._make_label_widget(page, tab_label)
+        return self.append_page(page, label_widget)
+    def append_deletable_page_menu(self, page, tab_label, menu_label):
+        tab_label_widget = self._make_label_widget(page, tab_label)
+        return self.append_page_menu(page, tab_label_widget, menu_label)
+    def _make_label_widget(self, page, tab_label):
+        hbox = Gtk.HBox()
+        hbox.pack_start(tab_label, expand=True, fill=True, padding=0)
+        button = Gtk.Button()
+        button.set_relief(Gtk.ReliefStyle.NONE)
+        button.set_focus_on_click(False)
+        icon = Gio.ThemedIcon.new_with_default_fallbacks('window-close-symbolic')
+        image = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.MENU)
+        image.set_tooltip_text(self._tab_delete_tooltip)
+        button.add(image)
+        button.set_name("notebook-tab-delete-button")
+        hbox.pack_start(button, expand=False, fill=True, padding=0)
+        button.connect("clicked", lambda _button: self._delete_page(page))
+        hbox.show_all()
+        return hbox
+    def _prepare_for_delete(self, page):
+        pass
+    def _delete_page(self, page):
+        self._prepare_for_delete(page)
+        self.remove_page(self.page_num(page))
+    def iterate_pages(self):
+        for pnum in range(self.get_n_pages()):
+            yield (pnum, self.get_nth_page(pnum))
+
+class UpdatableComboBoxText(Gtk.ComboBoxText):
+    __g_type_name__ = "UpdatableComboBoxText"
+    def __init__(self):
+        Gtk.ComboBoxText.__init__(self)
+        self.update_contents()
+        self.show_all()
+    def remove_text_item(self, item):
+        model = self.get_model()
+        for index in range(len(model)):
+            if model[index][0] == item:
+                self.remove(index)
+                return True
+        return False
+    def insert_text_item(self, item):
+        model = self.get_model()
+        if len(model) == 0 or model[-1][0] < item:
+            self.append_text(item)
+            return len(model) - 1
+        index = 0
+        while index < len(model) and model[index][0] < item:
+            index += 1
+        self.insert_text(index, item)
+        return index
+    def set_active_text(self, item):
+        model = self.get_model()
+        index = 0
+        while index < len(model) and model[index][0] != item:
+            index += 1
+        self.set_active(index)
+    def update_contents(self):
+        updated_set = set(self._get_updated_item_list())
+        for gone_away in (set([row[0] for row in self.get_model()]) - updated_set):
+            self.remove_text_item(gone_away)
+        for new_item in (updated_set - set([row[0] for row in self.get_model()])):
+            self.insert_text_item(new_item)
+    def _get_updated_item_list(self):
+        assert False, "_get_updated_item_list() must be defined in child"
+
+class YesNoWidget(Gtk.HBox):
+    def __init__(self, question_text):
+        Gtk.HBox.__init__(self)
+        q_label = Gtk.Label(question_text)
+        self.no_button = Gtk.Button.new_from_stock(Gtk.STOCK_NO)
+        self.yes_button = Gtk.Button.new_from_stock(Gtk.STOCK_YES)
+        self.pack_start(q_label, expand=True, fill=True, padding=0)
+        self.pack_start(no_button, expand=False, padding=0)
+        self.pack_start(yes_button, expand=False, padding=0)
+        self.show_all()
+    def set_button_sensitivity(self, no_sensitive, yes_sensitive):
+        self.no_button.set_sensitive(no_sensitive)
+        self.yes_button.set_sensitive(yes_sensitive)

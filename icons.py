@@ -21,7 +21,10 @@ import sys
 from gi.repository import Gtk
 from gi.repository import GdkPixbuf
 
-from ... import APP_NAME
+try:
+    from .. import APP_NAME
+except ImportError:
+    from ... import APP_NAME
 
 def find_app_icon_directory(app_name):
     """Find the directory containing "app_name"'s pixmaps."""
@@ -53,3 +56,4 @@ def add_own_stock_icons(stock_item_list):
     for _item in stock_item_list:
         _name = _item[0]
         factory.add(_name, Gtk.IconSet(make_pixbuf(_name)))
+

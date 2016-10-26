@@ -23,7 +23,10 @@ import configparser
 import os
 import sys
 
-from ... import CONFIG_DIR_PATH
+try:
+    from .. import CONFIG_DIR_PATH
+except ImportError:
+    from ... import CONFIG_DIR_PATH
 
 _RECOLLECTIONS_PATH = os.path.join(CONFIG_DIR_PATH, "guistate.mem")
 

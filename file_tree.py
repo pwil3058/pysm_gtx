@@ -32,7 +32,6 @@ from . import tlview
 from . import gutils
 from . import actions
 from . import dialogue
-from . import icons
 from . import auto_update
 from . import xtnl_edit
 from . import doop
@@ -452,7 +451,7 @@ class FileTreeView(tlview.View, actions.CAGandUIManager, doop.DoOperationMixin):
             ])
         self.action_groups[actions.AC_SELN_UNIQUE].add_actions(
            [
-                ("rename_fs_item", icons.STOCK_RENAME, _("Rename/Move"), None,
+                ("rename_fs_item", Gtk.STOCK_PASTE, _("Rename/Move"), None,
                  _("Rename/move the selected file or directory"),
                  lambda _action: self._move_or_copy_fs_item(False, self.get_selected_fsi_path())
                 ),

@@ -245,29 +245,34 @@ class GenericSnapshotWsFileDb(OsFileDb):
             return h.digest()
         def _populate(self):
             h = hashlib.sha1()
-            files_dict = {}
-            for item in os.listdir(self.data.path):
-                h.update(item.encode())
-                dir_path = os.path.join(self.data.path, item)
-                if os.path.isdir(dir_path):
-                    self._add_subdir(name=item, dir_path=dir_path)
-                else:
-                    files_dict[item] = self.FILE_DATA(path=os.path.join(self.data.path, item), status=self.DEFAULT_FILE_STATUS, related_file_data=None)
-            for file_path, status, rfd in iter(self._file_status_snapshot):
-                subdir, name = os.path.split(os.path.relpath(file_path, self.data.path))
-                if subdir:
-                    while subdir:
-                        base_subdir = subdir
-                        subdir = os.path.dirname(subdir)
-                    if base_subdir not in self._subdirs:
-                        self._add_subdir(name=base_subdir, status=False, clean_status=False)
-                else:
-                    if rfd:
-                        rfd = RFD(path=os.path.relpath(rfd.path, self.data.path), relation=rfd.relation)
-                    files_dict[name] = self.FILE_DATA(path=os.path.join(self.data.path, name), status=status, related_file_data=rfd)
-            # presort this data for multiple access efficiency
-            self._files_data = sorted(files_dict.values())
-            self._subdirs_data = sorted([s.data for s in self._subdirs.values()])
+            try:
+                files_dict = {}
+                for item in os.listdir(self.data.path):
+                    h.update(item.encode())
+                    dir_path = os.path.join(self.data.path, item)
+                    if os.path.isdir(dir_path):
+                        self._add_subdir(name=item, dir_path=dir_path)
+                    else:
+                        files_dict[item] = self.FILE_DATA(path=os.path.join(self.data.path, item), status=self.DEFAULT_FILE_STATUS, related_file_data=None)
+                for file_path, status, rfd in iter(self._file_status_snapshot):
+                    subdir, name = os.path.split(os.path.relpath(file_path, self.data.path))
+                    if subdir:
+                        while subdir:
+                            base_subdir = subdir
+                            subdir = os.path.dirname(subdir)
+                        if base_subdir not in self._subdirs:
+                            self._add_subdir(name=base_subdir, status=False, clean_status=False)
+                    else:
+                        if rfd:
+                            rfd = RFD(path=os.path.relpath(rfd.path, self.data.path), relation=rfd.relation)
+                        files_dict[name] = self.FILE_DATA(path=os.path.join(self.data.path, name), status=status, related_file_data=rfd)
+                # presort this data for multiple access efficiency
+                self._files_data = sorted(files_dict.values())
+                self._subdirs_data = sorted([s.data for s in self._subdirs.values()])
+            except FileNotFoundError:
+                # handle deleted directory race condition
+                self._files_data = []
+                self._subdirs_data = []
             self._is_populated = True
             return h.digest()
         def _is_hidden_dir(self, ddata):

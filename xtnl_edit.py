@@ -31,7 +31,10 @@ from . import gutils
 from . import table
 from . import tlview
 
-from ... import APP_NAME, CONFIG_DIR_PATH
+try:
+    from .. import APP_NAME, CONFIG_DIR_PATH
+except ImportError:
+    from ... import APP_NAME, CONFIG_DIR_PATH
 
 EDITORS_THAT_NEED_A_TERMINAL = ["vi", "joe", "vim"]
 DEFAULT_EDITOR = "gedit"

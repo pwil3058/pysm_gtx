@@ -211,10 +211,11 @@ class TableView(tlview.ListView, actions.CAGandUIManager, dialogue.BusyIndicator
             args["tbd_reset_only"] = [self]
         return self.AU_REQ_EVENTS
     def _get_table_db(self):
-        assert False, _("Must be defined in child")
+        # this method's purpose is to fetch a TableData instance
+        NotImplemented
     def _fetch_contents(self, tbd_reset_only=False, **kwargs):
         self._table_db = self._table_db.reset() if (tbd_reset_only and self in tbd_reset_only) else self._get_table_db()
-        return self._table_db.iter_rows()
+        return iter(self._table_db)
     def _set_contents(self, **kwargs):
         model = self.MODEL()
         model.set_contents(self._fetch_contents(**kwargs))
@@ -358,10 +359,14 @@ class TableData:
         self._db_hash_digest = h.digest()
         self._current_text_digest = None
         self._finalize(pdt)
-    def __getattr__(self, name):
-        if name == "is_current": return self._is_current()
+    @property
+    def is_current(self):
+        return self._is_current()
+    def __iter__(self):
+        return (row for row in self._rows)
     def _finalize(self, pdt):
-        assert False, "_finalize() must be defined in child"
+        # this method's role is to create the iterable self._rows
+        NotImplemented
     def _is_current(self):
         h = hashlib.sha1()
         self._current_text = self._get_data_text(h)
@@ -375,7 +380,14 @@ class TableData:
             self._finalize(self._current_text)
         return self
     def _get_data_text(self, h):
-        assert False, "_get_data_text() must be defined in child"
+        # this method's role is to get the RAW text for _finalize() to turn into rows if needed
+        NotImplemented
     def iter_rows(self):
-        for row in self._rows:
-            yield row
+        # DEPRECATED: use __iter__ instead
+        return iter(self)
+
+class NullTableData(TableData):
+    def _finalize(self, pdt):
+        self._rows = []
+    def _get_data_text(self, h):
+        return ""

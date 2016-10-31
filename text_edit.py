@@ -225,13 +225,13 @@ class DbMessageWidget(MessageWidget):
         MessageWidget.populate_action_groups(self)
         self.action_groups[actions.AC_DONT_CARE].add_actions(
             [
-                ("text_edit_save", Gtk.STOCK_SAVE, _("_Save"), "",
+                ("text_edit_save", Gtk.STOCK_SAVE, _("Save"), "",
                  _("Save summary to database"), self._save_text_acb),
-                ("text_edit_load", Gtk.STOCK_REVERT_TO_SAVED, _("_Reload"), "",
+                ("text_edit_load", Gtk.STOCK_REVERT_TO_SAVED, _("Reload"), "",
                  _("Reload summary from database"), self._reload_text_acb),
             ])
     def _save_text_acb(self, *args):
-        text = self.bfr.get_text(self.bfr.get_start_iter(), self.bfr.get_end_iter())
+        text = self.bfr.get_text(self.bfr.get_start_iter(), self.bfr.get_end_iter(), True)
         result = self.set_text_in_db(text)
         if not result.is_ok:
             self.report_any_problems(result)

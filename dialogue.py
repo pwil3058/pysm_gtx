@@ -107,6 +107,7 @@ class Window(Gtk.Window, BusyIndicator):
         Gtk.Window.__init__(self, *args, **kwargs)
         BusyIndicator.__init__(self)
 
+# TODO: redo use of Gtk.Dialog and children to reflect Gtk.Box improvements
 class Dialog(Gtk.Dialog, BusyIndicator):
     def __init__(self, *args, **kwargs):
         if not kwargs.get("parent", None):

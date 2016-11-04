@@ -17,7 +17,11 @@
 Wrappers for common (but complex) "do" operations.
 """
 
+import os
+
 from gi.repository import Gtk
+
+from ..bab import CmdResult
 
 from . import dialogue
 
@@ -28,14 +32,17 @@ class DoOperationMixin(dialogue.ClientMixin):
             return self.ask_dir_path(prompt, suggestion=os.path.relpath(os.getcwd()), existing=False)
         else:
             return self.ask_file_path(prompt, suggestion=file_paths[0], existing=False)
+
     def get_renamed_destn(self, destn, prompt=_("Enter new destination path:")):
         if os.path.isdir(destn):
             return self.ask_dir_path(prompt, suggestion=destn, existing=False)
         else:
             return self.ask_file_path(prompt, suggestion=destn, existing=False)
+
     @staticmethod
     def expand_destination(destn, file_paths):
         return [os.path.join(destn, os.path.basename(file_path)) for file_path in file_paths]
+
     def do_op_rename_overwrite_force_or_cancel(self, target, do_op, get_new_name=None):
         overwrite = False
         force = False
@@ -51,13 +58,14 @@ class DoOperationMixin(dialogue.ClientMixin):
                 elif resp == dialogue.Response.FORCE:
                     force = True
                 elif resp == dialogue.Response.RENAME:
-                    target = get_new_name(target) if get_new_name else self.ask_text(_("Name"), name)
+                    target = get_new_name(target) if get_new_name else self.get_renamed_destn(target)
                     if target is None:
                         break
                 continue
             break
         self.report_any_problems(result)
         return target # let the caller know if a rename occured
+
     def do_op_rename_overwrite_or_cancel(self, target, do_op, get_new_name=None):
         overwrite = False
         while True:
@@ -70,13 +78,14 @@ class DoOperationMixin(dialogue.ClientMixin):
                 elif resp == dialogue.Response.OVERWRITE:
                     overwrite = True
                 elif resp == dialogue.Response.RENAME:
-                    target = get_new_name(target) if get_new_name else self.ask_text(_("Name"), name)
+                    target = get_new_name(target) if get_new_name else self.get_renamed_destn(target)
                     if target is None:
                         break
                 continue
             break
         self.report_any_problems(result)
         return target # let the caller know if a rename occured
+
     def do_op_rename_force_or_cancel(self, name, do_op, get_new_name=None):
         force = False
         while True:
@@ -89,13 +98,14 @@ class DoOperationMixin(dialogue.ClientMixin):
                 elif resp == dialogue.Response.FORCE:
                     force = True
                 elif resp == dialogue.Response.RENAME:
-                    name = get_new_name(name) if get_new_name else self.ask_text(_("Name"), name)
+                    name = get_new_name(name) if get_new_name else self.get_renamed_destn(target)
                     if name is None:
                         break
                 continue
             break
         self.report_any_problems(result)
         return name
+
     def do_op_force_or_cancel(self, do_op):
         force = False
         while True:
@@ -110,13 +120,14 @@ class DoOperationMixin(dialogue.ClientMixin):
             self.report_any_problems(result)
             break
         return result.is_ok
+
     def do_op_rename_or_cancel(self, name, do_op, get_new_name=None):
         while True:
             with self.showing_busy():
                 result = do_op(name)
             if result.suggests_rename:
                 if self.ask_rename_or_cancel(result) == dialogue.Response.RENAME:
-                    name = get_new_name(name) if get_new_name else self.ask_text(_("Name"), name)
+                    name = get_new_name(name) if get_new_name else self.get_renamed_destn(target)
                     if not name:
                         break
                 else:
@@ -124,6 +135,7 @@ class DoOperationMixin(dialogue.ClientMixin):
             self.report_any_problems(result)
             break
         return name
+
     def do_op_cache_force_or_cancel(self, do_op):
         force = False
         cache = False
@@ -138,6 +150,67 @@ class DoOperationMixin(dialogue.ClientMixin):
                     force = True
                 elif resp == dialogue.Response.CACHE:
                     cache = True
+                continue
+            self.report_any_problems(result)
+            break
+        return result
+
+    def do_op_force_refresh_or_absorb(self, do_op, refresh_op):
+        absorb = False
+        force = False
+        refresh_tried = False
+        while True:
+            with self.showing_busy():
+                result = do_op(absorb=absorb, force=force)
+            if refresh_tried:
+                result = result - result.Suggest.REFRESH
+            if not (absorb or force) and result.suggests(result.Suggest.FORCE_ABSORB_OR_REFRESH):
+                resp = self.ask_force_refresh_absorb_or_cancel(result)
+                if resp == Gtk.ResponseType.CANCEL:
+                    return CmdResult.ok() # we don't want to be a nag
+                elif resp == dialogue.Response.FORCE:
+                    force = True
+                elif resp == dialogue.Response.ABSORB:
+                    absorb = True
+                elif resp == dialogue.Response.REFRESH:
+                    refresh_tried = True
+                    result = refresh_op()
+                    self.report_any_problems(result)
+                continue
+            self.report_any_problems(result)
+            break
+        return result
+
+    def do_op_force_refresh_overwrite_or_rename(self, destn, do_op, refresh_op):
+        force = False
+        overwrite = False
+        refresh_tried = False
+        while True:
+            with self.showing_busy():
+                result = do_op(destn, force=force, overwrite=overwrite)
+            if refresh_tried:
+                result = result - result.Suggest.REFRESH
+            if not force and result.suggests(result.Suggest.FORCE_OR_REFRESH):
+                resp = self.ask_force_refresh_or_cancel(result)
+                if resp == Gtk.ResponseType.CANCEL:
+                    return CmdResult.ok() # we don't want to be a nag
+                elif resp == dialogue.Response.FORCE:
+                    force = True
+                elif resp == dialogue.Response.REFRESH:
+                    refresh_tried = True
+                    result = refresh_op()
+                    self.report_any_problems(result)
+                continue
+            elif not overwrite and result.suggests(result.Suggest.OVERWRITE_OR_RENAME):
+                resp = self.ask_rename_overwrite_or_cancel(result)
+                if resp == Gtk.ResponseType.CANCEL:
+                    return CmdResult.ok() # we don't want to be a nag
+                elif resp == dialogue.Response.OVERWRITE:
+                    overwrite = True
+                elif resp == dialogue.Response.RENAME:
+                    destn = get_renamed_destn(destn)
+                    if destn is None:
+                        break
                 continue
             self.report_any_problems(result)
             break

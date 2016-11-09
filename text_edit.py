@@ -136,18 +136,18 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager, dialogue.ClientMix
             file_name = self._save_file_name
         try:
             open(file_name, "w").write(self.get_contents())
-            self._save_file_name = file_name
-            self._save_file_digest = self.digest
         except IOError:
             self.alert_user(_("Save failed!"))
+        else:
+            self._save_file_name = file_name
+            self._save_file_digest = self.digest
     def _save_text_to_file_acb(self, _action=None):
         self.save_text_to_file()
     def _save_text_as_acb(self, _action=None):
         fname = self.ask_file_path(_("Enter file name"), existing=False, suggestion=self._save_file_name)
         if fname and os.path.exists(fname) and not os.path.samefile(fname, self._save_file_name):
-            if not os.path.samefile(fname, ifce.SCM.get_default_commit_save_file()):
-                if not self.ask_ok_cancel(os.linesep.join([fname, _("\nFile exists. Overwrite?")])):
-                    return
+            if not self.ask_ok_cancel(os.linesep.join([fname, _("\nFile exists. Overwrite?")])):
+                return
         self.save_text_to_file(file_name=fname)
     def load_text_fm_file(self, file_name=None, already_checked=False):
         if not already_checked and not self._ok_to_overwrite_summary():

@@ -415,9 +415,9 @@ class FileTreeView(tlview.View, actions.CAGandUIManager, doop.DoOperationMixin):
         fs_item = tree_view.get_model()[tree_path][0]
         if not fs_item.is_dir:
             xtnl_edit.edit_files_extern([fs_item.path])
-    def __init__(self, show_hidden=False, hide_clean=False, parent=None):
+    def __init__(self, show_hidden=False, hide_clean=False, parent=None, **kwargs):
         self._parent = parent
-        tlview.TreeView.__init__(self)
+        tlview.TreeView.__init__(self, **kwargs)
         actions.CAGandUIManager.__init__(self, selection=self.get_selection(), popup=self.DEFAULT_POPUP)
         self.model.set_view(self)
         #self.connect("key_press_event", self._handle_control_c_key_press_cb)
@@ -561,7 +561,6 @@ class FileTreeWidget(Gtk.VBox, enotify.Listener):
     MENUBAR = "/files_menubar"
     BUTTON_BAR_ACTIONS = ["show_hidden_files"]
     TREE_VIEW = FileTreeView
-    SIZE = (120, 60)
     def __init__(self, show_hidden=False, hide_clean=False, **kwargs):
         Gtk.VBox.__init__(self)
         enotify.Listener.__init__(self)
@@ -569,7 +568,6 @@ class FileTreeWidget(Gtk.VBox, enotify.Listener):
         self.file_tree = self.TREE_VIEW(show_hidden=show_hidden, hide_clean=hide_clean, **kwargs)
         self.file_tree.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
         self.file_tree.set_headers_visible(False)
-        self.file_tree.set_size_request(*self.SIZE)
         scw = gutils.wrap_in_scrolled_window(self.file_tree, use_widget_size=True)
         # file tree menu bar
         mprefix = self.get_menu_prefix()

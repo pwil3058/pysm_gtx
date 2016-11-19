@@ -40,7 +40,7 @@ try:
             self._vte.set_size_request(200, 50)
             self._vte.set_scrollback_lines(-1)
             self._vte.show()
-            self._vte.connect('button_press_event', self._button_press_cb)
+            self._vte.connect("button_press_event", self._button_press_cb)
             self.add(self._vte)
             self.show_all()
             self._pid = self._vte.spawn_sync(Vte.PtyFlags.DEFAULT, os.getcwd(), self.ARGV, [], GLib.SpawnFlags.DO_NOT_REAP_CHILD, None, None,)
@@ -55,11 +55,11 @@ try:
             if event.type == Gdk.EventType.BUTTON_PRESS:
                 if event.button == 3:
                     menu = Gtk.Menu()
-                    copy_item = Gtk.MenuItem(label=_('Copy'))
+                    copy_item = Gtk.MenuItem(label=_("Copy"))
                     copy_item.connect("activate", lambda _item: widget.copy_clipboard())
                     copy_item.set_sensitive(widget.get_has_selection())
                     clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-                    paste_item = Gtk.MenuItem(label=_('Paste'))
+                    paste_item = Gtk.MenuItem(label=_("Paste"))
                     paste_item.set_sensitive(clipboard.wait_is_text_available())
                     paste_item.connect("activate", lambda _item: widget.paste_clipboard())
                     menu.append(copy_item)

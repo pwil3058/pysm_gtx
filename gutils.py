@@ -105,11 +105,11 @@ class EntryWithHistory(Gtk.Entry):
         self._history_list = []
         self._history_index = 0
         self._history_len = 0
-        self._saved_text = ''
+        self._saved_text = ""
         self._key_press_cb_id = self.connect("key_press_event", self._key_press_cb)
     def _key_press_cb(self, widget, event):
-        _KEYVAL_UP_ARROW = Gdk.keyval_from_name('Up')
-        _KEYVAL_DOWN_ARROW = Gdk.keyval_from_name('Down')
+        _KEYVAL_UP_ARROW = Gdk.keyval_from_name("Up")
+        _KEYVAL_DOWN_ARROW = Gdk.keyval_from_name("Down")
         if event.keyval in [_KEYVAL_UP_ARROW, _KEYVAL_DOWN_ARROW]:
             if event.keyval == _KEYVAL_UP_ARROW:
                 if self._history_index < self._history_len:
@@ -135,7 +135,7 @@ class EntryWithHistory(Gtk.Entry):
         text = self.get_text().rstrip()
         self.set_text("")
         # don't save empty entries or ones that start with white space
-        if not text or text[0] in [' ', '\t']:
+        if not text or text[0] in [" ", "\t"]:
             return
         # no adjacent duplicate entries allowed
         if (self._history_len == 0) or (text != self._history_list[-1]):
@@ -152,10 +152,10 @@ def _combo_entry_changed_cb(combo, entry):
     else:
         text = combo.saved_text.rstrip()
         # no duplicates, empty strings or strings starting with white space
-        if text and text[0] not in [' ', '\t'] and text not in combo.entry_set:
+        if text and text[0] not in [" ", "\t"] and text not in combo.entry_set:
             combo.entry_set.add(text)
             combo.prepend_text(text)
-        combo.saved_text = ''
+        combo.saved_text = ""
     return False
 
 def _combo_get_text(combo):
@@ -163,7 +163,7 @@ def _combo_get_text(combo):
 
 def _combo_set_text(combo, text):
     text = text.rstrip()
-    if text and text[0] not in [' ', '\t'] and text not in combo.entry_set:
+    if text and text[0] not in [" ", "\t"] and text not in combo.entry_set:
         combo.prepend_text(text)
         combo.set_active(0)
         combo.entry_set.add(text)
@@ -182,7 +182,7 @@ def new_mutable_combox_text_with_entry(entries=None):
             combo.append_text(entry)
             combo.entry_set.add(entry)
     combo.set_active(-1)
-    combo.get_child().connect('changed', lambda entry: _combo_entry_changed_cb(combo, entry))
+    combo.get_child().connect("changed", lambda entry: _combo_entry_changed_cb(combo, entry))
     return combo
 
 class ActionButton(Gtk.Button):
@@ -246,7 +246,7 @@ class ActionHButtonBox(Gtk.HBox):
             self.pack_start(button, expand=expand, fill=fill, padding=padding)
 
 class TimeOutController:
-    ToggleData = collections.namedtuple('ToggleData', ['name', 'label', 'tooltip', 'stock_id'])
+    ToggleData = collections.namedtuple("ToggleData", ["name", "label", "tooltip", "stock_id"])
     def __init__(self, toggle_data, function=None, is_on=True, interval=10000):
         self._interval = abs(interval)
         self._timeout_id = None
@@ -287,7 +287,7 @@ class TimeOutController:
     def get_interval(self):
         return self._interval
 
-TOC_DEFAULT_REFRESH_TD = TimeOutController.ToggleData("auto_refresh_toggle", _('Auto _Refresh'), _('Turn data auto refresh on/off'), Gtk.STOCK_REFRESH)
+TOC_DEFAULT_REFRESH_TD = TimeOutController.ToggleData("auto_refresh_toggle", _("Auto _Refresh"), _("Turn data auto refresh on/off"), Gtk.STOCK_REFRESH)
 
 class RefreshController(TimeOutController):
     def __init__(self, toggle_data=None, function=None, is_on=True, interval=10000):
@@ -295,7 +295,7 @@ class RefreshController(TimeOutController):
             toggle_data = TOC_DEFAULT_REFRESH_TD
         TimeOutController.__init__(self, toggle_data, function=function, is_on=is_on, interval=interval)
 
-TOC_DEFAULT_SAVE_TD = TimeOutController.ToggleData("auto_save_toggle", _('Auto _Save'), _('Turn data auto save on/off'), Gtk.STOCK_SAVE)
+TOC_DEFAULT_SAVE_TD = TimeOutController.ToggleData("auto_save_toggle", _("Auto _Save"), _("Turn data auto save on/off"), Gtk.STOCK_SAVE)
 
 class SaveController(TimeOutController):
     def __init__(self, toggle_data=None, function=None, is_on=True, interval=10000):
@@ -337,7 +337,7 @@ class SplitBar(Gtk.HBox):
         self.pack_end(self.rhs, expand=expand_rhs, fill=True, padding=0)
 
 def _ui_manager_connect_proxy(_ui_mgr, action, widget):
-    tooltip = action.get_property('tooltip')
+    tooltip = action.get_property("tooltip")
     if isinstance(widget, Gtk.MenuItem) and tooltip:
         widget.set_tooltip_text(tooltip)
 
@@ -350,7 +350,7 @@ def yield_to_pending_events():
 class UIManager(Gtk.UIManager):
     def __init__(self):
         Gtk.UIManager.__init__(self)
-        self.connect('connect-proxy', _ui_manager_connect_proxy)
+        self.connect("connect-proxy", _ui_manager_connect_proxy)
 
 class FlagButton(Gtk.CheckButton):
     def __init__(self, flag_text, tt_text=None):
@@ -457,7 +457,7 @@ class NotebookWithDelete(Gtk.Notebook):
         button = Gtk.Button()
         button.set_relief(Gtk.ReliefStyle.NONE)
         button.set_focus_on_click(False)
-        icon = Gio.ThemedIcon.new_with_default_fallbacks('window-close-symbolic')
+        icon = Gio.ThemedIcon.new_with_default_fallbacks("window-close-symbolic")
         image = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.MENU)
         image.set_tooltip_text(self._tab_delete_tooltip)
         button.add(image)

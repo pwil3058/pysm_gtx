@@ -78,9 +78,9 @@ trigger_auto_update = _auto_update_cb
 
 AUTO_UPDATE = gutils.TimeOutController(
     toggle_data=gutils.TimeOutController.ToggleData(
-        name='config_auto_update',
-        label=_('Auto Update'),
-        tooltip=_('Enable/disable automatic updating of displayed data'),
+        name="config_auto_update",
+        label=_("Auto Update"),
+        tooltip=_("Enable/disable automatic updating of displayed data"),
         stock_id=Gtk.STOCK_REFRESH
     ),
     function=_auto_update_cb, is_on=True, interval=10000

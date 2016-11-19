@@ -13,9 +13,9 @@
 ### along with this program; if not, write to the Free Software
 ### Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-'''A scrollable text view widget that uses right margin marker
+"""A scrollable text view widget that uses right margin marker
 (if available) and also ensures text is utf-8 friendly before
-insertion'''
+insertion"""
 
 import hashlib
 
@@ -108,7 +108,7 @@ class Widget(Gtk.VBox):
             self.bfr.end_user_action()
         return result
     def _initialize_contents(self):
-        self.set_contents('')
+        self.set_contents("")
     def get_contents(self):
         start_iter = self.bfr.get_start_iter()
         end_iter = self.bfr.get_end_iter()

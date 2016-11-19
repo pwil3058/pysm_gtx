@@ -35,8 +35,8 @@ class ConsoleLog(textview.Widget):
         self.action_group = Gtk.ActionGroup("console_log")
         self.action_group.add_actions(
             [
-                ("console_log_clear", Gtk.STOCK_CLEAR, _('_Clear'), None,
-                 _('Clear the console log'), self.clear),
+                ("console_log_clear", Gtk.STOCK_CLEAR, _("_Clear"), None,
+                 _("Clear the console log"), self.clear),
             ])
         self.view.connect("populate-popup", self._populate_popup_cb)
         self.view.set_editable(False)
@@ -95,7 +95,7 @@ class ConsoleLogWidget(Gtk.VBox, dialogue.BusyIndicatorUser):
         self._text_widget = ConsoleLog()
         if not terminal.AVAILABLE:
             hbox = Gtk.HBox()
-            hbox.pack_start(Gtk.Label(_('Run: ')), expand=False, fill=True, padding=0)
+            hbox.pack_start(Gtk.Label(_("Run: ")), expand=False, fill=True, padding=0)
             cmd_entry = gutils.EntryWithHistory()
             cmd_entry.connect("activate", self._cmd_entry_cb)
             hbox.pack_start(cmd_entry, expand=True, fill=True, padding=0)

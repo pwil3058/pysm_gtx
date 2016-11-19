@@ -13,9 +13,9 @@
 ### along with this program; if not, write to the Free Software
 ### Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-'''
+"""
 Conditionally enabled GTK action groups
-'''
+"""
 
 import collections
 
@@ -25,7 +25,7 @@ from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.types import GObjectMeta
 
-class MaskedCondns(collections.namedtuple('MaskedCondns', ['condns', 'mask'])):
+class MaskedCondns(collections.namedtuple("MaskedCondns", ["condns", "mask"])):
     __slots__ = ()
 
     def __or__(self, other):
@@ -139,7 +139,7 @@ class ConditionalButtonGroups:
         if seln is None:
             return None
         self.update_condns(get_masked_seln_conditions(seln))
-        return seln.connect('changed', self._seln_condns_change_cb)
+        return seln.connect("changed", self._seln_condns_change_cb)
     def __getitem__(self, condns):
         if condns not in self.groups:
             self.groups[condns] = ButtonGroup(is_sensitive=(condns & self.current_condns) == condns)
@@ -168,9 +168,9 @@ class ConditionalButtonGroups:
         """
         return self.get_button(button_name).connect(signal, callback, *args, **kwargs)
     def __str__(self):
-        string = 'ConditionalButtonGroup\n'.format(self.name)
+        string = "ConditionalButtonGroup\n".format(self.name)
         for condns, group in self.groups.items():
-            string += '\tGroup({0:x}): {2}\n'.format(condns, str(group))
+            string += "\tGroup({0:x}): {2}\n".format(condns, str(group))
         return string
     def create_button_box(self, button_name_list, horizontal=True, expand=True, fill=True, padding=0):
         if horizontal:
@@ -219,14 +219,14 @@ class ConditionalActionGroups:
         self.name = name
         self.set_selection(selection)
     def _group_name(self, condns):
-        return '{0}:{1:x}'.format(self.name, condns)
+        return "{0}:{1:x}".format(self.name, condns)
     def _seln_condns_change_cb(self, seln):
         self.update_condns(get_masked_seln_conditions(seln))
     def set_selection(self, seln):
         if seln is None:
             return None
         self.update_condns(get_masked_seln_conditions(seln))
-        return seln.connect('changed', self._seln_condns_change_cb)
+        return seln.connect("changed", self._seln_condns_change_cb)
     def __getitem__(self, condns):
         if condns not in self.groups:
             self.groups[condns] = Gtk.ActionGroup(self._group_name(condns))
@@ -274,16 +274,16 @@ class ConditionalActionGroups:
         """
         Connect the callback to the "activate" signal of the named action
         """
-        return self.get_action(action_name).connect('activate', callback, *user_data)
+        return self.get_action(action_name).connect("activate", callback, *user_data)
     def __str__(self):
-        string = 'ConditionalActionGroups({0}): condns={1:x}\n'.format(self.name, self.current_condns)
+        string = "ConditionalActionGroups({0}): condns={1:x}\n".format(self.name, self.current_condns)
         for condns, group in self.groups.items():
             name = group.get_name()
-            member_names = '['
+            member_names = "["
             for member_name in [action.get_name() for action in group.list_actions()]:
-                member_names += '{0}, '.format(member_name)
-            member_names += ']'
-            string += '\tGroup({0:x},{1}): {2}\n'.format(condns, name, member_names)
+                member_names += "{0}, ".format(member_name)
+            member_names += "]"
+            string += "\tGroup({0:x},{1}): {2}\n".format(condns, name, member_names)
         return string
     def create_action_button(self, action_name, use_underline=True):
         from . import gutils
@@ -301,17 +301,17 @@ class ConditionalActionGroups:
             box.pack_start(button, expand, fill, padding)
         return box
 
-CLASS_INDEP_AGS = ConditionalActionGroups('class_indep')
+CLASS_INDEP_AGS = ConditionalActionGroups("class_indep")
 
 class UIManager(Gtk.UIManager):
     __g_type_name__ = "UIManager"
     # TODO: check to see if this workaround is still necessary
     def __init__(self):
         Gtk.UIManager.__init__(self)
-        self.connect('connect-proxy', self._ui_manager_connect_proxy)
+        self.connect("connect-proxy", self._ui_manager_connect_proxy)
     @staticmethod
     def _ui_manager_connect_proxy(_ui_mgr, action, widget):
-        tooltip = action.get_property('tooltip')
+        tooltip = action.get_property("tooltip")
         if isinstance(widget, Gtk.MenuItem) and tooltip:
             widget.set_tooltip_text(tooltip)
 
@@ -326,12 +326,12 @@ class _ActionGroupPopulator(GObjectMeta, type):
 
 # TODO: change method names to avoid accidental conflicts with other mixins
 class CAGandUIManager(metaclass=_ActionGroupPopulator):
-    '''This is a "mix in" class and needs to be merged with a Gtk.Widget() descendant'''
-    UI_DESCR = '''<ui></ui>'''
+    """This is a "mix in" class and needs to be merged with a Gtk.Widget() descendant"""
+    UI_DESCR = """<ui></ui>"""
     def __init__(self, selection=None, popup=None):
         self.ui_manager = UIManager()
         CLASS_INDEP_AGS.add_ui_mgr(self.ui_manager)
-        name = '{0}:{1:x}'.format(self.__class__.__name__, self.__hash__())
+        name = "{0}:{1:x}".format(self.__class__.__name__, self.__hash__())
         self.action_groups = ConditionalActionGroups(name, ui_mgrs=[self.ui_manager], selection=selection)
         for action_group_populator in self._action_group_populators:
             action_group_populator(self)
@@ -348,7 +348,7 @@ class CAGandUIManager(metaclass=_ActionGroupPopulator):
         return False
     def set_popup(self, popup):
         if self._popup_cb_id is None:
-            self._popup_cb_id = self.connect('button_press_event', self._button_press_cb)
+            self._popup_cb_id = self.connect("button_press_event", self._button_press_cb)
             if popup is None:
                 self.enable_popup(False)
         elif self._popup is None and popup is not None:

@@ -126,31 +126,31 @@ class CellRendererSpin(Gtk.CellRendererSpin):
         Add an "editing-started" callback to setup connection to SpinButton
         """
         Gtk.CellRendererSpin.__init__(self, *args, **kwargs)
-        self.connect('editing-started', CellRendererSpin._editing_started_cb)
+        self.connect("editing-started", CellRendererSpin._editing_started_cb)
     @staticmethod
     def _editing_started_cb(cell, spinbutton, path):
         """
         Connect to the spinbutton's "value-changed" signal
         """
-        spinbutton.connect('value-changed', CellRendererSpin._spinbutton_value_changed_cb, cell, path)
+        spinbutton.connect("value-changed", CellRendererSpin._spinbutton_value_changed_cb, cell, path)
     @staticmethod
     def _spinbutton_value_changed_cb(spinbutton, cell, path):
         """
         Propagate "value-changed" signal to get things moving
         """
-        cell.emit('value-changed', path, spinbutton)
-GObject.signal_new('value-changed', CellRendererSpin, GObject.SignalFlags.RUN_LAST, None, (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT,))
+        cell.emit("value-changed", path, spinbutton)
+GObject.signal_new("value-changed", CellRendererSpin, GObject.SignalFlags.RUN_LAST, None, (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT,))
 
 # Views
 class ViewSpec:
-    __slots__ = ('properties', 'selection_mode', 'columns')
+    __slots__ = ("properties", "selection_mode", "columns")
     def __init__(self, properties=None, selection_mode=None, columns=None):
         self.properties = properties if properties is not None else dict()
         self.selection_mode = selection_mode
         self.columns = columns if columns is not None else list()
 
 class ColumnSpec:
-    __slots__ = ('title', 'properties', 'cells', 'sort_key_function')
+    __slots__ = ("title", "properties", "cells", "sort_key_function")
     def __init__(self, title, properties=None, cells=None, sort_key_function=None):
         self.title = title
         self.properties = properties if properties is not None else dict()
@@ -165,7 +165,7 @@ def simple_column(lbl, *cells):
     )
 
 class CellRendererSpec:
-    __slots__ = ('cell_renderer', 'properties', 'expand', 'start', "signal_handlers")
+    __slots__ = ("cell_renderer", "properties", "expand", "start", "signal_handlers")
     def __init__(self, cell_renderer, properties=None, expand=None, start=False, signal_handlers=None):
         self.cell_renderer = cell_renderer
         self.properties = properties if properties else {}
@@ -174,13 +174,13 @@ class CellRendererSpec:
         self.start = start
 
 class CellDataFunctionSpec:
-    __slots__ = ('function', 'user_data')
+    __slots__ = ("function", "user_data")
     def __init__(self, function, user_data=None):
         self.function = function
         self.user_data = user_data
 
 class CellSpec:
-    __slots__ = ('cell_renderer_spec', 'cell_data_function_spec', 'attributes')
+    __slots__ = ("cell_renderer_spec", "cell_data_function_spec", "attributes")
     def __init__(self, cell_renderer_spec, cell_data_function_spec=None, attributes=None):
         self.cell_renderer_spec = cell_renderer_spec
         self.cell_data_function_spec = cell_data_function_spec
@@ -238,13 +238,13 @@ def activatable_toggle_cell(model, fld, toggle_cb, xalign=0.5):
 def _transformer(treeviewcolumn, cell, model, iter, func_and_index):
     func, index = func_and_index
     pyobj = model.get_value(iter, index)
-    cell.set_property('text', func(pyobj))
+    cell.set_property("text", func(pyobj))
     return
 
 def _stock_id_transformer(treeviewcolumn, cell, model, iter, func_and_index):
     func, index = func_and_index
     pyobj = model.get_value(iter, index)
-    cell.set_property('stock_id', func(pyobj))
+    cell.set_property("stock_id", func(pyobj))
     return
 
 def transform_data_cell(model, fld, transform_func, xalign=0.5):
@@ -355,7 +355,7 @@ class View(Gtk.TreeView):
         for cell_d in col_d.cells:
             self._view_add_cell(col, cell_d)
         if col_d.sort_key_function is not None:
-            col.connect('clicked', self._column_clicked_cb, lambda x: col_d.sort_key_function(x[1]))
+            col.connect("clicked", self._column_clicked_cb, lambda x: col_d.sort_key_function(x[1]))
             col.set_clickable(True)
     def _view_add_cell(self, col, cell_d):
         cell = self._create_cell(col, cell_d.cell_renderer_spec)
@@ -363,10 +363,10 @@ class View(Gtk.TreeView):
             col.set_cell_data_func(cell, cell_d.cell_data_function_spec.function, cell_d.cell_data_function_spec.user_data)
         for attr_name, attr_index in cell_d.attributes.items():
             col.add_attribute(cell, attr_name, attr_index)
-            if attr_name == 'text':
-                cell.connect('edited', self._cell_text_edited_cb, attr_index)
-            elif attr_name == 'active':
-                cell.connect('toggled', self._cell_toggled_cb, attr_index)
+            if attr_name == "text":
+                cell.connect("edited", self._cell_text_edited_cb, attr_index)
+            elif attr_name == "active":
+                cell.connect("toggled", self._cell_toggled_cb, attr_index)
     @property
     def model(self):
         return self.get_model()
@@ -395,7 +395,7 @@ class View(Gtk.TreeView):
                 self.get_selection().unselect_all()
                 return True
         elif event.type == Gdk.EventType.KEY_PRESS:
-            if event.keyval == Gdk.keyval_from_name('Escape'):
+            if event.keyval == Gdk.keyval_from_name("Escape"):
                 self.get_selection().unselect_all()
                 return True
         return False

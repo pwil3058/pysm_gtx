@@ -424,7 +424,7 @@ class FileTreeView(tlview.View, actions.CAGandUIManager, doop.DoOperationMixin):
         self.connect("row-activated", self._handle_double_click_cb)
         seln = self.get_selection()
         seln.set_select_function(self._selection_filter_func)
-        seln.connect('changed', lambda seln: self.action_groups.update_condns(get_masked_seln_conditions(seln)))
+        seln.connect("changed", lambda seln: self.action_groups.update_condns(get_masked_seln_conditions(seln)))
         self.model.repopulate()
     def populate_action_groups(self):
         self.action_groups[actions.AC_DONT_CARE].add_actions(

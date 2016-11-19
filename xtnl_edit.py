@@ -141,8 +141,8 @@ class EditorAllocationView(table.EditableEntriesView):
     MODEL = EditorAllocationModel
     SPECIFICATION = tlview.ViewSpec(
         properties={
-            'enable-grid-lines' : True,
-            'reorderable' : True,
+            "enable-grid-lines" : True,
+            "reorderable" : True,
         },
         selection_mode=Gtk.SelectionMode.MULTIPLE,
         columns=[
@@ -215,9 +215,9 @@ def _edit_files_extern(file_list, ed_assigns):
         cmd = shlex.split(edstr) + filelist
         if cmd[0] in EDITORS_THAT_NEED_A_TERMINAL:
             if DEFAULT_TERMINAL == "gnome-terminal":
-                flag = '-x'
+                flag = "-x"
             else:
-                flag = '-e'
+                flag = "-e"
             cmd = [DEFAULT_TERMINAL, flag] + cmd
         return runext.run_cmd_in_bgnd(cmd)
     for edstr in list(ed_assigns.keys()):
@@ -244,7 +244,7 @@ def peruse_files_extern(file_list):
 actions.CLASS_INDEP_AGS[actions.AC_DONT_CARE].add_actions(
     [
         ("allocate_xtnl_editors", Gtk.STOCK_PREFERENCES, _("_Editor Allocation"), "",
-         _('Allocate editors to file types'),
+         _("Allocate editors to file types"),
          lambda _action=None:  EditorAllocationDialog().show()
         ),
         ("allocate_xtnl_perusers", Gtk.STOCK_PREFERENCES, _("_Peruser Allocation"), "",

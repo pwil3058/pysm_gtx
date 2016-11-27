@@ -1,17 +1,17 @@
-### Copyright (C) 2005-2016 Peter Williams <pwil3058@gmail.com>
-###
-### This program is free software; you can redistribute it and/or modify
-### it under the terms of the GNU General Public License as published by
-### the Free Software Foundation; version 2 of the License only.
-###
-### This program is distributed in the hope that it will be useful,
-### but WITHOUT ANY WARRANTY; without even the implied warranty of
-### MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-### GNU General Public License for more details.
-###
-### You should have received a copy of the GNU General Public License
-### along with this program; if not, write to the Free Software
-### Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+# Copyright (C) 2005-2016 Peter Williams <pwil3058@gmail.com>
+#
+# This is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; version 2 of the License only.
+#
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 import collections
 import os
@@ -68,7 +68,7 @@ class FileTreeModel(Gtk.TreeStore, enotify.Listener, auto_update.AutoUpdater, ac
     # as the contenst are dependent on the state of the View
     # NB: the use of a Gtk.TreeStoreFilter has been considered as an
     # alternative mechanism for implementing show_hidden/hide_clean has
-    # been considered and rejected as being unable to handle empty
+    # been rejected as being unable to handle empty
     # directories properly
     REPOPULATE_EVENTS = enotify.E_CHANGE_WD
     UPDATE_EVENTS = os_utils.E_FILE_CHANGES
@@ -420,7 +420,6 @@ class FileTreeView(tlview.View, actions.CAGandUIManager, doop.DoOperationMixin):
         tlview.TreeView.__init__(self, **kwargs)
         actions.CAGandUIManager.__init__(self, selection=self.get_selection(), popup=self.DEFAULT_POPUP)
         self.model.set_view(self)
-        #self.connect("key_press_event", self._handle_control_c_key_press_cb)
         self.connect("row-activated", self._handle_double_click_cb)
         seln = self.get_selection()
         seln.set_select_function(self._selection_filter_func)
@@ -484,21 +483,20 @@ class FileTreeView(tlview.View, actions.CAGandUIManager, doop.DoOperationMixin):
     def get_selected_fsi_path(self):
         store, selection = self.get_selection().get_selected_rows()
         assert len(selection) == 1
-        return store.get_fsi_path(selection[0])#[selection[0]][0].path
+        return store.get_fsi_path(selection[0])
     def get_selected_file_paths(self, expanded=True):
         store, selection = self.get_selection().get_selected_rows()
         file_path_list = list()
         for x in selection:
             if store[x][0].is_dir:
                 if expanded:
-                    #file_path_list += self.model.get_file_paths_in_dir(store[x][0].path, show_hidden=store.show_hidden, hide_clean=store.hide_clean, recursive=True)
                     file_path_list += self.model.get_file_paths_in_dir(store.get_fsi_path(x), show_hidden=store.show_hidden, hide_clean=store.hide_clean, recursive=True)
             else:
-                file_path_list.append(store.get_fsi_path(x))#[x][0].path)
+                file_path_list.append(store.get_fsi_path(x))
         return file_path_list
     def get_selected_fsi_paths(self):
         store, selection = self.get_selection().get_selected_rows()
-        return [store.get_fsi_path(x) for x in selection]#[store[x][0].path for x in selection]
+        return [store.get_fsi_path(x) for x in selection]
     def add_selected_fsi_paths_to_clipboard(self, clipboard=None):
         if not clipboard:
             clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)

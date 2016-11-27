@@ -409,18 +409,27 @@ class FileTreeView(tlview.View, actions.CAGandUIManager, doop.DoOperationMixin):
     OPEN_NEW_FILES_FOR_EDIT = True
     def handle_control_c_key_press_cb(self):
         return self.add_selected_fsi_paths_to_clipboard()
+    # 3-method mechanism for handling double clicks
     @staticmethod
-    def _handle_double_click_cb(tree_view, tree_path, tree_column):
-        # TODO: think about making double click on directory change directories
+    def _handle_file_activated(file_path):
+        xtnl_edit.edit_files_extern([file_path])
+    @staticmethod
+    def _handle_dir_activated(dir_path):
+        return
+    def _handle_row_activated_cb(self, tree_view, tree_path, tree_column):
         fs_item = tree_view.get_model()[tree_path][0]
-        if not fs_item.is_dir:
-            xtnl_edit.edit_files_extern([fs_item.path])
+        if not fs_item:
+            return
+        elif fs_item.is_dir:
+            return self._handle_dir_activated(fs_item.path)
+        else:
+            return self._handle_file_activated(fs_item.path)
     def __init__(self, show_hidden=False, hide_clean=False, parent=None, **kwargs):
         self._parent = parent
         tlview.TreeView.__init__(self, **kwargs)
         actions.CAGandUIManager.__init__(self, selection=self.get_selection(), popup=self.DEFAULT_POPUP)
         self.model.set_view(self)
-        self.connect("row-activated", self._handle_double_click_cb)
+        self.connect("row-activated", self._handle_row_activated_cb)
         seln = self.get_selection()
         seln.set_select_function(self._selection_filter_func)
         seln.connect("changed", lambda seln: self.action_groups.update_condns(get_masked_seln_conditions(seln)))

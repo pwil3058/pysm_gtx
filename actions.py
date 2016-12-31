@@ -34,8 +34,7 @@ class MaskedCondns(collections.namedtuple("MaskedCondns", ["condns", "mask"])):
         return "MaskedCondns(condns={0:x}, mask={1:x})".format(self.condns, self.mask)
 
 class ActionCondns:
-    from ..bab import utils
-    _flag_generator = utils.create_flag_generator()
+    _flag_generator = (2 ** flag_num for flag_num in range(64))
     @staticmethod
     def new_flags_and_mask(count):
         """
@@ -275,6 +274,11 @@ class ConditionalActionGroups:
         Connect the callback to the "activate" signal of the named action
         """
         return self.get_action(action_name).connect("activate", callback, *user_data)
+    def disconnect_action(self, action_name, handler_id):
+        """
+        Disconnect the callback to the "activate" signal of the named action
+        """
+        return self.get_action(action_name).disconnect(handler_id)
     def __str__(self):
         string = "ConditionalActionGroups({0}): condns={1:x}\n".format(self.name, self.current_condns)
         for condns, group in self.groups.items():

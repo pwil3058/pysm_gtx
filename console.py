@@ -22,6 +22,7 @@ from gi.repository import GObject
 
 from ..bab import runext
 from ..bab.decorators import singleton
+from ..bab import os_utils
 
 from . import dialogue
 from . import gutils
@@ -135,3 +136,5 @@ class ConsoleLogWidget(Gtk.VBox, dialogue.BusyIndicatorUser):
         return runext.run_cmd_in_console(self, *args, **kwargs)
 
 LOG = ConsoleLogWidget()
+
+os_utils.set_console_log(LOG)

@@ -29,7 +29,3 @@ def yield_to_pending_events():
         Gtk.main_iteration()
         if not Gtk.events_pending():
             break
-
-from ..bab import os_utils
-from . import console
-os_utils.set_console_log(console.LOG)

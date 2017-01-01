@@ -101,10 +101,10 @@ class BusyIndicatorUser:
             yield
 
 class Window(Gtk.Window, BusyIndicator):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         if not kwargs.get("parent", None):
             kwargs["parent"] = main_window
-        Gtk.Window.__init__(self, *args, **kwargs)
+        Gtk.Window.__init__(self, **kwargs)
         BusyIndicator.__init__(self)
 
 # TODO: redo use of Gtk.Dialog and children to reflect Gtk.Box improvements
@@ -112,7 +112,7 @@ class Dialog(Gtk.Dialog, BusyIndicator):
     def __init__(self, **kwargs):
         if not kwargs.get("parent", None):
             kwargs["parent"] = main_window
-        Gtk.Dialog.__init__(self, *args, **kwargs)
+        Gtk.Dialog.__init__(self, **kwargs)
         BusyIndicator.__init__(self, )
 
 class MessageDialog(Gtk.MessageDialog):
@@ -162,8 +162,8 @@ class ScrolledMessageDialog(Dialog):
         self.set_resizable(True)
 
 class ListenerDialog(Dialog, enotify.Listener):
-    def __init__(self, *args, **kwargs):
-        Dialog.__init__(self, *args, **kwargs)
+    def __init__(self, **kwargs):
+        Dialog.__init__(self, **kwargs)
         enotify.Listener.__init__(self)
         self.set_type_hint(Gdk.WindowTypeHint.NORMAL)
         self.add_notification_cb(enotify.E_CHANGE_WD, self._self_destruct_cb)
@@ -587,10 +587,10 @@ class ClientMixin(BusyIndicatorUser, PathSelectorMixin, AskerMixin, ReporterMixi
 
 @singleton
 class MainWindow(Gtk.Window, BusyIndicator, AskerMixin, ReporterMixin, PathSelectorMixin):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         global main_window
         kwargs["type"] = Gtk.WindowType.TOPLEVEL
-        Gtk.Window.__init__(self, *args, **kwargs)
+        Gtk.Window.__init__(self, **kwargs)
         BusyIndicator.__init__(self)
         main_window = self
 

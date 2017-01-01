@@ -54,7 +54,10 @@ class FramedScrollWindow(Gtk.Frame):
 def wrap_in_scrolled_window(widget, policy=(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC), with_frame=False, use_widget_size=False):
     scrw = FramedScrollWindow() if with_frame else Gtk.ScrolledWindow()
     scrw.set_policy(policy[0], policy[1])
-    scrw.add(widget)
+    if isinstance(widget, Gtk.Container):
+        scrw.add(widget)
+    else:
+        scrw.add_with_viewport(widget)
     if use_widget_size:
         vw, vh = widget.get_size_request()
         if vw > 0:
@@ -63,6 +66,15 @@ def wrap_in_scrolled_window(widget, policy=(Gtk.PolicyType.AUTOMATIC, Gtk.Policy
             scrw.set_min_content_height(vh)
     scrw.show_all()
     return scrw
+
+def wrap_in_frame(widget, shadow_type=Gtk.ShadowType.NONE):
+    """
+    Wrap the widget in a frame with the requested shadow type
+    """
+    frame = Gtk.Frame()
+    frame.set_shadow_type(shadow_type)
+    frame.add(widget)
+    return frame
 
 class RadioButtonFramedVBox(Gtk.Frame):
     def __init__(self, title, labels):

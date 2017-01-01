@@ -109,11 +109,57 @@ class Window(Gtk.Window, BusyIndicator):
 
 # TODO: redo use of Gtk.Dialog and children to reflect Gtk.Box improvements
 class Dialog(Gtk.Dialog, BusyIndicator):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         if not kwargs.get("parent", None):
             kwargs["parent"] = main_window
         Gtk.Dialog.__init__(self, *args, **kwargs)
         BusyIndicator.__init__(self, )
+
+class MessageDialog(Gtk.MessageDialog):
+    def __init__(self, **kwargs):
+        if not kwargs.get("parent", None):
+            kwargs["parent"] = main_window
+        Gtk.Dialog.__init__(self, **kwargs)
+
+class ScrolledMessageDialog(Dialog):
+    # TODO: expand ScrolledMessageDialog() interface to match Gtk.MessageDialog()
+    CLIPBOARD = Gdk.SELECTION_CLIPBOARD
+    icons = {
+        Gtk.MessageType.INFO: Gtk.STOCK_DIALOG_INFO,
+        Gtk.MessageType.WARNING: Gtk.STOCK_DIALOG_WARNING,
+        Gtk.MessageType.QUESTION: Gtk.STOCK_DIALOG_QUESTION,
+        Gtk.MessageType.ERROR: Gtk.STOCK_DIALOG_ERROR,
+    }
+    labels = {
+        Gtk.MessageType.INFO: _("FYI"),
+        Gtk.MessageType.WARNING: _("Warning"),
+        Gtk.MessageType.QUESTION: _("Question"),
+        Gtk.MessageType.ERROR: _("Error"),
+    }
+    @classmethod
+    def copy_cb(cls, tview):
+        tview.get_buffer().copy_clipboard(Gtk.Clipboard.get(cls.CLIPBOARD))
+    def __init__(self, parent=None, flags=Gtk.DialogFlags.MODAL|Gtk.DialogFlags.DESTROY_WITH_PARENT, type=Gtk.MessageType.INFO, buttons=(Gtk.STOCK_OK, Gtk.ResponseType.OK), text=None):
+        Dialog.__init__(self, title="{0}: {1}".format(sys.argv[0], self.labels[type]), parent=parent, flags=flags, buttons=buttons)
+        hbox = Gtk.HBox()
+        icon = Gtk.Image()
+        icon.set_from_stock(self.icons[type], Gtk.IconSize.DIALOG)
+        hbox.pack_start(icon, expand=False, fill=False, padding=0)
+        label = Gtk.Label(label=self.labels[type])
+        label.modify_font(Pango.FontDescription("bold 35"))
+        hbox.pack_start(label, expand=False, fill=False, padding=0)
+        self.get_content_area().pack_start(hbox, expand=False, fill=False, padding=0)
+        sbw = Gtk.ScrolledWindow()
+        sbw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        tview = Gtk.TextView()
+        tview.set_size_request(480,120)
+        tview.set_editable(False)
+        tview.get_buffer().set_text(text.strip())
+        tview.connect("copy-clipboard", self.copy_cb)
+        sbw.add(tview)
+        self.get_content_area().pack_end(sbw, expand=True, fill=True, padding=0)
+        self.show_all()
+        self.set_resizable(True)
 
 class ListenerDialog(Dialog, enotify.Listener):
     def __init__(self, *args, **kwargs):
@@ -211,6 +257,16 @@ class ReadTextAndTogglesDialog(ReadTextDialog):
             self._rtw.pack_start(self.toggles[toggle_prompt], expand=False, fill=True, padding=0)
         self.show_all()
 
+def _find_toplevel(thing):
+    """Find and return the top level widget for "thing" if it exists
+    or else return None
+    """
+    try:
+        top_level = thing.get_toplevel()
+    except AttributeError:
+        return None
+    return top_level if top_level.is_toplevel() else None
+
 class PathSelectorMixin:
     # TODO: fix relative paths in PathSelectorMixin results i.e. use "./" at start
     def select_file(self, prompt, suggestion=None, existing=True, absolute=False):
@@ -220,7 +276,7 @@ class PathSelectorMixin:
                 suggestion = None
         else:
             mode = Gtk.FileChooserAction.SAVE
-        dialog = Gtk.FileChooserDialog(prompt, self.get_toplevel(), mode,
+        dialog = Gtk.FileChooserDialog(prompt, _find_toplevel(self), mode,
                                    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                     Gtk.STOCK_OK, Gtk.ResponseType.OK))
         dialog.set_default_response(Gtk.ResponseType.OK)
@@ -251,7 +307,7 @@ class PathSelectorMixin:
         if existing:
             if suggestion and not os.path.exists(suggestion):
                 suggestion = None
-        dialog = Gtk.FileChooserDialog(prompt, self.get_toplevel(), Gtk.FileChooserAction.SELECT_FOLDER,
+        dialog = Gtk.FileChooserDialog(prompt, _find_toplevel(self), Gtk.FileChooserAction.SELECT_FOLDER,
                                    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                     Gtk.STOCK_OK, Gtk.ResponseType.OK))
         dialog.set_default_response(Gtk.ResponseType.OK)
@@ -279,7 +335,7 @@ class PathSelectorMixin:
     def select_uri(self, prompt, suggestion=None):
         if suggestion and not os.path.exists(suggestion):
             suggestion = None
-        dialog = Gtk.FileChooserDialog(prompt, self.get_toplevel(), Gtk.FileChooserAction.SELECT_FOLDER,
+        dialog = Gtk.FileChooserDialog(prompt, _find_toplevel(self), Gtk.FileChooserAction.SELECT_FOLDER,
                                    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                     Gtk.STOCK_OK, Gtk.ResponseType.OK))
         dialog.set_default_response(Gtk.ResponseType.OK)
@@ -439,7 +495,7 @@ def response_str(response):
 
 class AskerMixin:
     def ask_question(self, qtn, expln="", buttons=CANCEL_OK_BUTTONS):
-        dialog = QuestionDialog(parent=self.get_toplevel(), buttons=buttons, qtn=qtn, expln=expln)
+        dialog = QuestionDialog(parent=_find_toplevel(self), buttons=buttons, qtn=qtn, expln=expln)
         response = dialog.run()
         dialog.destroy()
         return response
@@ -449,17 +505,17 @@ class AskerMixin:
         buttons = (Gtk.STOCK_NO, Gtk.ResponseType.NO, Gtk.STOCK_YES, Gtk.ResponseType.YES)
         return self.ask_question(qtn, expln, buttons) == Gtk.ResponseType.YES
     def ask_dir_path(self, prompt, suggestion=None, existing=True):
-        dialog = EnterDirPathDialog(title=_("Enter Directory Path"), prompt=prompt, suggestion=suggestion, existing=existing, parent=self.get_toplevel())
+        dialog = EnterDirPathDialog(title=_("Enter Directory Path"), prompt=prompt, suggestion=suggestion, existing=existing, parent=_find_toplevel(self))
         dir_path = dialog.path if dialog.run() == Gtk.ResponseType.OK else None
         dialog.destroy()
         return dir_path
     def ask_file_path(self, prompt, suggestion=None, existing=True):
-        dialog = EnterFilePathDialog(title=_("Enter File Path"), prompt=prompt, suggestion=suggestion, existing=existing, parent=self.get_toplevel())
+        dialog = EnterFilePathDialog(title=_("Enter File Path"), prompt=prompt, suggestion=suggestion, existing=existing, parent=_find_toplevel(self))
         file_path = dialog.path if dialog.run() == Gtk.ResponseType.OK else None
         dialog.destroy()
         return file_path
     def ask_multiple_texts(self, prompts_and_suggestions):
-        dialog = ReadMultiTextDialog(prompts_and_suggestions, parent=self.get_toplevel())
+        dialog = ReadMultiTextDialog(prompts_and_suggestions, parent=_find_toplevel(self))
         if dialog.run() == Gtk.ResponseType.OK:
             texts = dialog.get_texts()
         else:
@@ -477,7 +533,7 @@ class AskerMixin:
                 buttons += (SUGGESTION_LABEL_MAP[suggestion], suggestion)
         return self.ask_question(result.message, expln, buttons)
     def choose_from_list(self, alist, prompt):
-        return dialogue.SelectFromListDialog(olist=alist, prompt=prompt, parent=self.get_toplevel()).make_selection()
+        return dialogue.SelectFromListDialog(olist=alist, prompt=prompt, parent=_find_toplevel(self)).make_selection()
     # Commonly encountered suggestion combinations
     def ask_edit_force_or_cancel(self, result, expln=""):
         return self.accept_suggestion_or_cancel(result, expln, [Suggestion.EDIT, Suggestion.FORCE])
@@ -500,7 +556,7 @@ class AskerMixin:
 
 class ReporterMixin:
     def inform_user(self, msg, expln=None, problem_type=Gtk.MessageType.INFO):
-        dialog = Gtk.MessageDialog(parent=self.get_toplevel(),
+        dialog = MessageDialog(parent=_find_toplevel(self),
                                flags=Gtk.DialogFlags.MODAL|Gtk.DialogFlags.DESTROY_WITH_PARENT,
                                type=problem_type, buttons=(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE),
                                text=msg)
@@ -515,6 +571,8 @@ class ReporterMixin:
         return self.inform_user(msg=failure.result, problem_type=Gtk.MessageType.ERROR)
     def report_exception_as_error(self, edata):
         return self.alert_user(msg=str(edata))
+    def report_io_error(self, edata):
+        return self.alert_user(msg="{0}: {1}".format(edata.strerror, edata.filename))
     def report_any_problems(self, result):
         if result.is_ok:
             return
@@ -538,9 +596,9 @@ class MainWindow(Gtk.Window, BusyIndicator, AskerMixin, ReporterMixin, PathSelec
 
 def ask_for_bug_report(exc_data):
     """Ask the user to report an uncaught exception."""
-    # TODO: add buttons for copyng info to the clipboard
+    # TODO: add buttons for copying info to the clipboard
     import traceback
-    dialog = Gtk.MessageDialog(main_window, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE)
+    dialog = MessageDialog(main_window, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE)
     dialog.set_markup(BUG_REPORT_REQUEST_MSG)
     dialog.format_secondary_text("".join(traceback.format_exception(exc_data[0], exc_data[1], exc_data[2])))
     dialog.run()

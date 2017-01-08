@@ -13,9 +13,8 @@
 ### along with this program; if not, write to the Free Software
 ### Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-'''
-Provide some higher level access to PyGTK printing mechanisms
-'''
+"""Provide some higher level access to PyGTK printing mechanisms
+"""
 
 # TODO: find out more about PyGTK printing and make this better
 
@@ -36,7 +35,7 @@ except ImportError:
 
 MM_PER_PT = 25.4 / 72
 
-_USER_SETTINGS_FILE = os.path.join(CONFIG_DIR_PATH, 'printer.cfg')
+_USER_SETTINGS_FILE = os.path.join(CONFIG_DIR_PATH, "printer.cfg")
 
 SETTINGS = Gtk.PrintSettings()
 
@@ -47,15 +46,14 @@ else:
     SETTINGS.to_file(_USER_SETTINGS_FILE)
 
 def print_text(text, parent=None):
-    '''
-    Print a plain text
-    '''
+    """Print a plain text
+    """
     prop = Gtk.PrintOperation()
 
     prop.set_print_settings(SETTINGS)
     prop.set_unit(Gtk.Unit.MM)
 
-    data = {'text' : text}
+    data = {"text" : text}
 
     prop.connect( "begin-print", begin_print_text, data)
     prop.connect("draw-page", draw_page_text, data)
@@ -82,13 +80,13 @@ def begin_print_text(operation, context, data):
     """
     layout = context.create_pango_layout()
     layout.set_width(int(context.get_width() * Pango.SCALE))
-    layout.set_text(data['text'])
+    layout.set_text(data["text"])
     _twidth, theight = layout.get_pixel_size()
-    data['layout'] = layout
+    data["layout"] = layout
     lheight = float(theight) / layout.get_line_count()
     pheight = context.get_height()
     lpp = int(pheight / lheight)
-    data['lines_per_page'] = lpp
+    data["lines_per_page"] = lpp
     operation.set_n_pages(int(math.ceil(float(layout.get_line_count()) / lpp)))
 
 def draw_page_text(operation, context, page_num, data):
@@ -97,15 +95,15 @@ def draw_page_text(operation, context, page_num, data):
     """
     cc = context.get_cairo_context()
 
-    layout = data['layout']
+    layout = data["layout"]
 
-    start_line = page_num * data['lines_per_page']
+    start_line = page_num * data["lines_per_page"]
     if page_num + 1 != operation.props.n_pages:
-        end_line = start_line + data['lines_per_page']
+        end_line = start_line + data["lines_per_page"]
     else:
         end_line = None
 
-    layout.set_text(''.join(data['text'].splitlines(True)[start_line:end_line]))
+    layout.set_text("".join(data["text"].splitlines(True)[start_line:end_line]))
 
     cc.move_to(0, 0)
     cc.show_layout(layout)
@@ -120,7 +118,7 @@ def print_markup_chunks(chunks, parent=None):
     prop.set_print_settings(SETTINGS)
     prop.set_unit(Gtk.Unit.MM)
     #
-    data = {'chunks' : chunks}
+    data = {"chunks" : chunks}
     #
     prop.connect( "begin-print", begin_print_markup_chunks, data)
     prop.connect("draw-page", draw_page_markup_chunks, data)
@@ -150,7 +148,7 @@ def begin_print_markup_chunks(operation, context, data):
     pages = []
     page = []
     total_height = 0
-    for chunk in data['chunks']:
+    for chunk in data["chunks"]:
         layout = context.create_pango_layout()
         layout.set_width(spwidth)
         layout.set_markup(chunk)
@@ -167,7 +165,7 @@ def begin_print_markup_chunks(operation, context, data):
             pass
     if page:
         pages.append(page)
-    data['pages'] = pages
+    data["pages"] = pages
     operation.set_n_pages(len(pages))
 
 def draw_page_markup_chunks(operation, context, page_num, data):
@@ -175,7 +173,7 @@ def draw_page_markup_chunks(operation, context, page_num, data):
     Process the "draw-page" signal
     """
     y = 0
-    for layout in data['pages'][page_num]:
+    for layout in data["pages"][page_num]:
         cc = context.get_cairo_context()
         cc.move_to(0, y)
         PangoCairo.show_layout(cc, layout)
@@ -191,7 +189,7 @@ def print_pixbuf(pixbuf, parent=None):
     prop.set_print_settings(SETTINGS)
     prop.set_unit(Gtk.Unit.MM)
     #
-    data = {'pixbuf' : pixbuf}
+    data = {"pixbuf" : pixbuf}
     #
     prop.connect( "begin-print", begin_print_pixbuf, data)
     prop.connect("draw-page", draw_page_pixbuf, data)
@@ -216,13 +214,13 @@ def begin_print_pixbuf(operation, context, data):
     """
     Scale the  pixbuf to fit the page.
     """
-    pheight = data['pixbuf'].get_height()
-    pwidth = data['pixbuf'].get_width()
+    pheight = data["pixbuf"].get_height()
+    pwidth = data["pixbuf"].get_width()
     psu = context.get_page_setup()
     if pwidth > pheight:
-        data['pixbuf'] = data['pixbuf'].rotate_simple(Gdk.PIXBUF_ROTATE_CLOCKWISE)
-        pheight = data['pixbuf'].get_height()
-        pwidth = data['pixbuf'].get_width()
+        data["pixbuf"] = data["pixbuf"].rotate_simple(Gdk.PIXBUF_ROTATE_CLOCKWISE)
+        pheight = data["pixbuf"].get_height()
+        pwidth = data["pixbuf"].get_width()
     cheight = fractions.Fraction.from_float(context.get_height())
     cwidth = fractions.Fraction.from_float(context.get_width())
     hscale = fractions.Fraction(cheight, pheight)
@@ -233,7 +231,7 @@ def begin_print_pixbuf(operation, context, data):
     else:
         new_width = int(round(pwidth * wscale))
         new_height = int(round(pheight * wscale))
-    data['pixbuf'] = data['pixbuf'].scale_simple(new_width, new_height, GdkPixbuf.InterpType.BILINEAR)
+    data["pixbuf"] = data["pixbuf"].scale_simple(new_width, new_height, GdkPixbuf.InterpType.BILINEAR)
     operation.set_n_pages(1)
 
 def draw_page_pixbuf(operation, context, page_num, data):
@@ -241,6 +239,6 @@ def draw_page_pixbuf(operation, context, page_num, data):
     Process the "draw-page" signal
     """
     cc = context.get_cairo_context()
-    sfc = Gdk.cairo_surface_create_from_pixbuf(data['pixbuf'], 0, None)
+    sfc = Gdk.cairo_surface_create_from_pixbuf(data["pixbuf"], 0, None)
     cc.set_source_surface(sfc, 0, 0)
     cc.paint()

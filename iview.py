@@ -13,9 +13,8 @@
 ### along with this program; if not, write to the Free Software
 ### Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-'''
-A viewer for digital images
-'''
+"""A viewer for digital images
+"""
 
 import fractions
 import cairo
@@ -116,14 +115,14 @@ class ZoomedPixbuf(object):
         return nmd_tuples.WH(wzoom, hzoom)
 
 class PixbufView(Gtk.ScrolledWindow, actions.CAGandUIManager):
-    UI_DESCR = '''
+    UI_DESCR = """
         <ui>
-            <popup name='pixbuf_view_popup'>
-                <menuitem action='copy_to_clipboard'/>
-                <menuitem action='print_pixbuf'/>
+            <popup name="pixbuf_view_popup">
+                <menuitem action="copy_to_clipboard"/>
+                <menuitem action="print_pixbuf"/>
             </popup>
         </ui>
-        '''
+        """
     AC_SELN_MADE, AC_SELN_MASK = actions.ActionCondns.new_flags_and_mask(1)
     AC_PIXBUF_SET, AC_PICBUF_MASK = actions.ActionCondns.new_flags_and_mask(1)
     ZOOM_FACTOR = fractions.Fraction(11, 10)
@@ -134,49 +133,49 @@ class PixbufView(Gtk.ScrolledWindow, actions.CAGandUIManager):
         A drawing area to contain a single image
         """
         Gtk.ScrolledWindow.__init__(self)
-        actions.CAGandUIManager.__init__(self, popup='/pixbuf_view_popup')
+        actions.CAGandUIManager.__init__(self, popup="/pixbuf_view_popup")
         self.__pixbuf = None
         self.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         self.__da = Gtk.DrawingArea()
         self.__da.connect("draw", self._expose_cb)
-        self.__size_allocate_cb_id = self.connect('size-allocate', self._size_allocate_cb)
+        self.__size_allocate_cb_id = self.connect("size-allocate", self._size_allocate_cb)
         self.add_with_viewport(self.__da)
         self.__last_alloc = None
         #
         self.add_events(Gdk.EventMask.SCROLL_MASK)
-        self.connect('scroll_event', self._scroll_ecb)
+        self.connect("scroll_event", self._scroll_ecb)
         #
         self.__seln = XYSelection(self.__da)
-        self.__seln.connect('status-changed', self._seln_status_change_cb)
-        self.__seln.connect('motion_notify', self._seln_motion_cb)
-        self.__press_cb_id = self.__da.connect('button_press_event', self._da_button_press_cb)
+        self.__seln.connect("status-changed", self._seln_status_change_cb)
+        self.__seln.connect("motion_notify", self._seln_motion_cb)
+        self.__press_cb_id = self.__da.connect("button_press_event", self._da_button_press_cb)
         self.__cb_ids = []
-        self.__cb_ids.append(self.__da.connect('button_release_event', self._da_button_release_cb))
-        self.__cb_ids.append(self.__da.connect('motion_notify_event', self._da_motion_notify_cb))
-        self.__cb_ids.append(self.__da.connect('leave_notify_event', self._da_leave_notify_cb))
+        self.__cb_ids.append(self.__da.connect("button_release_event", self._da_button_release_cb))
+        self.__cb_ids.append(self.__da.connect("motion_notify_event", self._da_motion_notify_cb))
+        self.__cb_ids.append(self.__da.connect("leave_notify_event", self._da_leave_notify_cb))
         for cb_id in self.__cb_ids:
             self.__da.handler_block(cb_id)
     def populate_action_groups(self):
         self.action_groups[self.AC_SELN_MADE].add_actions(
             [
-                ('copy_to_clipboard', Gtk.STOCK_COPY, None, None,
-                 _('Copy the selection to the clipboard.'),
+                ("copy_to_clipboard", Gtk.STOCK_COPY, None, None,
+                 _("Copy the selection to the clipboard."),
                  self._copy_to_clipboard_acb
                 ),
             ]
         )
         self.action_groups[self.AC_PIXBUF_SET].add_actions(
             [
-                ('print_pixbuf', Gtk.STOCK_PRINT, None, None,
-                 _('Print this image.'),
+                ("print_pixbuf", Gtk.STOCK_PRINT, None, None,
+                 _("Print this image."),
                  self._print_pixbuf_acb
                 ),
-                ('zoom_in', Gtk.STOCK_ZOOM_IN, None, None,
-                 _('Enlarge the image.'),
+                ("zoom_in", Gtk.STOCK_ZOOM_IN, None, None,
+                 _("Enlarge the image."),
                  self.zoom_in
                 ),
-                ('zoom_out', Gtk.STOCK_ZOOM_OUT, None, None,
-                 _('Shrink the image.'),
+                ("zoom_out", Gtk.STOCK_ZOOM_OUT, None, None,
+                 _("Shrink the image."),
                  self.zoom_out
                 ),
             ]
@@ -305,7 +304,7 @@ class PixbufView(Gtk.ScrolledWindow, actions.CAGandUIManager):
         Trigger repaint to show updated selection rectangle
         """
         self.__da.queue_draw()
-    # TODO: make 'zoom in' smoother
+    # TODO: make "zoom in" smoother
     def zoom_in(self, _action=None):
         if self.__pixbuf is not None:
             current_zoom = self.__pixbuf.zoom
@@ -314,7 +313,7 @@ class PixbufView(Gtk.ScrolledWindow, actions.CAGandUIManager):
             for dim, adj in enumerate([self.get_hadjustment(), self.get_vadjustment()]):
                 new_val = adj.get_value() * self.ZOOM_FACTOR + self.__zin_adj[dim]
                 adj.set_value(new_val)
-    # TODO: make 'zoom out' smoother
+    # TODO: make "zoom out" smoother
     def zoom_out(self, _action=None):
         if self.__pixbuf is not None:
             current_zoom = self.__pixbuf.zoom
@@ -340,9 +339,9 @@ class PixbufView(Gtk.ScrolledWindow, actions.CAGandUIManager):
                 return True
         elif event.get_state() & Gdk.ModifierType.SHIFT_MASK:
             if event.direction == Gdk.ScrollDirection.UP:
-                self.emit('scroll-child', Gtk.SCROLL_STEP_FORWARD, True)
+                self.emit("scroll-child", Gtk.SCROLL_STEP_FORWARD, True)
             elif event.direction == Gdk.ScrollDirection.DOWN:
-                self.emit('scroll-child', Gtk.SCROLL_STEP_BACKWARD, True)
+                self.emit("scroll-child", Gtk.SCROLL_STEP_BACKWARD, True)
             return True
     # Careful not to override CAGandUIManager method
     def _da_button_press_cb(self, widget, event):
@@ -403,11 +402,11 @@ class XYSelection(GObject.GObject):
         self.__seln_made = False
         self.__start_xy = self.__end_xy = None
         source.add_events(Gdk.EventMask.POINTER_MOTION_MASK|Gdk.EventMask.BUTTON_PRESS_MASK|Gdk.EventMask.BUTTON_RELEASE_MASK|Gdk.EventMask.LEAVE_NOTIFY_MASK)
-        self.__press_cb_id = source.connect('button_press_event', self._button_press_cb)
+        self.__press_cb_id = source.connect("button_press_event", self._button_press_cb)
         self.__cb_ids = []
-        self.__cb_ids.append(source.connect('button_release_event', self._button_release_cb))
-        self.__cb_ids.append(source.connect('motion_notify_event', self._motion_notify_cb))
-        self.__cb_ids.append(source.connect('leave_notify_event', self._leave_notify_cb))
+        self.__cb_ids.append(source.connect("button_release_event", self._button_release_cb))
+        self.__cb_ids.append(source.connect("motion_notify_event", self._motion_notify_cb))
+        self.__cb_ids.append(source.connect("leave_notify_event", self._leave_notify_cb))
         for cb_id in self.__cb_ids:
             source.handler_block(cb_id)
     def in_progress(self):
@@ -450,10 +449,10 @@ class XYSelection(GObject.GObject):
     def _clear(self):
         self.__seln_made = False
         self.__start_xy = self.__end_xy = None
-        self.emit('status-changed', False)
+        self.emit("status-changed", False)
     def clear(self):
         if self.in_progress():
-            raise Exception('clear while selection in progress')
+            raise Exception("clear while selection in progress")
         self._clear()
     def _button_press_cb(self, widget, event):
         """
@@ -464,7 +463,7 @@ class XYSelection(GObject.GObject):
             self.__seln_made = False
             for cb_id in self.__cb_ids:
                 widget.handler_unblock(cb_id)
-            self.emit('status-changed', False)
+            self.emit("status-changed", False)
             return True
         elif event.button == 2:
             if self.in_progress():
@@ -479,7 +478,7 @@ class XYSelection(GObject.GObject):
         Record the position and pass on the "motion-notify" signal
         """
         self.__end_xy = nmd_tuples.XY(event.x, event.y)
-        self.emit('motion-notify')
+        self.emit("motion-notify")
         return True
     def _leave_notify_cb(self, widget, event):
         """
@@ -499,8 +498,8 @@ class XYSelection(GObject.GObject):
         self.__seln_made = True
         for cb_id in self.__cb_ids:
             widget.handler_block(cb_id)
-        self.emit('status-changed', True)
+        self.emit("status-changed", True)
         return True
 GObject.type_register(XYSelection)
-GObject.signal_new('status-changed', XYSelection, GObject.SignalFlags.RUN_LAST, None, (GObject.TYPE_BOOLEAN,))
-GObject.signal_new('motion-notify', XYSelection, GObject.SignalFlags.RUN_LAST, None, ())
+GObject.signal_new("status-changed", XYSelection, GObject.SignalFlags.RUN_LAST, None, (GObject.TYPE_BOOLEAN,))
+GObject.signal_new("motion-notify", XYSelection, GObject.SignalFlags.RUN_LAST, None, ())

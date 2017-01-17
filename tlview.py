@@ -439,7 +439,10 @@ class View(Gtk.TreeView):
         model = self.get_model()
         if len(model) == 0:
             return
-        erows = list(enumerate(model.named()))
+        if hasattr(model, "named"):
+            erows = list(enumerate(model.named()))
+        else:
+            erows = list(enumerate(model))
         erows.sort(key=sort_key_function)
         if self.sort_order == Gtk.SortType.DESCENDING:
             erows.reverse()

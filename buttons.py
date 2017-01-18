@@ -26,7 +26,7 @@ __author__ = "Peter Williams <pwil3058@gmail.com>"
 
 from . import dialogue
 
-#TODO: move button widgets in gutils into buttons.py
+#TODO: use +/- buttons for HexSpinButton
 
 class ArrowButton(Gtk.Button):
     def __init__(self, arrow_type, shadow_type, width=-1, height=-1):
@@ -35,7 +35,6 @@ class ArrowButton(Gtk.Button):
         self.add(Gtk.Arrow(arrow_type, shadow_type))
 
 class HexSpinButton(Gtk.HBox, dialogue.ReporterMixin):
-    #TODO: find out why HexSpinnButtons are so tall
     OFF, INCR, DECR = range(3)
     PAUSE = 500
     INTERVAL = 5
@@ -61,18 +60,17 @@ class HexSpinButton(Gtk.HBox, dialogue.ReporterMixin):
         eh = self.entry.size_request().height
         bw = eh * 2 / 3
         bh = eh / 2 -1
-        vbox = Gtk.VBox()
-        self.pack_start(vbox, expand=False, fill=True, padding=0)
-        self.up_arrow = ArrowButton(Gtk.ArrowType.UP, Gtk.ShadowType.NONE, bw, bh)
-        self.up_arrow.connect("button-press-event", self._arrow_pressed_cb, self.INCR)
-        self.up_arrow.connect("button-release-event", self._arrow_released_cb)
-        self.up_arrow.connect("leave-notify-event", self._arrow_released_cb)
-        vbox.pack_start(self.up_arrow, expand=True, fill=True, padding=0)
         self.down_arrow = ArrowButton(Gtk.ArrowType.DOWN, Gtk.ShadowType.NONE, bw, bh)
         self.down_arrow.connect("button-press-event", self._arrow_pressed_cb, self.DECR)
         self.down_arrow.connect("button-release-event", self._arrow_released_cb)
         self.down_arrow.connect("leave-notify-event", self._arrow_released_cb)
-        vbox.pack_start(self.down_arrow, expand=True, fill=True, padding=0)
+        self.pack_start(self.down_arrow, expand=False, fill=True, padding=0)
+        self.up_arrow = ArrowButton(Gtk.ArrowType.UP, Gtk.ShadowType.NONE, bw, bh)
+        self.up_arrow = ArrowButton(Gtk.ArrowType.UP, Gtk.ShadowType.NONE, bw, bh)
+        self.up_arrow.connect("button-press-event", self._arrow_pressed_cb, self.INCR)
+        self.up_arrow.connect("button-release-event", self._arrow_released_cb)
+        self.up_arrow.connect("leave-notify-event", self._arrow_released_cb)
+        self.pack_start(self.up_arrow, expand=False, fill=True, padding=0)
     def get_value(self):
         return self.__value
     def set_value(self, value):

@@ -378,7 +378,6 @@ class ReadFilePathTextWidget(ReadTextWidget):
             text = os.path.dirname(text)
         else:
             populate_completion = not text or text.endswith(os.sep)
-        print("|"+text+"|", populate_completion)
         if populate_completion:
             dir_path = os.path.abspath(os.path.expanduser(text))
             model = Gtk.ListStore(str)
@@ -392,10 +391,10 @@ class ReadFilePathTextWidget(ReadTextWidget):
             return item if not os.path.isdir(os.path.join(dir_path, item)) else item + os.sep
         return sorted(decorate(item) for item in os.listdir(dir_path))
 
-class ReadDirPathTextWidget(ReadTextWidget):
+class ReadDirPathTextWidget(ReadFilePathTextWidget):
     @staticmethod
     def _get_suggestions_for_dir(dir_path):
-        return sorted((item for item in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, item))))
+        return sorted((item + os.sep for item in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, item))))
 
 
 # TODO: imporove auto completion into the text entry component
@@ -403,10 +402,10 @@ class _EnterPathWidget(Gtk.HBox, PathSelectorMixin):
     SELECT_FUNC = None
     SELECT_TITLE = None
     READ_PATH_TEXT = None
-    def __init__(self, prompt=None, suggestion=None, existing=True, width_chars=32, parent=None):
+    def __init__(self, prompt=None, suggestion="", existing=True, width_chars=32, parent=None):
         Gtk.HBox.__init__(self)
         self._parent = parent
-        self._path = self.READ_PATH_TEXT(prompt=prompt, suggestion=suggestion, width_chars=width_chars)
+        self._path = self.READ_PATH_TEXT(prompt=prompt, suggestion="" if suggestion is None else suggestion, width_chars=width_chars)
         self._path.entry.set_activates_default(True)
         self._existing = existing
         self.b_button = Gtk.Button.new_with_label(_("Browse"))

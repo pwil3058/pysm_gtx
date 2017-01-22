@@ -207,8 +207,9 @@ class ReadTextWidget(Gtk.HBox):
             p_label.set_markup(prompt)
             self.pack_start(p_label, expand=False, fill=True, padding=0)
         self.entry = Gtk.Entry()
+        self.entry.connect("changed", self._entry_change_cb)
+        self.entry.set_text(suggestion)
         if suggestion:
-            self.entry.set_text(suggestion)
             self.entry.set_width_chars(max(width_chars, len(suggestion)))
         else:
             self.entry.set_width_chars(width_chars)
@@ -217,6 +218,8 @@ class ReadTextWidget(Gtk.HBox):
     def _do_pulse(self):
         self.entry.progress_pulse()
         return True
+    def _entry_change_cb(self, editable):
+        pass
     def start_busy_pulse(self):
         self.entry.set_progress_pulse_step(0.2)
         self._timeout_id = GObject.timeout_add(100, self._do_pulse, priority=GObject.PRIORITY_HIGH)
@@ -270,10 +273,11 @@ def _find_toplevel(thing):
 class PathSelectorMixin:
     # TODO: fix relative paths in PathSelectorMixin results i.e. use "./" at start
     def select_file(self, prompt, suggestion=None, existing=True, absolute=False):
+        suggestion = os.path.abspath(os.path.expanduser(suggestion))
         if existing:
             mode = Gtk.FileChooserAction.OPEN
-            if suggestion and not os.path.exists(suggestion):
-                suggestion = None
+            while suggestion and not os.path.exists(suggestion):
+                suggestion = os.path.dirname(suggestion)
         else:
             mode = Gtk.FileChooserAction.SAVE
         dialog = Gtk.FileChooserDialog(prompt, _find_toplevel(self), mode,
@@ -294,7 +298,7 @@ class PathSelectorMixin:
         else:
             dialog.set_current_folder(os.getcwd())
         response = dialog.run()
-        if dialog.run() == Gtk.ResponseType.OK:
+        if response == Gtk.ResponseType.OK:
             if absolute:
                 new_file_path = dialog.get_filename()
             else:
@@ -304,9 +308,10 @@ class PathSelectorMixin:
         dialog.destroy()
         return new_file_path
     def select_directory(self, prompt, suggestion=None, existing=True, absolute=False):
+        suggestion = os.path.abspath(os.path.expanduser(suggestion))
         if existing:
-            if suggestion and not os.path.exists(suggestion):
-                suggestion = None
+            while suggestion and not os.path.exists(suggestion):
+                suggestion = os.path.dirname(suggestion)
         dialog = Gtk.FileChooserDialog(prompt, _find_toplevel(self), Gtk.FileChooserAction.SELECT_FOLDER,
                                    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                     Gtk.STOCK_OK, Gtk.ResponseType.OK))
@@ -357,14 +362,51 @@ class PathSelectorMixin:
         dialog.destroy()
         return uri
 
-# TODO: put auto completion into the text entry component
+
+class ReadFilePathTextWidget(ReadTextWidget):
+    def _entry_change_cb(self, editable):
+        text = editable.get_text()
+        if not hasattr(self, "entry_completion"):
+            self.entry_completion = Gtk.EntryCompletion()
+            self.entry.set_completion(self.entry_completion)
+            self.entry_completion.pack_start(Gtk.CellRendererText(), expand=True)
+            self.entry_completion.set_text_column(0)
+            self.entry_completion.set_inline_completion(True)
+            self.entry_completion.set_inline_selection(True)
+            self.entry_completion.set_minimum_key_length(0)
+            populate_completion = True
+            text = os.path.dirname(text)
+        else:
+            populate_completion = not text or text.endswith(os.sep)
+        print("|"+text+"|", populate_completion)
+        if populate_completion:
+            dir_path = os.path.abspath(os.path.expanduser(text))
+            model = Gtk.ListStore(str)
+            if os.path.isdir(dir_path):
+                for suggestion in (os.path.join(text, item) for item in self._get_suggestions_for_dir(dir_path)):
+                    model.append([suggestion])
+            self.entry_completion.set_model(model)
+    @staticmethod
+    def _get_suggestions_for_dir(dir_path):
+        def decorate(item):
+            return item if not os.path.isdir(os.path.join(dir_path, item)) else item + os.sep
+        return sorted(decorate(item) for item in os.listdir(dir_path))
+
+class ReadDirPathTextWidget(ReadTextWidget):
+    @staticmethod
+    def _get_suggestions_for_dir(dir_path):
+        return sorted((item for item in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, item))))
+
+
+# TODO: imporove auto completion into the text entry component
 class _EnterPathWidget(Gtk.HBox, PathSelectorMixin):
     SELECT_FUNC = None
     SELECT_TITLE = None
+    READ_PATH_TEXT = None
     def __init__(self, prompt=None, suggestion=None, existing=True, width_chars=32, parent=None):
         Gtk.HBox.__init__(self)
         self._parent = parent
-        self._path = ReadTextWidget(prompt=prompt, suggestion=suggestion, width_chars=width_chars)
+        self._path = self.READ_PATH_TEXT(prompt=prompt, suggestion=suggestion, width_chars=width_chars)
         self._path.entry.set_activates_default(True)
         self._existing = existing
         self.b_button = Gtk.Button.new_with_label(_("Browse"))
@@ -380,6 +422,7 @@ class _EnterPathWidget(Gtk.HBox, PathSelectorMixin):
         self.b_button.set_sensitive(sensitive)
     def _browse_cb(self, button=None):
         suggestion = self._path.entry.get_text()
+        print(suggestion)
         path = self.SELECT_FUNC(self.SELECT_TITLE, suggestion=suggestion, existing=self._existing, absolute=False)
         if path:
             self._path.entry.set_text(path)
@@ -410,6 +453,7 @@ class _EnterPathDialog(CancelOKDialog):
 class EnterDirPathWidget(_EnterPathWidget):
     SELECT_FUNC = PathSelectorMixin.select_directory
     SELECT_TITLE = _("Browse for Directory")
+    READ_PATH_TEXT = ReadDirPathTextWidget
 
 class EnterDirPathDialog(_EnterPathDialog):
     WIDGET = EnterDirPathWidget
@@ -417,6 +461,7 @@ class EnterDirPathDialog(_EnterPathDialog):
 class EnterFilePathWidget(_EnterPathWidget):
     SELECT_FUNC = PathSelectorMixin.select_file
     SELECT_TITLE = _("Browse for File")
+    READ_PATH_TEXT = ReadFilePathTextWidget
 
 class EnterFilePathDialog(_EnterPathDialog):
     WIDGET = EnterFilePathWidget

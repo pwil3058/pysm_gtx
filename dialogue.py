@@ -207,8 +207,9 @@ class ReadTextWidget(Gtk.HBox):
             p_label.set_markup(prompt)
             self.pack_start(p_label, expand=False, fill=True, padding=0)
         self.entry = Gtk.Entry()
+        # NB: connect to "changed" here so that callback catches the following set_text()
         self.entry.connect("changed", self._entry_change_cb)
-        self.entry.set_text(suggestion)
+        self.entry.set_text("" if suggestion is None else suggestion)
         if suggestion:
             self.entry.set_width_chars(max(width_chars, len(suggestion)))
         else:
@@ -365,7 +366,6 @@ class PathSelectorMixin:
 
 class ReadFilePathTextWidget(ReadTextWidget):
     def _entry_change_cb(self, editable):
-        text = editable.get_text()
         if not hasattr(self, "entry_completion"):
             self.entry_completion = Gtk.EntryCompletion()
             self.entry.set_completion(self.entry_completion)
@@ -374,17 +374,17 @@ class ReadFilePathTextWidget(ReadTextWidget):
             self.entry_completion.set_inline_completion(True)
             self.entry_completion.set_inline_selection(True)
             self.entry_completion.set_minimum_key_length(0)
-            populate_completion = True
-            text = os.path.dirname(text)
-        else:
-            populate_completion = not text or text.endswith(os.sep)
-        if populate_completion:
-            dir_path = os.path.abspath(os.path.expanduser(text))
-            model = Gtk.ListStore(str)
-            if os.path.isdir(dir_path):
-                for suggestion in (os.path.join(text, item) for item in self._get_suggestions_for_dir(dir_path)):
-                    model.append([suggestion])
-            self.entry_completion.set_model(model)
+        text = editable.get_text()
+        dir_path = os.path.dirname(text)
+        abs_dir_path = os.path.abspath(os.path.expanduser(dir_path))
+        model = Gtk.ListStore(str)
+        try:
+            completions = (os.path.join(dir_path, item) for item in self._get_suggestions_for_dir(abs_dir_path))
+        except FileNotFoundError:
+            completions = []
+        for completion in completions:
+            model.append([completion])
+        self.entry_completion.set_model(model)
     @staticmethod
     def _get_suggestions_for_dir(dir_path):
         def decorate(item):
@@ -421,7 +421,6 @@ class _EnterPathWidget(Gtk.HBox, PathSelectorMixin):
         self.b_button.set_sensitive(sensitive)
     def _browse_cb(self, button=None):
         suggestion = self._path.entry.get_text()
-        print(suggestion)
         path = self.SELECT_FUNC(self.SELECT_TITLE, suggestion=suggestion, existing=self._existing, absolute=False)
         if path:
             self._path.entry.set_text(path)

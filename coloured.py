@@ -28,8 +28,8 @@ __author__ = "Peter Williams <pwil3058@gmail.com>"
 GDK_BITS_PER_CHANNEL = 16
 GDK_ONE = (1 << GDK_BITS_PER_CHANNEL) - 1
 
-def best_foreground(rgb, threshold=0.5):
-    wval = (rgb[0] * 0.299 + rgb[1] * 0.587 + rgb[2] * 0.114)
+def best_foreground(colour, threshold=0.5):
+    wval = (colour.red * 0.299 + colour.green * 0.587 + colour.blue * 0.114)
     if wval > GDK_ONE * threshold:
         return Gdk.Color(0, 0, 0)
     else:
@@ -57,7 +57,8 @@ class ColouredLabel(ColourableLabel):
         if colour is not None:
             self.set_colour(colour)
     def set_colour(self, colour):
-        bg_colour = Gdk.Color(*colour)
+        assert isinstance(colour, Gdk.Color)
+        bg_colour = colour
         fg_colour = best_foreground(colour)
         for state in [Gtk.StateType.NORMAL, Gtk.StateType.PRELIGHT, Gtk.StateType.ACTIVE]:
             self.modify_base(state, bg_colour)
@@ -112,11 +113,12 @@ class ColouredButton(Gtk.EventBox):
         self.frame.set_border_width(self.unprelit_width)
         self.set_state(Gtk.StateType.NORMAL)
     def set_colour(self, colour):
+        assert isinstance(colour, Gdk.Color)
         self.colour = colour
         for state, value_ratio in self.state_value_ratio.items():
-            rgb = [min(int(colour[i] * value_ratio), 65535) for i in range(3)]
+            rgb = [min(int(getattr(colour, fld) * value_ratio), GDK_ONE) for fld in ["red", "green", "blue"]]
             bg_gcolour = Gdk.Color(*rgb)
-            fg_gcolour = best_foreground(rgb)
+            fg_gcolour = best_foreground(bg_gcolour)
             self.modify_base(state, bg_gcolour)
             self.modify_bg(state, bg_gcolour)
             self.modify_fg(state, fg_gcolour)

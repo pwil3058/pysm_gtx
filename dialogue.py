@@ -139,7 +139,7 @@ class ScrolledMessageDialog(Dialog):
     @classmethod
     def copy_cb(cls, tview):
         tview.get_buffer().copy_clipboard(Gtk.Clipboard.get(cls.CLIPBOARD))
-    def __init__(self, parent=None, flags=Gtk.DialogFlags.MODAL|Gtk.DialogFlags.DESTROY_WITH_PARENT, type=Gtk.MessageType.INFO, buttons=(Gtk.STOCK_OK, Gtk.ResponseType.OK), text=None):
+    def __init__(self, parent=None, flags=Gtk.DialogFlags.MODAL|Gtk.DialogFlags.DESTROY_WITH_PARENT, buttons=(Gtk.STOCK_OK, Gtk.ResponseType.OK), text=None):
         Dialog.__init__(self, title="{0}: {1}".format(sys.argv[0], self.labels[type]), parent=parent, flags=flags, buttons=buttons)
         hbox = Gtk.HBox()
         icon = Gtk.Image()

@@ -326,6 +326,7 @@ class View(Gtk.TreeView):
             "row-inserted", "rows-reordered"]
         self._change_cb_ids = [model.connect(sig_name, self._model_changed_cb) for sig_name in sig_names]
         self.last_sort_column = None
+        self.last_sort_function = None
         self.sort_order = Gtk.SortType.ASCENDING
     @staticmethod
     def _create_cell(column, cell_renderer_spec):
@@ -411,16 +412,27 @@ class View(Gtk.TreeView):
         # should it be model[path][index] = not model[path][index]
         self.model[path][index] = cell.get_active()
         self._notify_modification()
-    def _model_changed_cb(self, *_args, **_kwargs):
+    def _model_changed_cb(self, model, *_args, **_kwargs):
         """
         The model has changed and if the column involved is the
         current sort column the may no longer be sorted so we
-        need to turn off the sort indicators.
+        need to re-sort the list.
         """
-        # TODO: be more fine grained turning off sort indication
         if self.last_sort_column is not None:
-            self.last_sort_column.set_sort_indicator(False)
-            self.last_sort_column = None
+            assert self.last_sort_function is not None
+            if len(model) == 0:
+                return
+            if hasattr(model, "named"):
+                erows = list(enumerate(model.named()))
+            else:
+                erows = list(enumerate(model))
+            erows.sort(key=self.last_sort_function)
+            if self.sort_order == Gtk.SortType.DESCENDING:
+                erows.reverse()
+            # Turn off reorder callback while we do the reordering
+            model.handler_block(self._change_cb_ids[-1])
+            model.reorder([r[0] for r in erows])
+            model.handler_unblock(self._change_cb_ids[-1])
     def _column_clicked_cb(self, column, sort_key_function):
         """Sort the rows based on the given column"""
         # Heavily based on the FAQ example
@@ -436,6 +448,7 @@ class View(Gtk.TreeView):
         else:
            self.sort_order   = Gtk.SortType.ASCENDING
            self.last_sort_column = column
+           self.last_sort_function = sort_key_function
         model = self.get_model()
         if len(model) == 0:
             return

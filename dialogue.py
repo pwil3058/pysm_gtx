@@ -601,7 +601,7 @@ class ReporterMixin:
     def inform_user(self, msg, expln=None, problem_type=Gtk.MessageType.INFO):
         dialog = MessageDialog(parent=_find_toplevel(self),
                                flags=Gtk.DialogFlags.MODAL|Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                               type=problem_type, buttons=(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE),
+                               message_type=problem_type, buttons=(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE),
                                text=msg)
         if expln:
             dialog.format_secondary_text(expln)

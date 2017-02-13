@@ -641,7 +641,7 @@ def ask_for_bug_report(exc_data):
     """Ask the user to report an uncaught exception."""
     # TODO: add buttons for copying info to the clipboard
     import traceback
-    dialog = MessageDialog(main_window, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE)
+    dialog = MessageDialog(parent=main_window, message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.CLOSE)
     dialog.set_markup(BUG_REPORT_REQUEST_MSG)
     dialog.format_secondary_text("".join(traceback.format_exception(exc_data[0], exc_data[1], exc_data[2])))
     dialog.run()

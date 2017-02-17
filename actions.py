@@ -347,7 +347,7 @@ class CAGandUIManager(metaclass=_ActionGroupPopulator):
         if event.type == Gdk.EventType.BUTTON_PRESS:
             if event.button == 3 and widget._popup:
                 menu = widget.ui_manager.get_widget(widget._popup)
-                menu.popup(None, None, None, None, event.button, event.time)
+                menu.popup_at_pointer(event)
                 return True
         return False
     def set_popup(self, popup):

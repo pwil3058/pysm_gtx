@@ -21,7 +21,11 @@ __author__ = "Peter Williams <pwil3058@gmail.com>"
 
 import gi
 gi.require_version("Gtk", "3.0")
-gi.require_version("GtkSpell", "3.0")
+try:
+    gi.require_version("GtkSpell", "3.0")
+    GTK_SPELL_AVAILABLE = True
+except ValueError:
+    GTK_SPELL_AVAILABLE = False
 from gi.repository import Gtk
 
 def yield_to_pending_events():

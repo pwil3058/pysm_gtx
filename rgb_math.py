@@ -210,7 +210,7 @@ class HueAngle:
     __slots__ = ["__angle", "__max_chroma_rgb", "__chroma_correction"]
     def __init__(self, angle):
         if math.isnan(angle):
-            self.__angle = math.nan
+            self.__angle = float("nan")
             self.__max_chroma_rgb = PRGB(1.0, 1.0, 1.0)
             self.__chroma_correction = 1.0
         else:

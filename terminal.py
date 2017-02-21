@@ -13,22 +13,26 @@
 ### along with this program; if not, write to the Free Software
 ### Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+
+import os
+from shutil import which
+
 try:
     import gi
     gi.require_version("Vte", "2.91")
-
-    import os
-    from shutil import which
-
-    from gi.repository import Gtk
     from gi.repository import Vte
+    AVAILABLE = True
+except (ValueError, ImportError):
+    AVAILABLE = False
+    GITSOME_AVAILABLE = False
+
+if AVAILABLE:
+    from gi.repository import Gtk
     from gi.repository import GLib
     from gi.repository import Gdk
 
     from ..bab import enotify
     from ..bab import utils
-
-    AVAILABLE = True
 
     class Terminal(Gtk.ScrolledWindow, enotify.Listener):
         ARGV = [os.getenv("SHELL", "/bin/bash")]
@@ -75,9 +79,3 @@ try:
             ARGV = [GITSOME]
     else:
         GITSOME_AVAILABLE = False
-except ImportError as edata:
-    # NB: we don't want to ignore problems other than failing to find Vte
-    if edata.name != "Vte":
-        raise edata
-    AVAILABLE = False
-    GITSOME_AVAILABLE = False

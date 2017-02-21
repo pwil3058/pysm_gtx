@@ -21,7 +21,10 @@ import locale
 from gi.repository import Gtk
 from gi.repository import Pango
 from gi.repository import GObject
-from gi.repository import GtkSpell
+
+from . import GTK_SPELL_AVAILABLE
+if GTK_SPELL_AVAILABLE:
+    from gi.repository import GtkSpell
 
 from ..bab import CmdFailure
 from ..bab import utils
@@ -40,9 +43,10 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager, dialogue.ClientMix
         actions.CAGandUIManager.__init__(self)
         self.view.set_cursor_visible(True)
         self.view.set_editable(True)
-        self.spell_checker = GtkSpell.Checker()
-        self.spell_checker.attach(self.view)
-        self.spell_checker.set_language(locale.getdefaultlocale()[0])
+        if GTK_SPELL_AVAILABLE:
+            self.spell_checker = GtkSpell.Checker()
+            self.spell_checker.attach(self.view)
+            self.spell_checker.set_language(locale.getdefaultlocale()[0])
         # Set up file stuff
         self._save_interval = 1000 # milliseconds
         self._save_file_name = save_file_name

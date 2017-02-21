@@ -31,6 +31,8 @@ except ImportError:
 from ..bab import enotify
 from ..bab.decorators import singleton
 
+from . import entries
+
 from . import yield_to_pending_events
 
 BUG_REPORT_REQUEST_MSG = \
@@ -198,6 +200,33 @@ class CancelOKDialog(Dialog):
         flags = Gtk.DialogFlags.DESTROY_WITH_PARENT
         buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK)
         Dialog.__init__(self, title=title, parent=parent, flags=flags, buttons=buttons)
+
+
+class ReadTextAutoCompleteWidget(Gtk.HBox):
+    def __init__(self, prompt=None, lexicon=None, learn=True, multiword=True, width_chars=32, **kwargs):
+        Gtk.HBox.__init__(self)
+        if prompt:
+            p_label = Gtk.Label()
+            p_label.set_markup(prompt)
+            self.pack_start(p_label, expand=False, fill=True, padding=0)
+        self.entry = entries.TextEntryAutoComplete(lexicon=lexicon, learn=learn, multiword=multiword, **kwargs)
+        self.pack_start(self.entry, expand=True, fill=True, padding=0)
+        self.show_all()
+    def __getattr__(self, attr_name):
+        return getattr(self.entry, attr_name)
+
+
+class ReadTextAutoCompleteDialog(CancelOKDialog):
+    def __init__(self, title=None, prompt=None, lexicon=None, learn=True, multiword=True, parent=None, **kwargs):
+        CancelOKDialog.__init__(self, title=title, parent=parent)
+        self._rtw = ReadTextAutoCompleteWidget(prompt=prompt, lexicon=lexicon, learn=learn, multiword=multiword, **kwargs)
+        self._rtw.entry.set_activates_default(True)
+        self.vbox.pack_start(self._rtw, expand=False, fill=True, padding=0)
+        self.show_all()
+    @property
+    def entry(self):
+        return self._rtw.entry
+
 
 class ReadTextWidget(Gtk.HBox):
     def __init__(self, prompt=None, suggestion="", width_chars=32):
@@ -567,6 +596,17 @@ class AskerMixin:
         return texts
     def ask_text(self, prompt, suggestion=None):
         return self.ask_multiple_texts([(prompt, suggestion)])[0]
+    def ask_text_auto_complete(self, *, prompt=None, lexicon=None, learn=True, multiword=True):
+        if lexicon is None:
+            lexicon = Gtk.ListStore(str)
+        dialog = ReadTextAutoCompleteDialog(prompt=prompt, lexicon=lexicon, learn=learn, multiword=multiword, parent=_find_toplevel(self))
+        dialog.set_default_response(Gtk.ResponseType.OK)
+        if dialog.run() == Gtk.ResponseType.OK:
+            text = dialog.entry.get_text()
+        else:
+            text = None
+        dialog.destroy()
+        return text
     def confirm_list_action(self, alist, qtn):
         return self.ask_ok_cancel("\n".join(alist + ["\n", qtn]))
     def accept_suggestion_or_cancel(self, result, expln="", suggestions=ALL_SUGGESTIONS):

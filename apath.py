@@ -127,25 +127,22 @@ class AliasPathView(table.EditableEntriesView):
         extant_ap_list = []
         if not os.path.exists(cls.SAVED_FILE_NAME):
             return []
-        fobj = open(cls.SAVED_FILE_NAME, "r")
-        lines = fobj.readlines()
-        fobj.close()
-        for line in lines:
-            data = cls.MODEL.ROW(*line.strip().split(os.pathsep, 1))
-            if data in extant_ap_list:
-                continue
-            if cls._extant_path(data.Path):
-                extant_ap_list.append(data)
+        with open(cls.SAVED_FILE_NAME, "r") as f_obj:
+            for line in (l.strip() for l in f_obj):
+                data = cls.MODEL.ROW(*line.split(os.pathsep, 1))
+                if data in extant_ap_list:
+                    continue
+                if cls._extant_path(data.Path):
+                    extant_ap_list.append(data)
         extant_ap_list.sort()
         cls._write_list_to_file(extant_ap_list)
         return extant_ap_list
     @classmethod
     def _write_list_to_file(cls, ap_list):
-        fobj = open(cls.SAVED_FILE_NAME, "w")
-        for alpth in ap_list:
-            fobj.write(os.pathsep.join(alpth))
-            fobj.write(os.linesep)
-        fobj.close()
+        with open(cls.SAVED_FILE_NAME, "w") as f_obj:
+            for alpth in ap_list:
+                f_obj.write(os.pathsep.join(alpth))
+                f_obj.write("\n")
     @classmethod
     def generate_alias_path_menu(cls, label, item_activation_cb):
         return AliasPathMenu(label, cls._fetch_contents, item_activation_cb)

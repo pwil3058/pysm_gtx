@@ -80,11 +80,10 @@ def _read_editor_defs(edeff=None):
 
 def _write_editor_defs(edefs, edeff=None):
     edeff = edeff if edeff else _EDITOR_GLOB_FILE_PATH
-    fobj = open(edeff, "w")
-    for edef in edefs:
-        fobj.write("=".join(edef))
-        fobj.write(os.linesep)
-    fobj.close()
+    with open(edeff, "w") as f_obj:
+        for edef in edefs:
+            f_obj.write("=".join(edef))
+            f_obj.write("\n")
 
 if not os.path.exists(_EDITOR_GLOB_FILE_PATH):
     _write_editor_defs([("*", DEFAULT_EDITOR)], edeff=_EDITOR_GLOB_FILE_PATH)

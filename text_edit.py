@@ -150,7 +150,7 @@ class MessageWidget(textview.Widget, actions.CAGandUIManager, dialogue.ClientMix
     def _save_text_as_acb(self, _action=None):
         fname = self.ask_file_path(_("Enter file name"), existing=False, suggestion=self._save_file_name)
         if fname and os.path.exists(fname) and not os.path.samefile(fname, self._save_file_name):
-            if not self.ask_ok_cancel(os.linesep.join([fname, _("\nFile exists. Overwrite?")])):
+            if not self.ask_ok_cancel("\n".join([fname, _("\nFile exists. Overwrite?")])):
                 return
         self.save_text_to_file(file_name=fname)
     def load_text_fm_file(self, file_name=None, already_checked=False):
@@ -284,7 +284,7 @@ class FileModifyUndoSaveBuffer(ModifyUndoSaveBuffer):
     def save_file(self):
         with open(self._file_path, "w") as f_obj:
             for line in self.get_text(self.get_start_iter(), self.get_end_iter(), True).splitlines(False):
-                f_obj.write(line.rstrip() + os.linesep)
+                f_obj.write(line.rstrip() + "\n")
         self.load_file()
     def get_current_hash_digest(self):
         return hashlib.sha1(self.get_text(self.get_start_iter(), self.get_end_iter(), True)).digest()

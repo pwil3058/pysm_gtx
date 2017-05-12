@@ -215,13 +215,13 @@ class ActionButton(Gtk.Button):
             self.set_image(Gtk.Image.new_from_icon_name(icon_name))
         self.set_use_underline(use_underline)
         self.set_tooltip_text(action.get_property("tooltip"))
-        self.connect("clicked", lambda _button: action.activate())
+        self.set_related_action(action)
 
 class ActionCheckButton(Gtk.CheckButton):
     def __init__(self, action, use_underline=True):
         Gtk.CheckButton.__init__(self, label=action.get_property("label"), use_underline=use_underline)
         self.set_tooltip_text(action.get_property("tooltip"))
-        self.connect("toggled", lambda _button: action.activate())
+        self.set_related_action(action)
 
 def creat_button_from_action(action, use_underline=True):
     if isinstance(action, Gtk.ToggleAction):

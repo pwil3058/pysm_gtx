@@ -302,7 +302,7 @@ def _find_toplevel(thing):
 
 class PathSelectorMixin:
     # TODO: fix relative paths in PathSelectorMixin results i.e. use "./" at start
-    def select_file(self, prompt, suggestion=None, existing=True, absolute=False):
+    def select_file(self, prompt, suggestion="", existing=True, absolute=False):
         suggestion = os.path.abspath(os.path.expanduser(suggestion))
         if existing:
             mode = Gtk.FileChooserAction.OPEN
@@ -337,7 +337,7 @@ class PathSelectorMixin:
             new_file_path = None
         dialog.destroy()
         return new_file_path
-    def select_directory(self, prompt, suggestion=None, existing=True, absolute=False):
+    def select_directory(self, prompt, suggestion="", existing=True, absolute=False):
         suggestion = os.path.abspath(os.path.expanduser(suggestion))
         if existing:
             while suggestion and not os.path.exists(suggestion):

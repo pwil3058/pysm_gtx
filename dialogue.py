@@ -104,7 +104,7 @@ class BusyIndicatorUser:
 
 class Window(Gtk.Window, BusyIndicator):
     def __init__(self, **kwargs):
-        if not kwargs.get("parent", None):
+        if kwargs.get("parent", None) is None:
             kwargs["parent"] = main_window
         Gtk.Window.__init__(self, **kwargs)
         BusyIndicator.__init__(self)
@@ -112,16 +112,44 @@ class Window(Gtk.Window, BusyIndicator):
 # TODO: redo use of Gtk.Dialog and children to reflect Gtk.Box improvements
 class Dialog(Gtk.Dialog, BusyIndicator):
     def __init__(self, **kwargs):
-        if not kwargs.get("parent", None):
+        if kwargs.get("parent", None) is None:
             kwargs["parent"] = main_window
         Gtk.Dialog.__init__(self, **kwargs)
         BusyIndicator.__init__(self, )
 
+class SimpleDialog(Dialog):
+    RECOLLECT_SECTION = None
+    def __init__(self, *, payload=None, **kwargs):
+        if kwargs.get("use_header_bar", None) is None:
+            kwargs["use_header_bar"] = True
+        Dialog.__init__(self, **kwargs)
+        if self.RECOLLECT_SECTION:
+            from . import recollect
+            try:
+                recollect.define(self.RECOLLECT_SECTION, "last_size", recollect.Defn(str, ""))
+            except recollect.DuplicateDefn:
+                pass
+            last_size = recollect.get(self.RECOLLECT_SECTION, "last_size")
+            if last_size:
+                self.set_default_size(*eval(last_size))
+            self.connect("configure-event", self._configure_event_cb)
+            self.connect("realize", self._realize_cb)
+        if payload:
+            self.add(payload)
+    def _configure_event_cb(self, widget, allocation):
+        from . import recollect
+        recollect.set(self.RECOLLECT_SECTION, "last_size", "({0}, {1})".format(allocation.width + self._w_corrn, allocation.height + self._h_corrn))
+    def _realize_cb(self, widget):
+        req_size = widget.get_default_size()
+        new_allocation = self.get_allocation()
+        self._w_corrn = (req_size.width - new_allocation.width) if req_size.width > 0 else 0
+        self._h_corrn = (req_size.height - new_allocation.height) if req_size.height > 0 else 0
+
 class MessageDialog(Gtk.MessageDialog):
     def __init__(self, **kwargs):
-        if not kwargs.get("parent", None):
+        if kwargs.get("parent", None) is None:
             kwargs["parent"] = main_window
-        Gtk.Dialog.__init__(self, **kwargs)
+        Gtk.MessageDialog.__init__(self, **kwargs)
 
 class ScrolledMessageDialog(Dialog):
     # TODO: expand ScrolledMessageDialog() interface to match Gtk.MessageDialog()

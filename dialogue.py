@@ -102,18 +102,25 @@ class BusyIndicatorUser:
         else:
             yield
 
+def get_toplevel_window(widget):
+    if widget is None:
+        return main_window
+    try:
+        tl = widget.get_toplevel()
+    except AttributeError:
+        return main_window
+    return tl if isinstance(tl, Gtk.Window) else main_window
+
 class Window(Gtk.Window, BusyIndicator):
     def __init__(self, **kwargs):
-        if kwargs.get("parent", None) is None:
-            kwargs["parent"] = main_window
+        kwargs["parent"] = get_toplevel_window(kwargs.get("parent", None))
         Gtk.Window.__init__(self, **kwargs)
         BusyIndicator.__init__(self)
 
 # TODO: redo use of Gtk.Dialog and children to reflect Gtk.Box improvements
 class Dialog(Gtk.Dialog, BusyIndicator):
     def __init__(self, **kwargs):
-        if kwargs.get("parent", None) is None:
-            kwargs["parent"] = main_window
+        kwargs["parent"] = get_toplevel_window(kwargs.get("parent", None))
         Gtk.Dialog.__init__(self, **kwargs)
         BusyIndicator.__init__(self, )
 

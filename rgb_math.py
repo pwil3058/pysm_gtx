@@ -71,49 +71,6 @@ def non_zero_components(rgb):
     """
     return len(rgb) - rgb.count(0)
 
-def rotate_rgb(rgb, delta_hue_angle):
-    """Return a copy of rgb with the same value but the hue angle rotated
-    by the specified amount and with the item types unchanged.
-    NB the chroma will change when there are less than 3 non zero
-    components and in the case of 2 non zero components this change may
-    be undesirable.  If it is undesirable it can be avoided by using a
-    higher level wrapper function that is aware of item types and
-    maximum allowed value per component.
-    """
-    def calc_ks(delta_hue_angle):
-        a = math.sin(delta_hue_angle)
-        b = math.sin(mathx.PI_120 - delta_hue_angle)
-        c = a + b
-        k1 = b / c
-        k2 = a / c
-        return (k1, k2)
-    if isinstance(rgb[0], int):
-        f = lambda c1, c2: int(rgb[c1] * k1 + rgb[c2] * k2 + 0.5)
-    else:
-        f = lambda c1, c2: rgb[c1] * k1 + rgb[c2] * k2
-    if delta_hue_angle > 0:
-        if delta_hue_angle > mathx.PI_120:
-            k1, k2 = calc_ks(delta_hue_angle - mathx.PI_120)
-            rtd_rgb = (f(2, 1), f(0, 2), f(1, 0))
-        else:
-            k1, k2 = calc_ks(delta_hue_angle)
-            rtd_rgb = (f(0, 2), f(1, 0), f(2, 1))
-    elif delta_hue_angle < 0:
-        if delta_hue_angle < -mathx.PI_120:
-            k1, k2 = calc_ks(abs(delta_hue_angle) - mathx.PI_120)
-            rtd_rgb = (f(1, 2), f(2, 0), f(0, 1))
-        else:
-            k1, k2 = calc_ks(abs(delta_hue_angle))
-            rtd_rgb = (f(0, 1), f(1, 2), f(2, 0))
-    else:
-        rtd_rgb = rgb
-    if isinstance(rgb, array.array):
-        return array.array(rgb.typecode, rtd_rgb)
-    try:
-        return rgb.__class__(rtd_rgb)
-    except TypeError:
-        return rgb.__class__(*rtd_rgb)
-
 def rgb_hue_angle(rgb):
     """Return the hue angle for the given rgb.
     Angle returned is the angle between pure red (0 radians) and the hue

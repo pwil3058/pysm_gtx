@@ -240,8 +240,11 @@ class GenericSnapshotWsFileDb(OsFileDb):
             self._subdirs[name] = self._new_dir(name=name, dir_path=dir_path, status=status, clean_status=clean_status, parent_file_status_snapshot=self._file_status_snapshot, **kwargs)
         def _get_current_hash_digest(self):
             h = hashlib.sha1()
-            for item in os.listdir(self.data.path):
-                h.update(item.encode())
+            try:
+                for item in os.listdir(self.data.path):
+                    h.update(item.encode())
+            except FileNotFoundError:
+                pass # race condition with file system
             return h.digest()
         def _populate(self):
             h = hashlib.sha1()

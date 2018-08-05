@@ -22,16 +22,6 @@ from gi.repository import GObject
 from gi.repository import Gio
 from gi.repository import Gdk
 
-def get_gtk_window(widget):
-    gtk_window = widget
-    while True:
-        temp = gtk_window.get_parent()
-        if temp:
-            gtk_window = temp
-        else:
-            break
-    return gtk_window
-
 class FramedScrollWindow(Gtk.Frame):
     __g_type_name__ = "FramedScrollWindow"
     def __init__(self, policy=(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)):

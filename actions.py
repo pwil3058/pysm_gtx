@@ -292,6 +292,8 @@ class ConditionalActionGroups:
     def create_action_button(self, action_name, use_underline=True):
         from . import gutils
         action = self.get_action(action_name)
+        if not action:
+            raise self.UnknownAction(action_name)
         return gutils.creat_button_from_action(action, use_underline=use_underline)
     def create_action_button_box(self, action_name_list, use_underline=True,
                                  horizontal=True,
@@ -372,3 +374,17 @@ class CAGandUIManager(metaclass=_ActionGroupPopulator):
                 self.handler_block(self._popup_cb_id)
     def set_visibility_for_condns(self, condns, visible):
         self.action_groups.set_visibility_for_condns(condns, visible)
+    def create_action_button_box(self, action_name_list, use_underline=True,
+                                 horizontal=True,
+                                 expand=True, fill=True, padding=0):
+        if horizontal:
+            box = Gtk.HBox()
+        else:
+            box = Gtk.VBox()
+        for action_name in action_name_list:
+            try:
+                button = self.action_groups.create_action_button(action_name, use_underline)
+            except ConditionalActionGroups.UnknownAction:
+                button = CLASS_INDEP_AGS.create_action_button(action_name, use_underline)
+            box.pack_start(button, expand, fill, padding)
+        return box

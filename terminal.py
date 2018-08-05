@@ -54,7 +54,10 @@ if AVAILABLE:
             self.set_cwd(os.getcwd())
         def set_cwd(self, path):
             command = "cd {}\n".format(utils.quote_if_needed(os.path.abspath(os.path.expanduser(path))))
-            self._vte.feed_child(command, len(command))
+            try:
+                self._vte.feed_child(command, len(command))
+            except TypeError:
+                self._vte.feed_child([ord(c) for c in command])
         def _button_press_cb(self, widget, event):
             if event.type == Gdk.EventType.BUTTON_PRESS:
                 if event.button == 3:
